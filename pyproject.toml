@@ -1,0 +1,188 @@
+[build-system]
+requires      = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source           = "vcs"
+fallback-version = "0.0.0"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "physical_materials/_version.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true  # remove after reference published
+
+[project]
+name = "physical-materials"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "LGPL-2.1-or-later"
+dynamic = ["version"]
+dependencies = [
+   "numpy >=1.26",
+   "matplotlib >=3.10",
+   "pint >=0.24",
+   "pydantic>=2",
+   "numpydantic",
+   "periodictable",
+   "asttokens",
+   "babel",
+   "csl_reference @ git+https://git@github.com/Fusion-Power-Plant-Framework/csl-reference@main",
+   "CoolProp"
+   ]
+keywords = ["materials", "fusion", "structural", "electromagnetism", "neutronics"]
+classifiers = [
+  "Programming Language :: Python",
+  "Development Status :: 3 - Alpha",
+  "Natural Language :: English",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: GNU Lesser General Public License v2 or later (LGPLv2+)",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+
+[project.urls]
+Source        = "https://github.com/Fusion-Power-Plant-Framework/physical_materials"
+Documentation = "https://github.com/Fusion-Power-Plant-Framework/physical_materials#readme"
+Issues        = "https://github.com/Fusion-Power-Plant-Framework/physical_materials/issues"
+
+[project.optional-dependencies]
+neutronics = ["neutronics-material-maker"]
+dev = ["pre-commit"]
+test = [
+  "pytest",
+  "pytest-cov",
+  "pytest-html",
+  "pytest-metadata",
+  "pytest-json-report",
+]
+docs = [
+  "mkdocs",
+  "mkdocs-material",
+  "mkdocstrings[python]",
+  "mkdocs-gen-files",
+  "mkdocs-section-index",
+  "mkdocs-literate-nav",
+  "jupytext"
+]
+lint = ["ruff", "ty"]
+
+[tool.pyfluids]
+units_system = "SI"
+
+[tool.hatch.envs.default]
+features = ["dev", "test", "docs", "lint"]
+
+[tool.hatch.envs.test]
+features = ["test"]
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12", "3.13"]
+[tool.hatch.envs.test.scripts]
+tests      = "pytest {args:tests}"
+tests-cov  = "pytest --cov physical_materials  --cov-report html:htmlcov --cov-report xml {args:tests}"
+tests-cov-private  = "pytest --private --cov physical_materials --cov-report html:htmlcov --cov-report xml {args:tests}"
+
+[tool.hatch.envs.docs]
+features = ["docs"]
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build"
+serve = "mkdocs serve"
+deploy = "mkdocs gh-deploy"
+
+[tool.ty.terminal]
+output-format = "concise"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 89
+output-format = "concise"
+exclude = [
+  ".git",
+  "__pycache__",
+  "documentation",
+  ".env",
+  ".idea",
+  ".pytest_cache",
+  "htmlcov",
+]
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint]
+preview = true
+select = ["ALL"]
+ignore = [
+  "ANN",     # type annotations
+  "EM",      # string in error messages
+  "PD",      # Pandas
+  "B019",    # using cache memory leaks
+  "COM812",  # enforce trailing comma, disagrees with black/ruff format
+  "D200",    # docs stuff
+  "D203",
+  "D205",
+  "D301",
+  "D400",
+  "D401",
+  "DOC502",  # Raises sections not in top level function
+  "DTZ005",  # datetime timezone arg
+  "E203",    # black/ruff format conflicts
+  "FIX002",  # Line contains todo
+  "ISC001",  # ruff format conflict
+  "PLW1514", # Specify file open encoding
+  "PTH123",  # use Path.open
+  "TRY003",  # put error messages in error class
+  "FURB152", # 3.14 != pi
+  "ERA",  # remove commented out code
+  "G004",  # f-string in logging
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use magic values, assertions, and relative imports
+"tests/**" = [
+  "INP001",
+  "D100",
+  "D101",
+  "D102",
+  "D103",
+  "D104",
+  "ERA001",
+  "PLR2004",
+  "PLR0912",
+  "PLR0914",
+  "PLR6301",
+  "N801",
+  "N802",
+  "N806",
+  "S101",
+  "TID252",
+]
+"tests/conftest.py" = ["PLC0415"]
+"physical_materials/tools/tools.py" = ["PLR0913", "PLR0917"]
+"examples/**" = [
+  "INP001",
+  "DOC201",
+  "T201"
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["physical_materials"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.flake8-copyright]
+notice-rgx = "(?i)# SPDX-FileCopyrightText:\\s\\d{4}(-(\\d{4}|present))*"
+
+[tool.coverage.report]
+exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+"omit"        = ["physical_materials/_version.py"]
+
+[tool.pytest.ini_options]
+addopts = "--html=report.html --self-contained-html --strict-markers -r fEX"
+markers = ["private: Tests using private data"]
