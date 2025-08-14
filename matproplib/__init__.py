@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 """
-The physical-materials package provides an interface for material properties.
+The matproplib package provides an interface for material properties.
 
 The main aim of this package is to unite structural, thermal, electro-magnetic
 and neutronics properties under one interface.

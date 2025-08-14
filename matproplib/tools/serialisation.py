@@ -94,7 +94,7 @@ def inspect_lambda(func: Callable[..., Any]) -> LambdaInspection:  # noqa: C901,
 
     Parameters
     ----------
-    :
+    func:
         The lambda function
 
     Returns

@@ -15,6 +15,8 @@ from matproplib.properties.dependent import (
 )
 from matproplib.properties.group import props
 
+__all__ = ["Be12Ti", "BePebbleBed"]
+
 Be12Ti = material(
     "Be12Ti",
     elements="Be12Ti",

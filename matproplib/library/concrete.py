@@ -6,6 +6,8 @@
 from matproplib.material import material
 from matproplib.properties.group import props
 
+__all__ = ["Concrete", "HeavyConcrete", "OrdinaryConcrete"]
+
 Concrete = material(
     "Concrete",
     elements={

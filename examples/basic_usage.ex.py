@@ -23,35 +23,19 @@
 # %%
 from typing import Literal
 
-from pint import Unit  # noqa: F401
+from pint import Unit
 
-from matproplib.base import (
-    rebuild,
-)
+from matproplib.base import rebuild
 from matproplib.conditions import OperationalConditions
 from matproplib.converters.neutronics import (
     FispactNeutronicConfig,
     MCNPNeutronicConfig,
-    OpenMCNeutronicConfig,  # noqa: F401
+    OpenMCNeutronicConfig,
 )
-from matproplib.material import (
-    FullMaterial,
-    dependentphysicalproperty,
-    material,
-)
-from matproplib.properties.dependent import (
-    Density,
-    SpecificHeatCapacity,
-)
-from matproplib.properties.group import (
-    DefaultProperties,
-    Properties,
-    props,
-)
-from matproplib.properties.independent import (  # noqa: F401
-    PhysicalProperty,
-    pp,
-)
+from matproplib.material import FullMaterial, dependentphysicalproperty, material
+from matproplib.properties.dependent import Density, SpecificHeatCapacity
+from matproplib.properties.group import DefaultProperties, Properties, props
+from matproplib.properties.independent import PhysicalProperty, pp
 from matproplib.superconduction import NbTiBotturaParameterisation
 
 # %% [markdown]
@@ -72,9 +56,10 @@ from matproplib.superconduction import NbTiBotturaParameterisation
 #  - Pressure
 #  - Magnetic Field
 #  - Stress
+#  - Neutron Fluence
 #  - Neutron Damage
 #
-# The only conditions required are temperature and pressure
+# The only conditions required is temperature
 #
 # %%
 op_cond = OperationalConditions(temperature=298, pressure=(1, "atm"))
@@ -155,6 +140,7 @@ print(unob)
 # #### Properties
 # Properties come in two forms dependent and independent.
 #
+# ##### Independent
 # Independent properties have already been shown and are just a number with a unit.
 # These are generally used for conditions.
 #
@@ -166,6 +152,7 @@ cd = CurrentDensity(value=(5, "MA/m^2"))
 print(cd)
 
 # %% [markdown]
+# ##### Dependent
 # Dependent properties are dependent on any operational condition,
 # they can also be singular values.
 
@@ -256,8 +243,7 @@ print(
 # These details are usually code specific
 
 # %%
-# Requires openmc and neutronics_material_maker
-# n_props = OpenMCNeutronicConfig(enrichment_target='Li6')
+n_props_openmc = OpenMCNeutronicConfig(enrichment_target="Li6")
 
 n_props = FispactNeutronicConfig(volume=(3, "cm^3"))
 
@@ -340,6 +326,7 @@ steel.convert("fispact", op_cond)
 # Alternatively you can create a material using an existing properties object
 
 
+# %%
 @rebuild  # required when using the dependentphysicalproperty decorator
 class MyProperties(Properties):
     """Custom property class"""

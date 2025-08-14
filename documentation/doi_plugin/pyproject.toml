@@ -1,0 +1,17 @@
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mkdocs-doi-plugin"
+version = "0.1.0"
+description = "MkDocs plugin to auto-link DOIs in Markdown files"
+dependencies = [
+    "mkdocs"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["doi"]
+
+[project.entry-points."mkdocs.plugins"]
+doi = "doi.plugin:DOIPlugin"

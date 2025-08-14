@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025-present The Bluemira Developers <https://github.com/Fusion-Power-Plant-Framework/bluemira>
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Dependent properties of physical materials"""
+"""Dependent properties of matproplib"""
 
 from __future__ import annotations
 
@@ -25,12 +25,6 @@ from pydantic import Field, field_serializer, model_validator
 from pydantic_core import PydanticUndefinedType
 from typing_extensions import NotRequired
 
-from matproplib._serialisation import (
-    deserialise,
-    inspect_lambda,
-    is_lambda,
-    stringify_function,
-)
 from matproplib.base import (
     BasePhysicalProperty,
     References,
@@ -42,6 +36,12 @@ from matproplib.conditions import (
     OperationalConditions,
     check_conditions,
     modify_conditions,
+)
+from matproplib.tools.serialisation import (
+    deserialise,
+    inspect_lambda,
+    is_lambda,
+    stringify_function,
 )
 
 log = logging.getLogger("matproplib.base")

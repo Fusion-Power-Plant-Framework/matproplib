@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025-present The Bluemira Developers <https://github.com/Fusion-Power-Plant-Framework/bluemira>
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""References for physical materials library"""
+"""References for matproplib library"""
 
 FOKKENS_2003 = {
     "id": "fokkens2003",
@@ -52,6 +52,7 @@ SIMON_1992 = {
     "event_date": {"raw": "1992"},
     "annote": "",
     "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/MONO/nistmonograph177.pdf",
+    "doi": "10.6028/NIST.MONO.177",
 }
 
 HUST_1984 = {
@@ -62,6 +63,7 @@ HUST_1984 = {
     "event_date": {"raw": "1984"},
     "annote": "NBSIR 84-3007",
     "url": "https://www.govinfo.gov/content/pkg/GOVPUB-C13-5dca61206b094d8b3a54099ebcff1baa/pdf/GOVPUB-C13-5dca61206b094d8b3a54099ebcff1baa.pdf",
+    "doi": "10.6028/NBS.IR.84-3007",
 }
 
 
@@ -73,4 +75,5 @@ CHOONG_1975 = {
     "event_date": {"raw": "1975"},
     "annote": "",
     "url": "https://www.osti.gov/servlets/purl/4152287",
+    "doi": "10.2172/4152287",
 }

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2025-present The Bluemira Developers <https://github.com/Fusion-Power-Plant-Framework/bluemira>
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
-"""Dependent properties of physical materials"""
+"""Dependent properties of matproplib"""
 
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ class Nb3SnBotturaParameterisation(SuperconductingParameterisation):
     ITER-like Bottura-Bordini parameterisation of the critical surface of
     a Nb3Sn Superconducting strand.
 
-    ..doi: 10.1109/TASC.2009.2018278
+    .. doi:: 10.1109/TASC.2009.2018278
         :title: L. Bottura and B. Bordini, "JC(B,T,ε) Parameterization for the ITER Nb3Sn Production,"
         in IEEE Transactions on Applied Superconductivity, vol. 19, no. 3, pp. 1521-1524, June 2009
     """
@@ -103,7 +103,7 @@ class NbTiBotturaParameterisation(SuperconductingParameterisation):
     ITER-like Bottura parameterisation of the critical surface of
     a NbTi Superconducting strand. (strain-independent)
 
-    ..doi: 10.1109/77.828413
+    ..doi:: 10.1109/77.828413
         :title: L. Bottura, "A practical fit for the critical surface of NbTi,"
         in IEEE Transactions on Applied Superconductivity, vol. 10, no. 1, pp. 1054-1057, March 2000,
     """

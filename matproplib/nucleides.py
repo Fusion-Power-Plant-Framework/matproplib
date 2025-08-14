@@ -150,7 +150,7 @@ class Element(PMBaseModel):
     Verifies against the Generalised Nuclear Database Structure for metastable nucleides
     if provided (eg Am242_m1)
 
-    ..doi ::10.1787/5f05e3db-en
+    .. doi:: 10.1787/5f05e3db-en
 
     """
 

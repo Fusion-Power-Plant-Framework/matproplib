@@ -13,7 +13,7 @@ version-file = "matproplib/_version.py"
 allow-direct-references = true  # remove after reference published
 
 [project]
-name = "physical-materials"
+name = "matproplib"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -65,7 +65,9 @@ docs = [
   "mkdocs-gen-files",
   "mkdocs-section-index",
   "mkdocs-literate-nav",
-  "jupytext"
+  "mkdocs-jupyter",
+  "jupytext",
+  "mkdocs-doi-plugin @ {root:uri}/documentation/doi_plugin"
 ]
 lint = ["ruff", "ty"]
 
@@ -164,6 +166,7 @@ ignore = [
 "examples/**" = [
   "INP001",
   "DOC201",
+  "F401",
   "T201"
 ]
 

@@ -94,12 +94,13 @@ def nbti_specific_heat_capacity(op_cond: OperationalConditions) -> float:
     Provides the temperature-dependent specific heat capacity [J/(kg·K)] of the A15
     superconductor NbTi.
 
-    :notes:
-        - The superconducting part is ignored, which is typical in thermal quench calculations.
-    :references:
-        - EFDA Material Data Compilation for Superconductor Simulation, P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07.
-        - Elrod S.A. Miller J.R., Dresner L., “The specific heat of NbTi from 0-7T between 4.2 and 20K”, Advances in Cryogenic Engineering Materials, Vol. 28, 1981
-        https://doi.org/10.1103/PhysRevB.13.3783
+    Notes
+    -----
+    The superconducting part is ignored, which is typical in thermal quench calculations.
+
+    - EFDA Material Data Compilation for Superconductor Simulation, P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07.
+    - Elrod S.A. Miller J.R., Dresner L., “The specific heat of NbTi from 0-7T between 4.2 and 20K”, Advances in Cryogenic Engineering Materials, Vol. 28, 1981
+      .. doi:: 10.1007/978-1-4613-3542-9_60
     """
     gamma: Final[float] = 0.145  # [J/K²/kg] (Grueneisen)
     beta: Final[float] = 0.0023  # [J/K⁴/kg] (Debye)
@@ -139,14 +140,21 @@ def nb3sn_specific_heat_capacity(op_cond: OperationalConditions) -> float:
     Provides the temperature-dependent specific heat capacity [J/(kg·K)] of the A15
     superconductor Nb₃Sn.
 
-    :notes:
-        - The superconducting part is ignored, which is typical in thermal quench calculations.
-    :references:
-        - EFDA Material Data Compilation for Superconductor Simulation, P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07.
-        - ITER DRG1 Annex, Superconducting Material Database, Article 5, N 11 FDR 42 01-07-05 R 0.1.
-        - V.D. Arp, Stability and Thermal Quenches in Force-Cooled Superconducting Cables, Superconducting MHD Magnet Design Conf., MIT, pp 142-157, 1980.
-        - G.S. Knapp, S.D. Bader, Z. Fisk, Phonon properties of A-15 superconductors obtained from heat capacity measurements, Phys. Rev. B, 13(9), pp 3783-3789, 1976.
-        https://doi.org/10.1103/PhysRevB.13.3783
+    Notes
+    -----
+    The superconducting part is ignored, which is typical in thermal quench calculations.
+
+
+    - EFDA Material Data Compilation for Superconductor Simulation,
+      P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07.
+    - ITER DRG1 Annex, Superconducting Material Database,
+      Article 5, N 11 FDR 42 01-07-05 R 0.1.
+    - V.D. Arp, Stability and Thermal Quenches in Force-Cooled Superconducting Cables,
+      Superconducting MHD Magnet Design Conf., MIT, pp 142-157, 1980.
+    - G.S. Knapp, S.D. Bader, Z. Fisk,
+      Phonon properties of A-15 superconductors obtained from heat capacity measurements,
+      Phys. Rev. B, 13(9), pp 3783-3789, 1976.
+      .. doi:: 10.1103/PhysRevB.13.3783
     """
     gamma: Final[float] = 0.1  # [J/K²/kg] (Grueneisen)
     beta: Final[float] = 0.001  # [J/K⁴/kg] (Debye)

@@ -43,7 +43,7 @@ __all__ = [
 
 
 class OperationalConditions(PMBaseModel):
-    """Operating conditions ofr a given material"""
+    """Operating conditions of a given material"""
 
     temperature: Temperature
     pressure: Pressure | None = None

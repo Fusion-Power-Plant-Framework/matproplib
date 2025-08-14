@@ -6,11 +6,9 @@
 import numpy as np
 from pydantic import Field
 
-from matproplib.base import rebuild, References
+from matproplib.base import References, rebuild
 from matproplib.conditions import (
-    DependentPropertyConditionConfig,
     OperationalConditions,
-    PropertyConfig,
 )
 from matproplib.library.references import CHOONG_1975
 from matproplib.material import (
@@ -22,10 +20,8 @@ from matproplib.nucleides import Elements
 from matproplib.properties.dependent import (
     Density,
     SpecificHeatCapacity,
-    Stress,
     ThermalConductivity,
     ThermalExpansionCoefficient,
-    YoungsModulus,
 )
 from matproplib.properties.group import props
 from matproplib.tools.tools import annotate_reference
