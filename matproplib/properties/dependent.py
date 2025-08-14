@@ -25,26 +25,26 @@ from pydantic import Field, field_serializer, model_validator
 from pydantic_core import PydanticUndefinedType
 from typing_extensions import NotRequired
 
-from physical_materials._serialisation import (
+from matproplib._serialisation import (
     deserialise,
     inspect_lambda,
     is_lambda,
     stringify_function,
 )
-from physical_materials.base import (
+from matproplib.base import (
     BasePhysicalProperty,
     References,
     unit_conversion,
     ureg,
 )
-from physical_materials.conditions import (
+from matproplib.conditions import (
     DependentPropertyConditionConfig,
     OperationalConditions,
     check_conditions,
     modify_conditions,
 )
 
-log = logging.getLogger("physical_materials.base")
+log = logging.getLogger("matproplib.base")
 
 
 class _NoDependence: ...

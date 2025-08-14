@@ -3,13 +3,13 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 import pytest
 
-from physical_materials.library.superconductors import (
+from matproplib.library.superconductors import (
     NB3SN_CERN_STRAND,
     NB3SN_CSJA6_STRAND,
     NB3SN_EUTF4_STRAND,
     NBS3N_WST_TF_STRAND,
 )
-from physical_materials.tools.plotting import plot_superconductor
+from matproplib.tools.plotting import plot_superconductor
 
 
 @pytest.mark.parametrize(

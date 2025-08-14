@@ -9,20 +9,20 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from physical_materials.base import (
+from matproplib.base import (
     SuperconductingParameterisation,
     rebuild,
 )
-from physical_materials.material import dependentphysicalproperty
-from physical_materials.properties.independent import (
+from matproplib.material import dependentphysicalproperty
+from matproplib.properties.independent import (
     MagneticField,  # noqa: TC001
     Strain,  # noqa: TC001
     Temperature,  # noqa: TC001
 )
-from physical_materials.tools.tools import kludge_linear_spline
+from matproplib.tools.tools import kludge_linear_spline
 
 if TYPE_CHECKING:
-    from physical_materials.conditions import OperationalConditions
+    from matproplib.conditions import OperationalConditions
 
 
 @rebuild

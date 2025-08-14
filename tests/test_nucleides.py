@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 import pytest
 
-from physical_materials.base import References
-from physical_materials.nucleides import (
+from matproplib.base import References
+from matproplib.nucleides import (
     ElementFraction,
     Elements,
     mass_fraction_to_volume_fraction,

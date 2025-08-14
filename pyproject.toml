@@ -7,7 +7,7 @@ source           = "vcs"
 fallback-version = "0.0.0"
 
 [tool.hatch.build.hooks.vcs]
-version-file = "physical_materials/_version.py"
+version-file = "matproplib/_version.py"
 
 [tool.hatch.metadata]
 allow-direct-references = true  # remove after reference published
@@ -44,9 +44,9 @@ classifiers = [
 ]
 
 [project.urls]
-Source        = "https://github.com/Fusion-Power-Plant-Framework/physical_materials"
-Documentation = "https://github.com/Fusion-Power-Plant-Framework/physical_materials#readme"
-Issues        = "https://github.com/Fusion-Power-Plant-Framework/physical_materials/issues"
+Source        = "https://github.com/Fusion-Power-Plant-Framework/matproplib"
+Documentation = "https://github.com/Fusion-Power-Plant-Framework/matproplib#readme"
+Issues        = "https://github.com/Fusion-Power-Plant-Framework/matproplib/issues"
 
 [project.optional-dependencies]
 neutronics = ["neutronics-material-maker"]
@@ -81,8 +81,8 @@ features = ["test"]
 python = ["3.10", "3.11", "3.12", "3.13"]
 [tool.hatch.envs.test.scripts]
 tests      = "pytest {args:tests}"
-tests-cov  = "pytest --cov physical_materials  --cov-report html:htmlcov --cov-report xml {args:tests}"
-tests-cov-private  = "pytest --private --cov physical_materials --cov-report html:htmlcov --cov-report xml {args:tests}"
+tests-cov  = "pytest --cov matproplib  --cov-report html:htmlcov --cov-report xml {args:tests}"
+tests-cov-private  = "pytest --private --cov matproplib --cov-report html:htmlcov --cov-report xml {args:tests}"
 
 [tool.hatch.envs.docs]
 features = ["docs"]
@@ -160,7 +160,7 @@ ignore = [
   "TID252",
 ]
 "tests/conftest.py" = ["PLC0415"]
-"physical_materials/tools/tools.py" = ["PLR0913", "PLR0917"]
+"matproplib/tools/tools.py" = ["PLR0913", "PLR0917"]
 "examples/**" = [
   "INP001",
   "DOC201",
@@ -168,7 +168,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["physical_materials"]
+known-first-party = ["matproplib"]
 
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -181,7 +181,7 @@ notice-rgx = "(?i)# SPDX-FileCopyrightText:\\s\\d{4}(-(\\d{4}|present))*"
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
-"omit"        = ["physical_materials/_version.py"]
+"omit"        = ["matproplib/_version.py"]
 
 [tool.pytest.ini_options]
 addopts = "--html=report.html --self-contained-html --strict-markers -r fEX"

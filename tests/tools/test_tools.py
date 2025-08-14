@@ -5,7 +5,7 @@
 import numpy as np
 import pytest
 
-from physical_materials.tools.tools import kludge_linear_spline
+from matproplib.tools.tools import kludge_linear_spline
 
 
 @pytest.mark.parametrize(

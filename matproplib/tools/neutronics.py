@@ -12,12 +12,12 @@ from typing import TYPE_CHECKING, Literal
 
 import numpy as np
 
-from physical_materials.base import ureg
+from matproplib.base import ureg
 
 if TYPE_CHECKING:
     import openmc
 
-    from physical_materials.nucleides import ElementFraction
+    from matproplib.nucleides import ElementFraction
 
 
 __all__ = [

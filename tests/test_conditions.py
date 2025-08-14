@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 from pint import Quantity
 
-from physical_materials.conditions import (
+from matproplib.conditions import (
     DependentPropertyConditionConfig,
     OperationalConditions,
     Pressure,
@@ -16,7 +16,7 @@ from physical_materials.conditions import (
     check_conditions,
     modify_conditions,
 )
-from physical_materials.properties.independent import Volume
+from matproplib.properties.independent import Volume
 from tests import _np_and_value_test
 
 

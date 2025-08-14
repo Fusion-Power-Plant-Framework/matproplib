@@ -14,7 +14,7 @@ from pint.errors import DimensionalityError
 from pydantic import Field, create_model, model_validator
 from pydantic_core import PydanticUndefinedType
 
-from physical_materials.base import BasePhysicalProperty, unit_conversion, ureg
+from matproplib.base import BasePhysicalProperty, unit_conversion, ureg
 
 __all__ = [
     "MagneticField",

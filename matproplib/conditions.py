@@ -21,8 +21,8 @@ from pydantic import (
     model_validator,
 )
 
-from physical_materials.base import PMBaseModel, ureg
-from physical_materials.properties.independent import (
+from matproplib.base import PMBaseModel, ureg
+from matproplib.properties.independent import (
     MagneticField,
     NeutronDamage,
     NeutronFluence,

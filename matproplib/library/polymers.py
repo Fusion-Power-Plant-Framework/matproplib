@@ -5,10 +5,10 @@
 
 from pydantic import Field
 
-from physical_materials.base import rebuild
-from physical_materials.material import FullMaterial, PropertiesT_co
-from physical_materials.nucleides import Elements
-from physical_materials.properties.group import props
+from matproplib.base import rebuild
+from matproplib.material import FullMaterial, PropertiesT_co
+from matproplib.nucleides import Elements
+from matproplib.properties.group import props
 
 
 @rebuild

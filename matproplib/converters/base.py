@@ -11,11 +11,11 @@ from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pydantic import Field, RootModel, model_validator
 
-from physical_materials.base import PMBaseModel
+from matproplib.base import PMBaseModel
 
 if TYPE_CHECKING:
-    from physical_materials.conditions import OperationalConditions
-    from physical_materials.materials import Material
+    from matproplib.conditions import OperationalConditions
+    from matproplib.materials import Material
 
 
 ConverterK = TypeVar("ConverterK", bound=str)

@@ -5,8 +5,8 @@
 import numpy as np
 import pytest
 
-from physical_materials.conditions import OperationalConditions
-from physical_materials.library.copper import CryogenicCopper
+from matproplib.conditions import OperationalConditions
+from matproplib.library.copper import CryogenicCopper
 
 
 def cryo_copper(rrr: float):

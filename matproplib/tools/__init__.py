@@ -4,7 +4,7 @@
 
 """Physical material tools"""
 
-from physical_materials.tools.neutronics import (
+from matproplib.tools.neutronics import (
     to_fispact_material,
     to_mcnp_material,
     to_openmc_material,

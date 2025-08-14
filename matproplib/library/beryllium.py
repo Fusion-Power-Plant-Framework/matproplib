@@ -5,15 +5,15 @@
 
 import numpy as np
 
-from physical_materials.conditions import OperationalConditions
-from physical_materials.converters.neutronics import OpenMCNeutronicConfig
-from physical_materials.library.references import FOKKENS_2003
-from physical_materials.material import dependentphysicalproperty, material
-from physical_materials.properties.dependent import (
+from matproplib.conditions import OperationalConditions
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
+from matproplib.library.references import FOKKENS_2003
+from matproplib.material import dependentphysicalproperty, material
+from matproplib.properties.dependent import (
     SpecificHeatCapacity,
     ThermalExpansionCoefficient,
 )
-from physical_materials.properties.group import props
+from matproplib.properties.group import props
 
 Be12Ti = material(
     "Be12Ti",

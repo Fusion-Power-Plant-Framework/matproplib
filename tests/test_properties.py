@@ -8,14 +8,14 @@ import pytest
 from pint import Unit
 from pydantic_core import ValidationError
 
-from physical_materials.base import rebuild, ureg
-from physical_materials.conditions import (
+from matproplib.base import rebuild, ureg
+from matproplib.conditions import (
     DependentPropertyConditionConfig,
     PropertyConfig,
     STPConditions,
 )
-from physical_materials.material import dependentphysicalproperty, material
-from physical_materials.properties.dependent import (
+from matproplib.material import dependentphysicalproperty, material
+from matproplib.properties.dependent import (
     CoerciveField,
     Density,
     DependentPhysicalProperty,
@@ -30,8 +30,8 @@ from physical_materials.properties.dependent import (
     ViscousRemanentMagnetism,
     YoungsModulus,
 )
-from physical_materials.properties.group import Properties, props
-from physical_materials.properties.independent import (
+from matproplib.properties.group import Properties, props
+from matproplib.properties.independent import (
     MagneticField,
     NeutronDamage,
     PhysicalProperty,

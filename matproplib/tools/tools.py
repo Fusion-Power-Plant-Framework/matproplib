@@ -5,7 +5,7 @@
 
 from copy import deepcopy
 import numpy as np
-from physical_materials.base import References
+from matproplib.base import References
 
 
 def annotate_reference(reference: References, annotation: str) -> References:

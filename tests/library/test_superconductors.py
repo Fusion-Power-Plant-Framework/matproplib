@@ -5,8 +5,8 @@
 import numpy as np
 import pytest
 
-from physical_materials.conditions import OperationalConditions
-from physical_materials.library.superconductors import (
+from matproplib.conditions import OperationalConditions
+from matproplib.library.superconductors import (
     NB3SN_CERN_STRAND,
     NB3SN_CSJA6_STRAND,
     NB3SN_EUTF4_STRAND,

@@ -138,7 +138,7 @@ class PMBaseModel(BaseModel, ABC):
 
     @model_validator(mode="after")
     def _inject_group(self):
-        from physical_materials.properties.dependent import (  # noqa: PLC0415
+        from matproplib.properties.dependent import (  # noqa: PLC0415
             DependentPhysicalProperty,
             _NoDependence,
             _WrapCallable,
@@ -267,7 +267,7 @@ class BaseGroup(PMBaseModel):
         :
             List of defined properties
         """
-        from physical_materials.properties.dependent import (  # noqa: PLC0415
+        from matproplib.properties.dependent import (  # noqa: PLC0415
             UndefinedProperty,
         )
 
@@ -294,7 +294,7 @@ def rebuild(cls):
     :
         modified class
     """
-    from physical_materials.properties.dependent import (  # noqa: PLC0415
+    from matproplib.properties.dependent import (  # noqa: PLC0415
         DependentPhysicalProperty,
     )
 

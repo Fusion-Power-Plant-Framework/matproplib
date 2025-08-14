@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Concrete materials"""
 
-from physical_materials.material import material
-from physical_materials.properties.group import props
+from matproplib.material import material
+from matproplib.properties.group import props
 
 Concrete = material(
     "Concrete",

@@ -8,17 +8,17 @@ from typing import Final
 import numpy as np
 from pydantic import Field
 
-from physical_materials.base import References, rebuild
-from physical_materials.conditions import OperationalConditions
-from physical_materials.library.references import HUST_1984, SIMON_1992
-from physical_materials.material import (
+from matproplib.base import References, rebuild
+from matproplib.conditions import OperationalConditions
+from matproplib.library.references import HUST_1984, SIMON_1992
+from matproplib.material import (
     FullMaterial,
     Material,
     PropertiesT_co,
     dependentphysicalproperty,
 )
-from physical_materials.nucleides import Elements
-from physical_materials.properties.dependent import (
+from matproplib.nucleides import Elements
+from matproplib.properties.dependent import (
     BulkModulus,
     ElectricalResistivity,
     MagneticSusceptibility,
@@ -29,8 +29,8 @@ from physical_materials.properties.dependent import (
     ThermalExpansionCoefficient,
     YoungsModulus,
 )
-from physical_materials.properties.group import props
-from physical_materials.tools.tools import annotate_reference
+from matproplib.properties.group import props
+from matproplib.tools.tools import annotate_reference
 
 
 @rebuild

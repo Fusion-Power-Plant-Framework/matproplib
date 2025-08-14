@@ -17,4 +17,4 @@ report.html
 .ruff_cache
 
 # Versioning
-physical_materials/_version.py
+matproplib/_version.py

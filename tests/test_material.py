@@ -5,17 +5,17 @@ import pytest
 from csl_reference import Reference
 from pint import Unit
 
-from physical_materials.base import rebuild, ureg
-from physical_materials.conditions import (
+from matproplib.base import rebuild, ureg
+from matproplib.conditions import (
     DependentPropertyConditionConfig,
     OperationalConditions,
     STPConditions,
 )
-from physical_materials.converters.base import Converters
-from physical_materials.converters.neutronics import OpenMCNeutronicConfig
-from physical_materials.library.copper import CryogenicCopper
-from physical_materials.library.fluids import H2O, DDPlasma, DTPlasma
-from physical_materials.material import (
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
+from matproplib.library.copper import CryogenicCopper
+from matproplib.library.fluids import H2O, DDPlasma, DTPlasma
+from matproplib.material import (
     FullMaterial,
     Material,
     MaterialFraction,
@@ -23,15 +23,15 @@ from physical_materials.material import (
     material,
     mixture,
 )
-from physical_materials.nucleides import ElementFraction, Elements
-from physical_materials.properties.dependent import (
+from matproplib.nucleides import ElementFraction, Elements
+from matproplib.properties.dependent import (
     Density,
     PoissonsRatio,
     UndefinedProperty,
     YoungsModulus,
 )
-from physical_materials.properties.group import DefaultProperties, props
-from physical_materials.superconduction import Nb3SnBotturaParameterisation
+from matproplib.properties.group import DefaultProperties, props
+from matproplib.superconduction import Nb3SnBotturaParameterisation
 
 
 class TestMaterialFunctionalInit:

@@ -7,16 +7,16 @@ from typing import Any
 import numpy as np
 import pytest
 
-from physical_materials.conditions import OperationalConditions
-from physical_materials.converters.neutronics import (
+from matproplib.conditions import OperationalConditions
+from matproplib.converters.neutronics import (
     FispactNeutronicConfig,
     MCNPNeutronicConfig,
     OpenMCNeutronicConfig,
     SerpentNeutronicConfig,
     global_id,
 )
-from physical_materials.material import material
-from physical_materials.tools.neutronics import NMM_FRACTION_TYPE_MAPPING
+from matproplib.material import material
+from matproplib.tools.neutronics import NMM_FRACTION_TYPE_MAPPING
 
 
 def empty_filter(lst: list[Any]) -> list[Any]:

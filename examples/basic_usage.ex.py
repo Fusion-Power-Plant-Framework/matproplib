@@ -18,41 +18,41 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-"""An example to show the basic usage of physical_materials"""
+"""An example to show the basic usage of matproplib"""
 
 # %%
 from typing import Literal
 
 from pint import Unit  # noqa: F401
 
-from physical_materials.base import (
+from matproplib.base import (
     rebuild,
 )
-from physical_materials.conditions import OperationalConditions
-from physical_materials.converters.neutronics import (
+from matproplib.conditions import OperationalConditions
+from matproplib.converters.neutronics import (
     FispactNeutronicConfig,
     MCNPNeutronicConfig,
     OpenMCNeutronicConfig,  # noqa: F401
 )
-from physical_materials.material import (
+from matproplib.material import (
     FullMaterial,
     dependentphysicalproperty,
     material,
 )
-from physical_materials.properties.dependent import (
+from matproplib.properties.dependent import (
     Density,
     SpecificHeatCapacity,
 )
-from physical_materials.properties.group import (
+from matproplib.properties.group import (
     DefaultProperties,
     Properties,
     props,
 )
-from physical_materials.properties.independent import (  # noqa: F401
+from matproplib.properties.independent import (  # noqa: F401
     PhysicalProperty,
     pp,
 )
-from physical_materials.superconduction import NbTiBotturaParameterisation
+from matproplib.superconduction import NbTiBotturaParameterisation
 
 # %% [markdown]
 # ## Basics

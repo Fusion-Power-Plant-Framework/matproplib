@@ -6,7 +6,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from physical_materials.conditions import OperationalConditions
+from matproplib.conditions import OperationalConditions
 
 
 def plot_superconductor(

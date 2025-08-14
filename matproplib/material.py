@@ -27,20 +27,20 @@ from pydantic.types import NonNegativeFloat  # noqa: TC002
 from pydantic_core import ValidationError
 from typing_extensions import TypeVar
 
-from physical_materials.base import (
+from matproplib.base import (
     BaseGroup,
     PMBaseModel,
     References,
     SuperconductingParameterisationT_co,
 )
-from physical_materials.conditions import (
+from matproplib.conditions import (
     DependentPropertyConditionConfig,
     DependentPropertyConditionConfigTD,
     OperationalConditions,
     STPConditions,
 )
-from physical_materials.converters.base import Converter, ConverterK, Converters
-from physical_materials.nucleides import (
+from matproplib.converters.base import Converter, ConverterK, Converters
+from matproplib.nucleides import (
     ElementFraction,
     Elements,
     atomic_fraction_to_mass_fraction,
@@ -48,7 +48,7 @@ from physical_materials.nucleides import (
     ef_root_model,
     volume_fraction_to_atomic_fraction,
 )
-from physical_materials.properties.dependent import (
+from matproplib.properties.dependent import (
     BulkModulus,
     CoerciveField,
     Density,
@@ -67,14 +67,14 @@ from physical_materials.properties.dependent import (
     ViscousRemanentMagnetism,
     YoungsModulus,
 )
-from physical_materials.properties.group import (
+from matproplib.properties.group import (
     Ldefine,
     Properties,
     UndefinedSuperconductingParameterisation,
     _superconduction_validation,
     props,
 )
-from physical_materials.properties.mixture import Mixture
+from matproplib.properties.mixture import Mixture
 
 BaseGroupT_co = TypeVar("BaseGroupT_co", bound=BaseGroup, covariant=True)
 PropertiesT_co = TypeVar("PropertiesT_co", bound=Properties, covariant=True)
@@ -223,7 +223,7 @@ class Material(PMBaseModel, ABC, Generic[ConverterK]):
         :
             List of defined properties
         """
-        from physical_materials.properties.dependent import (  # noqa: PLC0415
+        from matproplib.properties.dependent import (  # noqa: PLC0415
             UndefinedProperty,
         )
 
@@ -346,7 +346,7 @@ def material(
     :
         New material class
     """
-    from physical_materials.properties.dependent import (  # noqa: PLC0415
+    from matproplib.properties.dependent import (  # noqa: PLC0415
         DependentPhysicalProperty,
     )
 

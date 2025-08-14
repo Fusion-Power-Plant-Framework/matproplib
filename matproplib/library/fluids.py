@@ -6,12 +6,12 @@
 from CoolProp.CoolProp import PropsSI
 from pydantic import Field
 
-from physical_materials.converters.base import Converters
-from physical_materials.converters.neutronics import OpenMCNeutronicConfig
-from physical_materials.material import FullMaterial, material
-from physical_materials.nucleides import Elements
-from physical_materials.properties.dependent import Density
-from physical_materials.properties.group import props
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
+from matproplib.material import FullMaterial, material
+from matproplib.nucleides import Elements
+from matproplib.properties.dependent import Density
+from matproplib.properties.group import props
 
 
 class Void(FullMaterial):

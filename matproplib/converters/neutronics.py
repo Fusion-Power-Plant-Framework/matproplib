@@ -11,14 +11,14 @@ from typing import TYPE_CHECKING, Literal
 
 import periodictable as pt
 
-from physical_materials.base import N_AVOGADRO
-from physical_materials.converters.base import Converter
-from physical_materials.nucleides import (
+from matproplib.base import N_AVOGADRO
+from matproplib.converters.base import Converter
+from matproplib.nucleides import (
     atomic_fraction_to_mass_fraction,
     ef_root_model,
 )
-from physical_materials.properties.independent import Volume  # noqa: TC001
-from physical_materials.tools import (
+from matproplib.properties.independent import Volume  # noqa: TC001
+from matproplib.tools import (
     to_fispact_material,
     to_mcnp_material,
     to_openmc_material,
@@ -28,9 +28,9 @@ from physical_materials.tools import (
 if TYPE_CHECKING:
     import openmc
 
-    from physical_materials.conditions import OperationalConditions
-    from physical_materials.material import Material
-    from physical_materials.nucleides import ElementFraction
+    from matproplib.conditions import OperationalConditions
+    from matproplib.material import Material
+    from matproplib.nucleides import ElementFraction
 
 
 class NeutronicConfig(Converter, ABC):

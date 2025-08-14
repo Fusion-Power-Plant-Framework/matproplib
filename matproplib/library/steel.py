@@ -6,20 +6,20 @@
 import numpy as np
 from pydantic import Field
 
-from physical_materials.base import rebuild, References
-from physical_materials.conditions import (
+from matproplib.base import rebuild, References
+from matproplib.conditions import (
     DependentPropertyConditionConfig,
     OperationalConditions,
     PropertyConfig,
 )
-from physical_materials.library.references import CHOONG_1975
-from physical_materials.material import (
+from matproplib.library.references import CHOONG_1975
+from matproplib.material import (
     FullMaterial,
     PropertiesT_co,
     dependentphysicalproperty,
 )
-from physical_materials.nucleides import Elements
-from physical_materials.properties.dependent import (
+from matproplib.nucleides import Elements
+from matproplib.properties.dependent import (
     Density,
     SpecificHeatCapacity,
     Stress,
@@ -27,8 +27,8 @@ from physical_materials.properties.dependent import (
     ThermalExpansionCoefficient,
     YoungsModulus,
 )
-from physical_materials.properties.group import props
-from physical_materials.tools.tools import annotate_reference
+from matproplib.properties.group import props
+from matproplib.tools.tools import annotate_reference
 
 
 @dependentphysicalproperty(
@@ -116,5 +116,3 @@ def SS316_LN_density(op_cond: OperationalConditions):
     SS316_LN_density2 = [7930, 7919, 7899, 7879, 7858, 7837, 7815, 7793, 7770, 7747, 7724, 7701, 7677, 7654, 7630, 7606, 7582]
     # fmt: on
     return np.interp(op_cond.temperature, SS316_LN_density1, SS316_LN_density2)
-
-

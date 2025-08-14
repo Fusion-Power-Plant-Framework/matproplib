@@ -15,7 +15,7 @@ import periodictable as pt
 from pydantic import RootModel, model_serializer, model_validator
 from pydantic.types import NonNegativeFloat  # noqa: TC002
 
-from physical_materials.base import PMBaseModel, References
+from matproplib.base import PMBaseModel, References
 
 if TYPE_CHECKING:
     from collections.abc import Callable

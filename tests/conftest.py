@@ -7,12 +7,12 @@ import pytest
 
 @pytest.fixture
 def test_material():
-    from physical_materials.converters.neutronics import (
+    from matproplib.converters.neutronics import (
         FispactNeutronicConfig,
     )
-    from physical_materials.material import material
-    from physical_materials.properties.group import props
-    from physical_materials.superconduction import (
+    from matproplib.material import material
+    from matproplib.properties.group import props
+    from matproplib.superconduction import (
         Nb3SnBotturaParameterisation,
     )
 
@@ -45,6 +45,6 @@ def test_material():
 
 @pytest.fixture
 def test_condition():
-    from physical_materials.conditions import OperationalConditions
+    from matproplib.conditions import OperationalConditions
 
     return OperationalConditions(temperature=np.array([298, 200]), pressure=(1, "atm"))

@@ -12,11 +12,11 @@ from numpydantic.dtype import Number
 from pint import Unit
 from pydantic import Field, field_validator, model_validator
 
-from physical_materials.base import PMBaseModel
-from physical_materials.conditions import (
+from matproplib.base import PMBaseModel
+from matproplib.conditions import (
     OperationalConditions,
 )
-from physical_materials.properties.dependent import DependentPhysicalProperty
+from matproplib.properties.dependent import DependentPhysicalProperty
 
 DependentPhysicalPropertyT = TypeVar(
     "DependentPhysicalPropertyT", bound=DependentPhysicalProperty

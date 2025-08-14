@@ -13,14 +13,14 @@ from pint import Unit
 from pydantic import ConfigDict, Field, create_model, field_validator
 from pydantic_core import PydanticUndefined
 
-from physical_materials.base import (
+from matproplib.base import (
     BaseGroup,
     References,
     SuperconductingParameterisation,
     SuperconductingParameterisationT_co,
     UndefinedSuperconductingParameterisation,
 )
-from physical_materials.properties.dependent import (
+from matproplib.properties.dependent import (
     BulkModulus,
     CoerciveField,
     Density,
@@ -42,7 +42,7 @@ from physical_materials.properties.dependent import (
 )
 
 if TYPE_CHECKING:
-    from physical_materials.base.material import PropertiesT_co
+    from matproplib.base.material import PropertiesT_co
 
 
 class Properties(BaseGroup):

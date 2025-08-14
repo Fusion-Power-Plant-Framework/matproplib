@@ -5,12 +5,12 @@
 
 from typing import Final
 
-from physical_materials.conditions import OperationalConditions
-from physical_materials.library.references import CORATO_2016, FERRACIN_2022
-from physical_materials.material import dependentphysicalproperty, material
-from physical_materials.properties.dependent import SpecificHeatCapacity
-from physical_materials.properties.group import props
-from physical_materials.superconduction import (
+from matproplib.conditions import OperationalConditions
+from matproplib.library.references import CORATO_2016, FERRACIN_2022
+from matproplib.material import dependentphysicalproperty, material
+from matproplib.properties.dependent import SpecificHeatCapacity
+from matproplib.properties.group import props
+from matproplib.superconduction import (
     Nb3SnBotturaParameterisation,
     NbTiBotturaParameterisation,
     SummersParameterisation,

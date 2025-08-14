@@ -11,10 +11,10 @@ and neutronics properties under one interface.
 
 import logging
 
-from physical_materials.conditions import OperationalConditions, STPConditions
-from physical_materials.material import Material, material
-from physical_materials.properties.group import props
-from physical_materials.properties.independent import pp
+from matproplib.conditions import OperationalConditions, STPConditions
+from matproplib.material import Material, material
+from matproplib.properties.group import props
+from matproplib.properties.independent import pp
 
 __all__ = [
     "Material",
@@ -26,5 +26,5 @@ __all__ = [
 ]
 
 logging.basicConfig()
-logger = logging.getLogger("physical_materials")
+logger = logging.getLogger("matproplib")
 logger.setLevel(logging.INFO)
