@@ -10,5 +10,5 @@ In `matproplib` all material properties are called with an `OperationalCondition
 | pressure| Pa | Operational pressure (fluids).
 | magnetic_field                     | T             | Operational magnetic field.                                                  |
 | strain | — | Operational strain.
-| neutron_damage         | dpa             | Operational neutron damage (displacements per atom).                                        |                      
-| neutron_fluence         | 1/m^2             | Operational neutron fluence.                                        |        
+| neutron_damage         | dpa             | Operational neutron damage (displacements per atom).                                        |
+| neutron_fluence         | 1/m^2             | Operational neutron fluence.                                        |

@@ -10,7 +10,7 @@
 | youngs_modulus                     | Pa            | Young's modulus.                                                  |
 | shear_modulus                      | Pa            | Shear modulus.                                                    |
 | bulk_modulus                       | Pa            | Bulk modulus.                                                     |
-| thermal_conductivity               | W·m/K         | Thermal conductivity.  
+| thermal_conductivity               | W·m/K         | Thermal conductivity.
 | coefficient_thermal_expansion      | K⁻¹           | Coefficient of thermal expansion (CTE).                           |
 | specific_heat_capacity             | J/kg/K        | Specific heat capacity.                                           |
 | electrical_resistivity             | Ω·m           | Electrical resistivity.                                           |
@@ -21,4 +21,4 @@
 | minimum_yield_stress               | Pa            | Minimum yield stress.                                             |
 | average_yield_stress               | Pa            | Average yield stress.                                             |
 | minimum_ultimate_tensile_stress    | Pa            | Minimum ultimate tensile stress.                                  |
-| average_ultimate_tensile_stress    | Pa            | Average ultimate tensile stress.    
+| average_ultimate_tensile_stress    | Pa            | Average ultimate tensile stress.

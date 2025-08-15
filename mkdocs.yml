@@ -78,6 +78,11 @@ markdown_extensions:
   - admonition
 
 nav:
-  - index.md
+  - User Guide:
+      - index.md
+      - properties.md
+      - conditions.md
+      - superconductors.md
+      - neutronics.md
   - Example: examples/basic_usage.ex.py
   - API Reference: source/reference/

@@ -11,7 +11,7 @@ Superconducting parameterisations take many forms. At present, three formulation
 
  Each parameterisation takes a range of free parameters. For example, one can instantiate a superconducting parameterisation:
 
- ```python
+```python
 from matproplib.superconduction import Nb3SnBotturaParameterisation
 
 NBS3N_WST_TF_STRAND = Nb3SnBotturaParameterisation(
@@ -42,7 +42,7 @@ Nb3Sn = material(
     elements="Nb3Sn",
     properties=props(
         as_field=True,
-        density=8040.0, 
+        density=8040.0,
         superconducting_parameterisation=NBS3N_WST_TF_STRAND,
     )
 )
