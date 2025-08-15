@@ -46,7 +46,7 @@ class TestParameterisations:
 def test_summers_cern_strand():
     """
     https://conferences.lbl.gov/event/979/contributions/5985/attachments/4069/3482/U9-U10_final.pdf slide 25
-    """
+    """  # noqa: E501
     op_cond = OperationalConditions(temperature=4.2, magnetic_field=12.0, strain=0.0)
     j_crit = NB3SN_CERN_STRAND.critical_current_density(op_cond)
     assert np.isclose(j_crit, 2.9e9, rtol=1e-3, atol=0.0)

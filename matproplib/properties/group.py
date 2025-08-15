@@ -219,7 +219,7 @@ def props(  # noqa: PLR0913
         },
     )
     if superconducting_parameterisation is not None:
-        model = model[Union[*SuperconductingParameterisation.__subclasses__()]]
+        model = model[Union[tuple(SuperconductingParameterisation.__subclasses__())]]
 
     if as_field:
         return Field(validate_default=True, default_factory=model)

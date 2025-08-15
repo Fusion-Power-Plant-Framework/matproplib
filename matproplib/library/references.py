@@ -18,7 +18,13 @@ CORATO_2016 = {
     "type": "report",
     "author": [
         {
-            "family": "V. Corato, R. Bonifetto, P. Bruzzone, D. Ciazynski, M. Coleman, E. Gaio, R. Heller, B. Lacroix, M. Lewandowska, A. Maistrello, L. Muzzi, S. Nicollet, A. Nijhuis, F. Nunio, A. Panin, L. Savoldi, K. Sedlak, A. Torre, S. Turtu, R. Vallcorba, R. Wesche, L. Zani, R. Zanino"
+            "family": (
+                "V. Corato, R. Bonifetto, P. Bruzzone, D. Ciazynski, M. Coleman, "
+                "E. Gaio, R. Heller, B. Lacroix, M. Lewandowska, A. Maistrello, "
+                "L. Muzzi, S. Nicollet, A. Nijhuis, F. Nunio, A. Panin, L. Savoldi"
+                ", K. Sedlak, A. Torre, S. Turtu, R. Vallcorba, R. Wesche, "
+                "L. Zani, R. Zanino"
+            )
         }
     ],
     "title": "Common operating values for DEMO magnets design for 2016",
@@ -48,7 +54,10 @@ SIMON_1992 = {
     "id": "simon1992",
     "type": "report",
     "author": [{"family": "Simon, J., Drexler, E. S., and Reed, R. P."}],
-    "title": "NIST Monograph 177, Properties of Copper and Copper Alloys at Cryogenic Temperatures",
+    "title": (
+        "NIST Monograph 177, Properties of Copper and Copper Alloys at"
+        " Cryogenic Temperatures"
+    ),
     "event_date": {"raw": "1992"},
     "annote": "",
     "url": "https://nvlpubs.nist.gov/nistpubs/Legacy/MONO/nistmonograph177.pdf",
@@ -59,7 +68,10 @@ HUST_1984 = {
     "id": "hust1984",
     "type": "report",
     "author": [{"family": "Hust, J. G., and Lankford, A. B."}],
-    "title": "THERMAL CONDUCTIVITY OF ALUMINUM, COPPER, IRON, AND TUNGSTEN FOR TEMPERATURES FROM 1 K TO THE MELTING POINT",
+    "title": (
+        "THERMAL CONDUCTIVITY OF ALUMINUM, COPPER, IRON, AND TUNGSTEN FOR "
+        "TEMPERATURES FROM 1 K TO THE MELTING POINT"
+    ),
     "event_date": {"raw": "1984"},
     "annote": "NBSIR 84-3007",
     "url": "https://www.govinfo.gov/content/pkg/GOVPUB-C13-5dca61206b094d8b3a54099ebcff1baa/pdf/GOVPUB-C13-5dca61206b094d8b3a54099ebcff1baa.pdf",

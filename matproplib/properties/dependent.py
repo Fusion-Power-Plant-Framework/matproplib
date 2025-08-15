@@ -279,7 +279,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
             check_conditions(op_cond, self.op_cond_config)
         return self.value(op_cond, *args, **kwargs)
 
-    def __str__(self) -> str:
+    def __str__(self) -> str:  # noqa: D105
         return (
             f"{type(self).__name__}(value={self.value}, "
             f"unit={self.unit:~P}, "

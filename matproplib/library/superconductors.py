@@ -85,7 +85,10 @@ NB3SN_CERN_STRAND = SummersParameterisation(
     reference={
         "id": "nb3sn_cp",
         "type": "report",
-        "title": "EFDA Material Data Compilation for Superconductor Simulation, P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07",
+        "title": (
+            "EFDA Material Data Compilation for Superconductor Simulation, "
+            "P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07"
+        ),
     },
 )
 def nbti_specific_heat_capacity(op_cond: OperationalConditions) -> float:
@@ -98,10 +101,13 @@ def nbti_specific_heat_capacity(op_cond: OperationalConditions) -> float:
     -----
     The superconducting part is ignored, which is typical in thermal quench calculations.
 
-    - EFDA Material Data Compilation for Superconductor Simulation, P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07.
-    - Elrod S.A. Miller J.R., Dresner L., “The specific heat of NbTi from 0-7T between 4.2 and 20K”, Advances in Cryogenic Engineering Materials, Vol. 28, 1981
+    - EFDA Material Data Compilation for Superconductor Simulation, P. Bauer,
+      H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07.
+    - Elrod S.A. Miller J.R., Dresner L.,
+     “The specific heat of NbTi from 0-7T between 4.2 and 20K”, Advances in Cryogenic Engineering Materials,
+      Vol. 28, 1981
       .. doi:: 10.1007/978-1-4613-3542-9_60
-    """
+    """  # noqa: DOC201, E501
     gamma: Final[float] = 0.145  # [J/K²/kg] (Grueneisen)
     beta: Final[float] = 0.0023  # [J/K⁴/kg] (Debye)
     cp_300: Final[float] = 400.0  # [J/K/kg] Room-temperature specific heat
@@ -117,7 +123,8 @@ NbTi = material(
     elements="NbTi",
     properties=props(
         as_field=True,
-        density=6000.0,  # Large variations in the literature, depending on the alloying elements
+        # Large variations in the literature, depending on the alloying elements
+        density=6000.0,
         poissons_ratio=0.33,
         specific_heat_capacity=nbti_specific_heat_capacity,
         superconducting_parameterisation=NBTI_ITER_STRAND,
@@ -131,7 +138,10 @@ NbTi = material(
     reference={
         "id": "nb3sn_cp",
         "type": "report",
-        "title": "EFDA Material Data Compilation for Superconductor Simulation, P. Bauer, H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07",
+        "title": (
+            "EFDA Material Data Compilation for Superconductor Simulation, P. Bauer,"
+            " H. Rajainmaki, E. Salpietro, EFDA CSU, Garching, 04/18/07"
+        ),
     },
 )
 def nb3sn_specific_heat_capacity(op_cond: OperationalConditions) -> float:
@@ -155,7 +165,7 @@ def nb3sn_specific_heat_capacity(op_cond: OperationalConditions) -> float:
       Phonon properties of A-15 superconductors obtained from heat capacity measurements,
       Phys. Rev. B, 13(9), pp 3783-3789, 1976.
       .. doi:: 10.1103/PhysRevB.13.3783
-    """
+    """  # noqa: DOC201
     gamma: Final[float] = 0.1  # [J/K²/kg] (Grueneisen)
     beta: Final[float] = 0.001  # [J/K⁴/kg] (Debye)
     cp_300: Final[float] = 210.0  # [J/K/kg] Room-temperature specific heat
@@ -171,7 +181,9 @@ Nb3Sn = material(
     elements="Nb3Sn",
     properties=props(
         as_field=True,
-        density=8040.0,  # Large variations in the literature, depending on the whether or not Bronze is included
+        # Large variations in the literature,
+        # depending on the whether or not Bronze is included
+        density=8040.0,
         poissons_ratio=0.33,
         specific_heat_capacity=nb3sn_specific_heat_capacity,
         superconducting_parameterisation=NBS3N_WST_TF_STRAND,

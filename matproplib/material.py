@@ -173,6 +173,7 @@ class Material(PMBaseModel, ABC, Generic[ConverterK]):
         setattr(self, dp, Mixture(dpp=materials_dpp, fractions=fractions))
 
     def convert(self, name: ConverterK, op_cond: OperationalConditions, *args, **kwargs):
+        """Convert material to another format"""  # noqa: DOC201
         return self.converters[name].convert(self, op_cond, *args, **kwargs)
 
     def __getattr__(self, value: str) -> Any:
@@ -252,6 +253,8 @@ def field_alias_path(name, *alias_path, default=None):
 class FullMaterial(
     Material[ConverterK], Generic[ConverterK, SuperconductingParameterisationT_co]
 ):
+    """Fully specified material with all default properties"""
+
     density: UndefinedProperty | Density = field_alias_path("density", "properties")
 
     poissons_ratio: UndefinedProperty | PoissonsRatio = field_alias_path(
@@ -432,7 +435,7 @@ def _ignore_undefined(ann):
     )
 
     if len(types) > 1:
-        return Union[types]
+        return Union[types]  # noqa: UP007
     return types[0]
 
 
@@ -452,6 +455,37 @@ def mixture(
     volume_conditions: OperationalConditions | None = None,
     **property_overrides: DependentPhysicalProperty,
 ) -> Material[ConverterK]:
+    """
+    Create a mixture from a set of materials
+
+    Parameters
+    ----------
+    name:
+        Mixture name
+    materials:
+        list of materials with their fractions
+    fraction_type:
+        the type of fractional mixing to perform
+    converters:
+        Conversion to other formats, these are not transferred from constituent materials
+    reference:
+        Any reference for the material data
+    volume_conditions:
+        if the fraction type is 'volume' what conditions to mix under.
+        These are used to calculate the density of the materials. Defaults to IUPAC STP
+    **properties_overrides:
+        any replacement properties for the mixture eg density
+
+    Returns
+    -------
+    :
+        Mixed material
+
+    Raises
+    ------
+    AttributeError
+        If one material has a property the others dont and there is no override provided
+    """
     materials = [MaterialFraction.model_validate(m) for m in materials]
     all_fields = reduce(
         operator.or_,

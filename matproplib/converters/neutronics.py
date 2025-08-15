@@ -52,10 +52,10 @@ class OpenMCNeutronicConfig(NeutronicConfig):
     name: Literal["openmc"] = "openmc"
     """Name of converter"""
     zaid_suffix: str = ""
-    """The nuclear library to apply to the zaid, for example ".31c", this is used in
-        MCNP and Serpent material cards."""
+    """The nuclear library to apply to the zaid, for example '.31c'"""
     material_id: int | None = None
-    """The id number or mat number used in the MCNP and OpenMC material cards."""
+    """The id number or mat number used in OpenMC materials,
+    auto assigned by default within OpenMC."""
     packing_fraction: float = 1.0
     """Amount of unit packed volume of a material"""
     percent_type: Literal["atomic", "mass", "volume"] = "atomic"
@@ -68,10 +68,10 @@ class OpenMCNeutronicConfig(NeutronicConfig):
     """Enrichment percentage type"""
     atoms_per_unit_cell: int | None = None
     """Number of atoms per unit cell, used in combination with volume_of_unit_cell for
- density fallback calculation"""
+    density fallback calculation"""
     volume_of_unit_cell: float | None = None
     """Volume of unit cell, used in combination with atoms_per_unit_cell for
- density fallback calculation"""
+    density fallback calculation"""
     decimal_places: int = 8
     """Precision of the material card"""
 
@@ -175,6 +175,7 @@ class FispactNeutronicConfig(NeutronicConfig):
 
 
 global_id = Counter({"mcnp": 1})
+"""MCNP requires material ID this counter increments if none provided"""
 
 
 class MCNPNeutronicConfig(NeutronicConfig):
