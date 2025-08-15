@@ -30,6 +30,7 @@ CORATO_2016 = {
     "title": "Common operating values for DEMO magnets design for 2016",
     "event_date": {"raw": "2016"},
     "annote": "MEMO for WPMAG-MCD-2.1, version 1.4, EFDA_D_2MMDTG",
+    "url": "https://scipub.euro-fusion.org/wp-content/uploads/eurofusion/WPMAGREP16_16565_submitted.pdf",
 }
 
 FERRACIN_2022 = {

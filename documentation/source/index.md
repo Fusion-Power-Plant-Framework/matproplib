@@ -6,9 +6,10 @@ The main aim of this package is to unite structural, thermal, electro-magnetic a
 
 
 ## Contents
-- [Definitions and conventions]
 - [Material properties](properties.md)
 - [Operational conditions](conditions.md)
+- [Superconducting parameterisations](superconductors.md)
+- [Neutronics](neutronics.md)
 
 
 ## User guide
