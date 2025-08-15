@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import copy
+import logging
 import operator
 from abc import ABC
 from collections.abc import Callable, Iterable, Sequence
@@ -49,6 +50,7 @@ from matproplib.nucleides import (
     volume_fraction_to_atomic_fraction,
 )
 from matproplib.properties.dependent import (
+    AttributeErrorProperty,
     BulkModulus,
     CoerciveField,
     Density,
@@ -78,6 +80,8 @@ from matproplib.properties.mixture import Mixture
 
 BaseGroupT_co = TypeVar("BaseGroupT_co", bound=BaseGroup, covariant=True)
 PropertiesT_co = TypeVar("PropertiesT_co", bound=Properties, covariant=True)
+
+log = logging.getLogger(__name__)
 
 
 class MaterialFraction(PMBaseModel, Generic[ConverterK]):
@@ -520,10 +524,11 @@ def mixture(
                     f"{i}: {mat.material.name}"
                     for i, mat in zip(ind, materials, strict=True)
                 )
-
-                raise AttributeError(
+                msg = (
                     f"Material property '{prp}' not defined and not overidden at {mats} "
-                ) from None
+                )
+                prop_val[prp] = AttributeErrorProperty(msg=msg)
+                log.debug(msg)
 
     model = create_model(
         name,

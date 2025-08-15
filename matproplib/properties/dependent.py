@@ -299,6 +299,14 @@ class UndefinedProperty(DependentPhysicalProperty):
         raise NotImplementedError("")
 
 
+class AttributeErrorProperty(UndefinedProperty):
+    msg: str = Field(default="", frozen=True)
+
+    def __call__(self, op_cond: OperationalConditions, *args, **kwargs):
+        """Call for Undefined property is undefined"""
+        raise AttributeError(self.msg)
+
+
 class Density(DependentPhysicalProperty):
     """Density of a material"""
 
