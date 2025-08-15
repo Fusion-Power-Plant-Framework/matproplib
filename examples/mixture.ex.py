@@ -59,9 +59,10 @@ my_mixture = mixture(
 
 # %%
 
-op_cond = OperationalConditions(temperature=300)
+op_cond = OperationalConditions(temperature=300, pressure=8e5)
 
-print(f"{my_mixture.density(op_cond)} kg/m^3")
+mixture_density = my_mixture.density(op_cond)
+print(f"{mixture_density} kg/m^3")
 
 
 # %%[markdown]
@@ -69,11 +70,20 @@ print(f"{my_mixture.density(op_cond)} kg/m^3")
 
 
 # %%
-my_mixture.density = lambda _: 1000.0  # Override density to be 1000 kg/m^3
+my_mixture.density = lambda _: 5000.0  # Override density to be 5000 kg/m^3
+overriden_density = my_mixture.density(op_cond)
 
 # %%[markdown]
-# We can still access teh underlying materials in the mixture.
+# We can still access the underlying materials in the mixture.
 
 # %%
-print(f"{my_mixture.materials[0].density(op_cond)} kg/m^3")
-print(f"{my_mixture.materials[1].density(op_cond)} kg/m^3")
+
+steel_density = my_mixture.mixture_fraction[0].material.density(op_cond)
+water_density = my_mixture.mixture_fraction[1].material.density(op_cond)
+recalculated_density = 0.7 * steel_density + 0.3 * water_density
+
+print(f"{steel_density=} kg/m^3")
+print(f"{water_density=} kg/m^3")
+print(f"{mixture_density=} kg/m^3")
+print(f"{mixture_density=} kg/m^3")
+print(f"{overriden_density=} kg/m^3")
