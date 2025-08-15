@@ -84,5 +84,7 @@ nav:
       - conditions.md
       - superconductors.md
       - neutronics.md
-  - Example: examples/basic_usage.ex.py
+  - Examples:
+      - examples.md
+      - examples/*.ex.py
   - API Reference: source/reference/

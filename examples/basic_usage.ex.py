@@ -39,6 +39,7 @@ from matproplib.properties.independent import PhysicalProperty, pp
 from matproplib.superconduction import NbTiBotturaParameterisation
 
 # %% [markdown]
+# # Usage Overview
 # ## Basics
 #
 # <div class="alert alert-block alert-info">
