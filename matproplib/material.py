@@ -162,7 +162,9 @@ class Material(PMBaseModel, ABC, Generic[ConverterK]):
                             if dp not in def_props
                             else mf.material
                         )
-                        raise ValueError(f"{dp} is undefined on {material}")
+                        msg = f"{dp} is undefined on {material}"
+                        log.debug(msg)
+                        object.__setattr__(self, dp, AttributeErrorProperty(msg=msg))  # noqa: PLC2801
 
         return self
 
@@ -519,10 +521,10 @@ def mixture(
                 )
             except ValidationError:
                 ind = _get_indexes(mix_properties["dpp"])
-                materials = [materials[i] for i in ind]
+                miss_materials = [materials[i] for i in ind]
                 mats = "".join(
                     f"{i}: {mat.material.name}"
-                    for i, mat in zip(ind, materials, strict=True)
+                    for i, mat in zip(ind, miss_materials, strict=True)
                 )
                 msg = (
                     f"Material property '{prp}' not defined and not overidden at {mats} "
