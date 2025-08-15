@@ -69,7 +69,7 @@ docs = [
   "jupytext",
   "mkdocs-doi-plugin @ {root:uri}/documentation/doi_plugin"
 ]
-lint = ["ruff", "ty"]
+lint = ["ruff==0.12.9", "ty"]
 all = ["matproplib[test,docs,lint,neutronics]"]
 
 [tool.pyfluids]
@@ -187,6 +187,14 @@ convention = "numpy"
 
 [tool.ruff.lint.flake8-copyright]
 notice-rgx = "(?i)# SPDX-FileCopyrightText:\\s\\d{4}(-(\\d{4}|present))*"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
+[tool.ruff.lint.pylint]
+# These should be made stricter
+max-args = 17
+max-locals = 17
 
 [tool.coverage.report]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]

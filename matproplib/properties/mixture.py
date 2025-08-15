@@ -26,8 +26,14 @@ log = logging.getLogger(__name__)
 
 
 class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
+    """
+    Mixture of properties
+
+    Mixes using atomic fractions
+    """
+
     dpp: list[DependentPhysicalPropertyT]
-    fractions: NDArray[Shape["* x"], Number] = Field(default=[1])
+    fractions: NDArray[Shape["* x"], Number] = Field(default=[1])  # noqa: F722
     unit: Unit | str
     _unit_warn: bool = False
 
@@ -35,9 +41,9 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
     def _fix_sizes(out: list[np.ndarray | float]):
         if any(isinstance(o, np.ndarray) for o in out):
             sizes = np.unique([o.size if isinstance(o, np.ndarray) else 1 for o in out])
-            if sizes.size > 2:
+            if sizes.size > 2:  # noqa: PLR2004
                 raise NotImplementedError("Cannot mix independently sized arrays")
-            if sizes.size == 2 and 1 in sizes:
+            if sizes.size == 2 and 1 in sizes:  # noqa: PLR2004
                 size = max(sizes)
                 for no, o in enumerate(out):
                     if not isinstance(o, np.ndarray):
@@ -75,6 +81,17 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
         *args,
         **kwargs,
     ) -> float:
+        """
+        Returns
+        -------
+        :
+            value in another unit
+
+        Raises
+        ------
+        ValueError
+            Failed unit conversion
+        """
         return self._fractional_calc([
             d.value_as(op_cond, unit, *args, **kwargs) for d in self.dpp
         ])
@@ -85,6 +102,13 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
         *args,
         **kwargs,
     ) -> float:
+        """Helper to inject and modify conditions as required
+
+        Returns
+        -------
+        :
+            Property value at conditons
+        """
         return self._fractional_calc([
             d.value_as(op_cond, self.unit, *args, **kwargs) for d in self.dpp
         ])

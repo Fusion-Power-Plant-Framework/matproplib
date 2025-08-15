@@ -68,7 +68,7 @@ class Nb3SnBotturaParameterisation(SuperconductingParameterisation):
         result = self.constant / field * s * (1.0 - t_152) * (1.0 - reduced_t**2)
 
         j_crit = np.zeros_like(reduced_b)
-        ind = np.where((reduced_b < 1.0) & (reduced_b > 0), True, False)
+        ind = np.where((reduced_b < 1.0) & (reduced_b > 0), True, False)  # noqa: FBT003
         inv_ind = ~ind
         reduced_b_ind = reduced_b[ind]
         reduced_b_not_ind = reduced_b[inv_ind]

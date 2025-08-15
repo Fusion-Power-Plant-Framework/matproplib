@@ -405,7 +405,7 @@ def _unparse_check(formula: str, parsed: ParsedFormula):
         raise ValueError(f"Unparsed chemical equation symbols '{out}'")
 
 
-def convert_chemical_equation_to_elements(formula: str) -> dict[str, ElementFraction]:  # noqa: C901
+def convert_chemical_equation_to_elements(formula: str) -> dict[str, ElementFraction]:
     """Convert chemical formula into a form ingestable by Elements
 
     Returns

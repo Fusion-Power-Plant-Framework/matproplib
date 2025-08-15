@@ -16,11 +16,13 @@ from typing import Any
 import asttokens
 
 
-def pickle_base64(obj):
+def pickle_base64(obj) -> str:
+    """Pickle an object to a base64 string"""  # noqa: DOC201
     return base64.b64encode(pickle.dumps(obj))
 
 
-def stringify_function(obj):
+def stringify_function(obj) -> str:
+    """Turn a function into its python code string"""  # noqa: DOC201
     src = inspect.getsource(obj)
     psrc = ast.parse(dedent(src))
 
@@ -32,6 +34,7 @@ def stringify_function(obj):
 
 
 def deserialise(obj: str) -> Callable:
+    """Deserialise a python code string"""
     raise NotImplementedError("Deserialising raw functions is not currently implemented")
 
 
@@ -46,7 +49,7 @@ class LambdaInspection:
     node: ast.Lambda
     text: str = field(init=False)
 
-    def __post_init__(self):
+    def __post_init__(self):  # noqa: D105
         self.text = ast.unparse(
             ast.parse(self.atok.get_text(self.node).replace("\n", ""))
         )

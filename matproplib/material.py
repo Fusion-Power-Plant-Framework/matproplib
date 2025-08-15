@@ -81,6 +81,8 @@ PropertiesT_co = TypeVar("PropertiesT_co", bound=Properties, covariant=True)
 
 
 class MaterialFraction(PMBaseModel, Generic[ConverterK]):
+    """Material fraction object"""
+
     material: Material[ConverterK]
     fraction: NonNegativeFloat
 
