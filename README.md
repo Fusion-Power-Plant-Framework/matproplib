@@ -9,11 +9,9 @@ The latest stable release is available through `pip`:
 
 `pip install matproplib`
 
-If you want to work on more recent versions, git clone the repository and run:
+If you want to work on more recent versions:
 
-`pip install .`
-
-in the destination folder.
+`pip install matproplib@git+https://github.com/Fusion-Power-Plant-Framework/matproplib@main`
 
 ## Library
 
