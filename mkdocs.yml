@@ -75,7 +75,12 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - pymdownx.arithmatex:
+      generic: true
   - admonition
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js
 
 nav:
   - User Guide:
