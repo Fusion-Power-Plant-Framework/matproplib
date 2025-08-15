@@ -9,6 +9,7 @@ from abc import ABC
 from collections import Counter
 from typing import TYPE_CHECKING, Literal
 
+import numpy as np
 import periodictable as pt
 
 from matproplib.base import N_AVOGADRO
@@ -44,6 +45,21 @@ def _to_fraction_conversion(fraction_type: str, ef_dict: ef_root_model) -> ef_ro
     if fraction_type == "mass":
         return atomic_fraction_to_mass_fraction(ef_dict)
     raise NotImplementedError(f"Conversion to {fraction_type} not implemented")
+
+
+def _temp_check(temperature, temperature_to_neutronics_code: bool):  # noqa: FBT001
+    temperature = temperature if temperature_to_neutronics_code else None
+    if (
+        temperature_to_neutronics_code
+        and temperature is not None
+        and isinstance(temperature, np.ndarray)
+    ):
+        if temperature.size != 1:
+            raise ValueError(
+                "Only singular temperature value can be passed into neutronics material"
+            )
+        return temperature.item()
+    return temperature
 
 
 class OpenMCNeutronicConfig(NeutronicConfig):
@@ -107,7 +123,9 @@ class OpenMCNeutronicConfig(NeutronicConfig):
         return to_openmc_material(
             name=material.name,
             material_id=self.material_id,
-            temperature=op_cond.temperature.value,
+            temperature=_temp_check(
+                op_cond.temperature.value, temperature_to_neutronics_code
+            ),
             density=density,
             density_unit="g/cm^3",
             isotopes=isotopes or None,
@@ -267,7 +285,7 @@ class SerpentNeutronicConfig(NeutronicConfig):
             material.name,
             mass_density,
             nucleides,
-            op_cond.temperature.value,
+            _temp_check(op_cond.temperature.value, temperature_to_neutronics_code),
             self.decimal_places,
             self.zaid_suffix,
             additional_end_lines,

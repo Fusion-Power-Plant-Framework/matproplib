@@ -15,7 +15,7 @@ from matproplib.base import PMBaseModel
 
 if TYPE_CHECKING:
     from matproplib.conditions import OperationalConditions
-    from matproplib.materials import Material
+    from matproplib.material import Material
 
 
 ConverterK = TypeVar("ConverterK", bound=str)

@@ -115,13 +115,7 @@ def to_openmc_material(
             "density calculation requires 'atoms_per_unit_cell' and "
             "'volume_per_unit_cell' to be set when density is unset"
         )
-    if temperature_to_neutronics_code and temperature is not None:
-        if isinstance(temperature, np.ndarray) and temperature.size != 1:
-            raise ValueError(
-                "Only singular temperature value can be passed into neutronics material"
-            )
-    elif not temperature_to_neutronics_code:
-        temperature = None
+
     with patch_nmm_openmc() as nmm:
         return nmm.Material(
             name=name,
