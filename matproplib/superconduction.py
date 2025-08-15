@@ -34,7 +34,7 @@ class Nb3SnBotturaParameterisation(SuperconductingParameterisation):
     .. doi:: 10.1109/TASC.2009.2018278
         :title: L. Bottura and B. Bordini, "JC(B,T,ε) Parameterization for the ITER Nb3Sn Production,"
         in IEEE Transactions on Applied Superconductivity, vol. 19, no. 3, pp. 1521-1524, June 2009
-    """
+    """  # noqa: E501
 
     constant: float  # Current density scaling constant
     p: float  # Low field exponent of the pinning force
@@ -51,7 +51,7 @@ class Nb3SnBotturaParameterisation(SuperconductingParameterisation):
         """
         Calculate the critical current density as a function of temperature,
         magnetic field, and strain.
-        """
+        """  # noqa: DOC201
         temperature = op_cond.temperature
         field = np.maximum(0.001, op_cond.magnetic_field)  # Avoid division by zero
         strain = op_cond.strain
@@ -90,7 +90,7 @@ def _nb3sn_strain_twente(
     :math:`s({\\epsilon}) = 1+ \\frac{1}{1-C_{a1}{\\epsilon}_{0,a}}[C_{a1}
     (\\sqrt{{\\epsilon}_{sk}^{2}+{\\epsilon}_{0,a}^{2}}-\\sqrt{({\\epsilon}-
     {\\epsilon}_{sk})^{2}+{\\epsilon}_{0,a}^{2}})-C_{a2}{\\epsilon}]`
-    """
+    """  # noqa: DOC201
     eps_sh = c_a2 * eps_0a / np.sqrt(c_a1**2 - c_a2**2)
     s1 = 1.0 / (1.0 - c_a1 * eps_0a)
     s2 = np.sqrt(eps_sh**2 + eps_0a**2) - np.sqrt((strain - eps_sh) ** 2 + eps_0a**2)
@@ -106,7 +106,7 @@ class NbTiBotturaParameterisation(SuperconductingParameterisation):
     ..doi:: 10.1109/77.828413
         :title: L. Bottura, "A practical fit for the critical surface of NbTi,"
         in IEEE Transactions on Applied Superconductivity, vol. 10, no. 1, pp. 1054-1057, March 2000,
-    """
+    """  # noqa: E501
 
     constant: float  # Current density scaling constant
     alpha: float  # Low field exponent of the pinning force
@@ -120,7 +120,7 @@ class NbTiBotturaParameterisation(SuperconductingParameterisation):
         """
         Calculate the critical current density as a function of temperature
         and magnetic field.
-        """
+        """  # noqa: DOC201
         field = np.maximum(0.001, op_cond.magnetic_field)  # Avoid division by zero
         temperature = op_cond.temperature
 
@@ -150,7 +150,7 @@ class SummersParameterisation(SuperconductingParameterisation):
     https://scispace.com/pdf/a-model-for-the-prediction-of-nb-sub-3-sn-critical-current-xoujezlpxh.pdf
     see e.g. https://conferences.lbl.gov/event/979/contributions/5985/attachments/4069/3482/U9-U10_final.pdf, slide 25
 
-    """
+    """  # noqa: E501
 
     constant: float  # Current density scaling constant
     alpha: float  # Strain function exponent (Ekin-like)
@@ -164,7 +164,7 @@ class SummersParameterisation(SuperconductingParameterisation):
         """
         Calculate the critical current density as a function of temperature,
         magnetic field, and strain.
-        """
+        """  # noqa: DOC201
         field = np.maximum(0.001, op_cond.magnetic_field)  # Avoid division by zero
         temperature = op_cond.temperature
         f_strain = 1.0 - self.alpha * abs(op_cond.strain) ** 1.7

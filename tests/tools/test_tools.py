@@ -9,7 +9,7 @@ from matproplib.tools.tools import kludge_linear_spline
 
 
 @pytest.mark.parametrize(
-    "x,x_expected",
+    ("x", "x_expected"),
     [
         (1.0e6, 1.0e6),
         (1.0, 1.0),

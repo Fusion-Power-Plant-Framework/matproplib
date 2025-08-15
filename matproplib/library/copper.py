@@ -35,6 +35,8 @@ from matproplib.tools.tools import annotate_reference
 
 @rebuild
 class Bronze(FullMaterial):
+    """Simple Bronze Material"""
+
     name: str = Field(default="Bronze")
     elements: Elements = Field(default={"Cu": 0.95, "Sn": 0.05})
     properties: PropertiesT_co = props(
@@ -154,7 +156,7 @@ def _copper_specific_heat_capacity(op_cond: OperationalConditions) -> float:
 
     Returns
     -------
-    float
+    :
         Specific heat capacity of copper in J/(kg·K).
 
     Notes
@@ -206,19 +208,20 @@ def _copper_magnetic_susceptibility(op_cond: OperationalConditions) -> float:
 
 def _copper_rrr_resistivity(temperature: float, rrr: float) -> float:
     """
-    Calculate the electrical resistivity of cryogenic copper based on temperature and RRR.
+    Calculate the electrical resistivity of cryogenic copper based on
+    temperature and RRR.
 
     Parameters
     ----------
-    temperature : float
+    temperature:
         Operating temperature in kelvin [K].
 
-    rrr : float
+    rrr:
         Residual resistivity ratio (dimensionless).
 
     Returns
     -------
-    float
+    :
         Electrical resistivity of copper in ohm-meters [Ω·m].
 
     References
@@ -230,21 +233,20 @@ def _copper_rrr_resistivity(temperature: float, rrr: float) -> float:
     Equation 8-1
 
     J. G. Hust, A. B. Lankford, NBSIR 84-3007,
-    "Thermal Conductivity of Aluminum, Copper, Iron, and Tungsten for Temperatures from 1 K to the Melting Point", 1984.
+    "Thermal Conductivity of Aluminum, Copper, Iron, and Tungsten for Temperatures from
+     1 K to the Melting Point", 1984.
     https://nvlpubs.nist.gov/nistpubs/Legacy/IR/nbsir84-3007.pdf
     """
     p1: Final[float] = 1.171e-17
     p2: Final[float] = 4.49
     p3: Final[float] = 3.841e10
-    p4: Final[
-        float
-    ] = -1.14  # Appears to be a typo in the original papers... given as 1.14
+    # p4 appears to be a typo in the original papers... given as 1.14
+    p4: Final[float] = -1.14
     p5: Final[float] = 50.0
     p6: Final[float] = 6.428
     p7: Final[float] = 0.4531
-    rho_c: Final[float] = (
-        0.0  # Experimentally determined deviation from Matthiessen rule (no data)
-    )
+    # rho_c experimentally determined deviation from Matthiessen rule (no data)
+    rho_c: Final[float] = 0.0
     p9: Final[float] = 1.553e-8
 
     t = temperature
@@ -263,16 +265,17 @@ def _copper_rrr_resistivity(temperature: float, rrr: float) -> float:
 
 def _copper_irradiation_resistivity(fluence: float) -> float:
     """
-    Estimate the radiation-induced increase in copper resistivity due to neutron irradiation.
+    Estimate the radiation-induced increase in copper resistivity due to
+    neutron irradiation.
 
     Parameters
     ----------
-    fluence : float
+    fluence:
         Total neutron fluence [n/m²].
 
     Returns
     -------
-    float
+    :
         Radiation-induced resistivity increase in ohm-meters [Ω·m].
 
     Notes
@@ -285,12 +288,12 @@ def _copper_irradiation_resistivity(fluence: float) -> float:
 
     References
     ----------
-    M. Kovari, 09/11/2012, internal notes (Excel / Mathcad), Technology Program, WP12, PEX, Super-X Divertor for DEMO.
+    M. Kovari, 09/11/2012, internal notes (Excel / Mathcad), Technology Program, WP12,
+    PEX, Super-X Divertor for DEMO.
 
-    M. Nakagawa et al., "High-dose neutron-irradiation effects in fcc metals at 4.6 K",
-    *Phys. Rev. B*, 16, 5285 (1977).
-    https://doi.org/10.1103/PhysRevB.16.5285
-    Figure 6
+    ..doi:: 10.1103/PhysRevB.16.5285
+        :title: M. Nakagawa et al., "High-dose neutron-irradiation effects in fcc metals
+        at 4.6 K", *Phys. Rev. B*, 16, 5285 (1977). Figure 6
     """
     c1: Final[float] = 0.00283
     c2: Final[float] = -0.0711
@@ -309,15 +312,15 @@ def _copper_magneto_resistivity(resistivity: float, field: float) -> float:
 
     Parameters
     ----------
-    resistivity : float
+    resistivity:
         Base electrical resistivity of copper [Ω·m].
 
-    field : float
+    field:
         Magnetic field strength [T].
 
     Returns
     -------
-    float
+    :
         Total resistivity including magnetoresistance [Ω·m].
 
     Notes
@@ -364,13 +367,13 @@ def _copper_electrical_resistivity(
 
     Parameters
     ----------
-    op_cond : OperationalConditions
+    op_cond:
         The operational conditions, including temperature, for which
         the electrical resistivity is to be calculated.
 
     Returns
     -------
-    float
+    :
         Electrical resistivity of copper [Ω·m].
 
     Notes
@@ -394,11 +397,11 @@ def _copper_electrical_resistivity(
 
     M. Kovari, 09/11/2012, internal notes (Excel / Mathcad), Technology Program, WP12, PEX, Super-X Divertor for DEMO.
 
-    M. Nakagawa et al., "High-dose neutron-irradiation effects in fcc metals at 4.6 K",
-    *Phys. Rev. B*, 16, 5285 (1977).
-    https://doi.org/10.1103/PhysRevB.16.5285
-    Figure 6
-    """
+    ..doi:: 10.1103/PhysRevB.16.5285
+        :title: M. Nakagawa et al.,
+                "High-dose neutron-irradiation effects in fcc metals at 4.6 K",
+                *Phys. Rev. B*, 16, 5285 (1977). Figure 6
+    """  # noqa: E501
     rho_rrr = _copper_rrr_resistivity(
         op_cond.temperature, self.residual_resistance_ratio(op_cond)
     )
@@ -408,7 +411,9 @@ def _copper_electrical_resistivity(
 
 @rebuild
 class CryogenicCopper(FullMaterial):
-    name: str = "High-purity cryogenic copper, NIST properties"
+    """High-purity cryogenic copper, NIST properties"""
+
+    name: str = "CryogenicCopper"
     elements: Elements = Field(
         default={
             "Cu": 0.999964,

@@ -9,9 +9,67 @@ description = "MkDocs plugin to auto-link DOIs in Markdown files"
 dependencies = [
     "mkdocs"
 ]
+license = "MIT"
 
 [tool.hatch.build.targets.wheel]
 packages = ["doi"]
 
 [project.entry-points."mkdocs.plugins"]
 doi = "doi.plugin:DOIPlugin"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 89
+output-format = "concise"
+exclude = [
+  ".git",
+  "__pycache__",
+  "documentation",
+  ".env",
+  ".idea",
+  ".pytest_cache",
+  "htmlcov",
+]
+
+[tool.ruff.format]
+preview = true
+
+[tool.ruff.lint]
+preview = true
+select = ["ALL"]
+ignore = [
+  "ANN",     # type annotations
+  "EM",      # string in error messages
+  "PD",      # Pandas
+  "B019",    # using cache memory leaks
+  "COM812",  # enforce trailing comma, disagrees with black/ruff format
+  "D200",    # docs stuff
+  "D203",
+  "D205",
+  "D301",
+  "D400",
+  "D401",
+  "DOC502",  # Raises sections not in top level function
+  "DTZ005",  # datetime timezone arg
+  "E203",    # black/ruff format conflicts
+  "FIX002",  # Line contains todo
+  "ISC001",  # ruff format conflict
+  "PLW1514", # Specify file open encoding
+  "PTH123",  # use Path.open
+  "TRY003",  # put error messages in error class
+  "FURB152", # 3.14 != pi
+  "ERA",  # remove commented out code
+  "G004",  # f-string in logging
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["doi"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.flake8-copyright]
+notice-rgx = "(?i)# SPDX-FileCopyrightText:\\s\\d{4}(-(\\d{4}|present))*"

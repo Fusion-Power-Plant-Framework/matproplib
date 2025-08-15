@@ -15,7 +15,7 @@ def cryo_copper(rrr: float):
 
 class TestCryogenicCopper:
     @pytest.mark.parametrize(
-        "rrr,temperature,expected",
+        ("rrr", "temperature", "expected"),
         [
             (30, 1, 46),
             (30, 2, 91),
@@ -56,7 +56,7 @@ class TestCryogenicCopper:
         assert np.isclose(actual, expected, rtol=2e-3, atol=1.0)
 
     @pytest.mark.parametrize(
-        "temperature,expected",
+        ("temperature", "expected"),
         [
             (4, 0.112),
             (7, 0.309),
@@ -86,7 +86,7 @@ class TestCryogenicCopper:
 
     @pytest.mark.xfail
     @pytest.mark.parametrize(
-        "temperature,expected",
+        ("temperature", "expected"),
         [
             (4, 0.00239e6),
             (11, 0.0408e6),

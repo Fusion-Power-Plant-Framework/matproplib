@@ -13,6 +13,8 @@ from matproplib.properties.group import props
 
 @rebuild
 class EpoxyResin(FullMaterial):
+    """Epoxy resin"""
+
     name: str = Field(default="EpoxyResin")
     elements: Elements = Field(
         default={

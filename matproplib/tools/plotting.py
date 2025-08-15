@@ -6,30 +6,44 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
+from matproplib.base import SuperconductingParameterisation
 from matproplib.conditions import OperationalConditions
 
 
 def plot_superconductor(
-    sc_parameterisation, t_min, t_max, b_min, b_max, strain, n_points=50
+    sc_parameterisation: SuperconductingParameterisation,
+    t_min: float,
+    t_max: float,
+    b_min: float,
+    b_max: float,
+    strain: float,
+    n_points: int = 50,
 ):
     """Plot the critical current density of a superconductor parameterisation.
 
     Parameters
     ----------
-    sc_parameterisation : SuperconductorParameterisation
+    sc_parameterisation:
         The superconductor parameterisation to plot.
-    t_min : float
+    t_min:
         Minimum temperature in K.
-    t_max : float
+    t_max:
         Maximum temperature in K.
-    b_min : float
+    b_min:
         Minimum magnetic field in T.
-    b_max : float
+    b_max:
         Maximum magnetic field in T.
-    strain : float
+    strain:
         Strain value to use for the plot.
-    n_points : int, optional
+    n_points:
         Number of points to use for the plot, by default 100.
+
+    Returns
+    -------
+    :
+        Figure
+    :
+        Axes
     """
     temperatures = np.linspace(t_min, t_max, n_points)
     magnetic_fields = np.linspace(b_min, b_max, n_points)

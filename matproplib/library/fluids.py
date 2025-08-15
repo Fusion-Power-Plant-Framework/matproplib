@@ -15,6 +15,8 @@ from matproplib.properties.group import props
 
 
 class Void(FullMaterial):
+    """Material for a void, very low hydrogen concentration"""
+
     name: str = Field(default="Void")
     elements: Elements = Field(default=["H"], frozen=True)
     density: Density = Field(

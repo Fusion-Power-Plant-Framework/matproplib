@@ -115,6 +115,7 @@ class References(RootModel):
         return " ".join(f"[{k}] {ref.__str__()}" for k, ref in self.root.items())
 
     def combine(self, reference: References | Reference):
+        """Combine references into this reference object"""
         if isinstance(reference, References):
             for k, r in reference:
                 self.root[k] = r

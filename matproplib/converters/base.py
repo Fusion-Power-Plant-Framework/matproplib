@@ -22,9 +22,16 @@ ConverterK = TypeVar("ConverterK", bound=str)
 
 
 class Converters(RootModel[ConverterK], Generic[ConverterK]):
+    """
+    Converter grouping object
+
+    Collects all objects to convert materials into other formats
+    """
+
     root: dict[ConverterK, Converter] = Field(default_factory=dict)
 
     def add(self, converter: Converter):
+        """Add a converter to the group"""
         self.root[converter.name] = converter
 
     @model_validator(mode="before")
@@ -41,24 +48,26 @@ class Converters(RootModel[ConverterK], Generic[ConverterK]):
     def __getitem__(self, item):  # noqa: D105
         return self.root[item]
 
-    def __getattr__(self, name: str):
+    def __getattr__(self, name: str):  # noqa: D105
         if name == "root":
             return super().__getattr__(name)
         return self.__getitem__(name)
 
-    def __setattr__(self, name: str, value):
+    def __setattr__(self, name: str, value):  # noqa: D105
         if name == "root":
             super().__setattr__(name, value)
         self.root[name] = value
         # TODO fix for subclass validation
         # Converter.model_validate(value)
 
-    def __repr__(self) -> str:
+    def __repr__(self) -> str:  # noqa: D105
         converters = ", ".join(v.__repr__() for v in self.root.values())
         return f"{type(self).__name__}({converters})"
 
 
 class Converter(PMBaseModel, ABC):
+    """Base converter object for material format converters"""
+
     name: str
 
     @abstractmethod

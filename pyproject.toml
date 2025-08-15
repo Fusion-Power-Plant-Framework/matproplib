@@ -50,7 +50,7 @@ Issues        = "https://github.com/Fusion-Power-Plant-Framework/matproplib/issu
 
 [project.optional-dependencies]
 neutronics = ["neutronics-material-maker"]
-dev = ["pre-commit"]
+dev = ["pre-commit", "matproplib[test,docs,lint]"]
 test = [
   "pytest",
   "pytest-cov",
@@ -70,6 +70,7 @@ docs = [
   "mkdocs-doi-plugin @ {root:uri}/documentation/doi_plugin"
 ]
 lint = ["ruff", "ty"]
+all = ["matproplib[test,docs,lint,neutronics]"]
 
 [tool.pyfluids]
 units_system = "SI"
@@ -163,6 +164,11 @@ ignore = [
 ]
 "tests/conftest.py" = ["PLC0415"]
 "matproplib/tools/tools.py" = ["PLR0913", "PLR0917"]
+"matproplib/library/**" = [
+  "N801",
+  "N802",
+  "N806",
+]
 "examples/**" = [
   "INP001",
   "DOC201",

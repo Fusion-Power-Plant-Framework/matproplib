@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from collections.abc import Callable
+from collections.abc import Callable  # noqa: TC003
 from functools import partial
 from typing import (
     Literal,
@@ -19,7 +19,7 @@ import numpy as np
 import periodictable as pt
 from numpydantic import NDArray, Shape
 from numpydantic.dtype import Number
-from pint import Unit
+from pint import Unit  # noqa: TC002
 from pint.errors import DimensionalityError
 from pydantic import Field, field_serializer, model_validator
 from pydantic_core import PydanticUndefinedType

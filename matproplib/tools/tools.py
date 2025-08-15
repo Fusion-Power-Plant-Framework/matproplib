@@ -12,7 +12,10 @@ from matproplib.base import References
 
 def annotate_reference(reference: References, annotation: str) -> References:
     """
-    Annotate a reference object
+    Returns
+    -------
+    :
+        Annotated a reference object
     """
     reference = deepcopy(reference)
     reference["id"] += annotation
@@ -49,7 +52,10 @@ def kludge_linear_spline(x: float, x_kludge: float, width: float) -> float:
     For x < x_kludge:
         0.0 < x < x_kludge
 
-    Linear kludge with cubic spline transition.
+    Returns
+    -------
+    :
+        Linear kludge with cubic spline transition.
 
     Notes
     -----
