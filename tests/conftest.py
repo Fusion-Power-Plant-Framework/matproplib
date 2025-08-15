@@ -51,6 +51,13 @@ def test_condition():
     return OperationalConditions(temperature=np.array([298, 200]), pressure=(1, "atm"))
 
 
+@pytest.fixture
+def condition():
+    from matproplib.conditions import OperationalConditions
+
+    return OperationalConditions(temperature=298, pressure=(1, "atm"))
+
+
 def pytest_addoption(parser):
     """
     Adds a custom command line option to pytest to control plotting.

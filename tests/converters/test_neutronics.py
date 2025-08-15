@@ -66,13 +66,13 @@ class TestOpenMCNeutronics:
                 converters=OpenMCNeutronicConfig(),
             )().convert("openmc", test_condition, temperature_to_neutronics_code=True)
 
-    def test_material_with_bad_density(self, test_condition):
+    def test_material_with_bad_density(self, condition):
         with pytest.raises(ValueError, match="density"):
             material(
                 "Simple",
                 "H2O",
                 converters=OpenMCNeutronicConfig(),
-            )().convert("openmc", test_condition, temperature_to_neutronics_code=True)
+            )().convert("openmc", condition, temperature_to_neutronics_code=True)
 
     def test_material_with_temperature(self):
         pytest.importorskip("openmc")
