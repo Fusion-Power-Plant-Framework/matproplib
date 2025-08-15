@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from abc import ABC
 from collections import Counter
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 import numpy as np
 import periodictable as pt
@@ -65,7 +65,7 @@ def _temp_check(temperature, temperature_to_neutronics_code: bool):  # noqa: FBT
 class OpenMCNeutronicConfig(NeutronicConfig):
     """OpenMC neutronic properties model"""
 
-    name: Literal["openmc"] = "openmc"
+    name: ClassVar[Literal["openmc"]] = "openmc"
     """Name of converter"""
     zaid_suffix: str = ""
     """The nuclear library to apply to the zaid, for example '.31c'"""
@@ -157,7 +157,7 @@ def _atoms(fraction: float, mass_density: float, molar_mass: float):
 class FispactNeutronicConfig(NeutronicConfig):
     """Fispact neutronic properties model"""
 
-    name: Literal["fispact"] = "fispact"
+    name: ClassVar[Literal["fispact"]] = "fispact"
     """Name of converter"""
     volume: Volume
     """Volume of material provided"""
@@ -199,7 +199,7 @@ global_id = Counter({"mcnp": 1})
 class MCNPNeutronicConfig(NeutronicConfig):
     """MCNP6 neutronic properties model"""
 
-    name: Literal["mcnp"] = "mcnp"
+    name: ClassVar[Literal["mcnp"]] = "mcnp"
     """Name of converter"""
     zaid_suffix: str = ""
     """The nuclear library to apply to the zaid, for example ".31c", this is used in
@@ -251,7 +251,7 @@ class MCNPNeutronicConfig(NeutronicConfig):
 class SerpentNeutronicConfig(NeutronicConfig):
     """Serpent neutronic properties model"""
 
-    name: Literal["serpent"] = "serpent"
+    name: ClassVar[Literal["serpent"]] = "serpent"
     """Name of converter"""
     zaid_suffix: str = ""
     """The nuclear library to apply to the zaid, for example ".31c", this is used in
