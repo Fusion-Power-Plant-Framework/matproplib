@@ -15,6 +15,7 @@ from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.copper import CryogenicCopper
 from matproplib.library.fluids import H2O, DDPlasma, DTPlasma
+from matproplib.library.steel import SS316_L
 from matproplib.material import (
     FullMaterial,
     Material,
@@ -320,8 +321,15 @@ class TestMixtures:
         )
         assert mix.density(test_condition) == pytest.approx(6)
 
-    def test_undefined_properties_on_one_material_raises(self):
-        raise NotImplementedError
+    def test_undefined_properties_on_one_material_raises(self, test_condition):
+        steel = SS316_L()
+        water = H2O()
+        my_mixture = mixture(
+            "SteelWaterMixture", [(steel, 0.7), (water, 0.3)], fraction_type="mass"
+        )
+
+        with pytest.raises(AttributeError, match="is undefined on H2O"):
+            my_mixture.coefficient_thermal_expansion(test_condition)
 
     @pytest.mark.parametrize(
         ("fraction", "elements"),

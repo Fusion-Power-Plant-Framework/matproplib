@@ -300,10 +300,12 @@ class UndefinedProperty(DependentPhysicalProperty):
 
 
 class AttributeErrorProperty(UndefinedProperty):
+    """Raise AttributeError on access"""
+
     msg: str = Field(default="", frozen=True)
 
-    def __call__(self, op_cond: OperationalConditions, *args, **kwargs):
-        """Call for Undefined property is undefined"""
+    def __call__(self, op_cond: OperationalConditions, *args, **kwargs):  # noqa: ARG002
+        """Call for Undefined property is undefined"""  # noqa: DOC501
         raise AttributeError(self.msg)
 
 
