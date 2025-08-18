@@ -10,8 +10,8 @@ from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import FOKKENS_2003
 from matproplib.material import dependentphysicalproperty, material
 from matproplib.properties.dependent import (
+    CoefficientThermalExpansion,
     SpecificHeatCapacity,
-    ThermalExpansionCoefficient,
 )
 from matproplib.properties.group import props
 
@@ -30,7 +30,7 @@ Be12Ti = material(
 
 
 @dependentphysicalproperty(
-    ThermalExpansionCoefficient,
+    CoefficientThermalExpansion,
     unit="1e-6/T",
     op_cond_config={"temperature": ("degC", 25, 800)},
     reference={

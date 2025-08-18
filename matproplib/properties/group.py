@@ -22,6 +22,7 @@ from matproplib.base import (
 )
 from matproplib.properties.dependent import (
     BulkModulus,
+    CoefficientThermalExpansion,
     CoerciveField,
     Density,
     DependentPhysicalProperty,
@@ -35,7 +36,6 @@ from matproplib.properties.dependent import (
     SpecificHeatCapacity,
     TensileStress,
     ThermalConductivity,
-    ThermalExpansionCoefficient,
     UndefinedProperty,
     ViscousRemanentMagnetism,
     YieldStress,
@@ -85,7 +85,7 @@ class DefaultProperties(Properties, Generic[SuperconductingParameterisationT_co]
     youngs_modulus: UndefinedProperty | YoungsModulus = UndefinedProperty()
     shear_modulus: UndefinedProperty | ShearModulus = UndefinedProperty()
     bulk_modulus: UndefinedProperty | BulkModulus = UndefinedProperty()
-    coefficient_thermal_expansion: UndefinedProperty | ThermalExpansionCoefficient = (
+    coefficient_thermal_expansion: UndefinedProperty | CoefficientThermalExpansion = (
         UndefinedProperty()
     )
     specific_heat_capacity: UndefinedProperty | SpecificHeatCapacity = (
@@ -131,7 +131,7 @@ def props(  # noqa: PLR0913
     youngs_modulus: YoungsModulus | Ldefine = False,
     shear_modulus: ShearModulus | Ldefine = False,
     bulk_modulus: BulkModulus | Ldefine = False,
-    coefficient_thermal_expansion: ThermalExpansionCoefficient | Ldefine = False,
+    coefficient_thermal_expansion: CoefficientThermalExpansion | Ldefine = False,
     specific_heat_capacity: SpecificHeatCapacity | Ldefine = False,
     electrical_resistivity: ElectricalResistivity | Ldefine = False,
     magnetic_saturation: MagneticSaturation | Ldefine = False,

@@ -20,13 +20,13 @@ from matproplib.material import (
 from matproplib.nucleides import Elements
 from matproplib.properties.dependent import (
     BulkModulus,
+    CoefficientThermalExpansion,
     ElectricalResistivity,
     MagneticSusceptibility,
     PoissonsRatio,
     ShearModulus,
     SpecificHeatCapacity,
     ThermalConductivity,
-    ThermalExpansionCoefficient,
     YoungsModulus,
 )
 from matproplib.properties.group import props
@@ -178,7 +178,7 @@ def _copper_specific_heat_capacity(op_cond: OperationalConditions) -> float:
 
 
 @dependentphysicalproperty(
-    ThermalExpansionCoefficient,
+    CoefficientThermalExpansion,
     op_cond_config={"temperature": ("degK", 4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 7-3"),
 )

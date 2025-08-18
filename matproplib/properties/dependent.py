@@ -369,7 +369,7 @@ class SpecificHeatCapacity(DependentPhysicalProperty):
     unit: Unit | str = "J/kg/K"
 
 
-class ThermalExpansionCoefficient(DependentPhysicalProperty):
+class CoefficientThermalExpansion(DependentPhysicalProperty):
     """Coefficient of thermal expansion (CTE)"""
 
     unit: Unit | str = "K^-1"

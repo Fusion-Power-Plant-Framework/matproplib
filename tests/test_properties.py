@@ -16,6 +16,7 @@ from matproplib.conditions import (
 )
 from matproplib.material import dependentphysicalproperty, material
 from matproplib.properties.dependent import (
+    CoefficientThermalExpansion,
     CoerciveField,
     Density,
     DependentPhysicalProperty,
@@ -25,7 +26,6 @@ from matproplib.properties.dependent import (
     SpecificHeatCapacity,
     Stress,
     ThermalConductivity,
-    ThermalExpansionCoefficient,
     UndefinedProperty,
     ViscousRemanentMagnetism,
     YoungsModulus,
@@ -50,23 +50,6 @@ class TestDensity:
     def test_value_from_nuclear_units(self, unit, result, test_condition):
         den = Density.from_nuclear_units(elements={"H": 1}, value=1, unit=unit)
         assert den(test_condition) == pytest.approx(result)
-
-
-prop = pytest.mark.parametrize(
-    "prop",
-    [
-        PoissonsRatio,
-        ThermalConductivity,
-        YoungsModulus,
-        SpecificHeatCapacity,
-        ThermalExpansionCoefficient,
-        ElectricalResistivity,
-        MagneticSaturation,
-        ViscousRemanentMagnetism,
-        CoerciveField,
-        Stress,
-    ],
-)
 
 
 class TestIndependentPhysicalProperty:
@@ -156,7 +139,21 @@ class TestIndependentPhysicalProperty:
 
 
 class TestDependentPhysicalProperties:
-    @prop
+    @pytest.mark.parametrize(
+        "prop",
+        [
+            PoissonsRatio,
+            ThermalConductivity,
+            YoungsModulus,
+            SpecificHeatCapacity,
+            CoefficientThermalExpansion,
+            ElectricalResistivity,
+            MagneticSaturation,
+            ViscousRemanentMagnetism,
+            CoerciveField,
+            Stress,
+        ],
+    )
     @pytest.mark.parametrize(
         "value",
         [

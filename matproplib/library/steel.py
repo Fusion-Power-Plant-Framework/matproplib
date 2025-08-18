@@ -18,10 +18,10 @@ from matproplib.material import (
 )
 from matproplib.nucleides import Elements
 from matproplib.properties.dependent import (
+    CoefficientThermalExpansion,
     Density,
     SpecificHeatCapacity,
     ThermalConductivity,
-    ThermalExpansionCoefficient,
 )
 from matproplib.properties.group import props
 from matproplib.tools.tools import annotate_reference
@@ -49,7 +49,7 @@ def _ss316l_density(op_cond: OperationalConditions) -> float:
 
 
 @dependentphysicalproperty(
-    ThermalExpansionCoefficient,
+    CoefficientThermalExpansion,
     op_cond_config={"temperature": ("degK", 300, 1600)},
     reference=annotate_reference(CHOONG_1975, "Equation 24"),
 )

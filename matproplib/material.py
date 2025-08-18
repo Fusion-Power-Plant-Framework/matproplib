@@ -53,6 +53,7 @@ from matproplib.nucleides import (
 from matproplib.properties.dependent import (
     AttributeErrorProperty,
     BulkModulus,
+    CoefficientThermalExpansion,
     CoerciveField,
     Density,
     DependentPhysicalProperty,
@@ -65,7 +66,6 @@ from matproplib.properties.dependent import (
     SpecificHeatCapacity,
     TensileStress,
     ThermalConductivity,
-    ThermalExpansionCoefficient,
     UndefinedProperty,
     ViscousRemanentMagnetism,
     YieldStress,
@@ -285,7 +285,7 @@ class FullMaterial(
     bulk_modulus: UndefinedProperty | BulkModulus = field_alias_path(
         "bulk_modulus", "properties"
     )
-    coefficient_thermal_expansion: UndefinedProperty | ThermalExpansionCoefficient = (
+    coefficient_thermal_expansion: UndefinedProperty | CoefficientThermalExpansion = (
         field_alias_path("coefficient_thermal_expansion", "properties")
     )
     specific_heat_capacity: UndefinedProperty | SpecificHeatCapacity = field_alias_path(
