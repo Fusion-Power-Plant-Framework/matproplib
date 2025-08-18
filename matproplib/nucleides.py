@@ -8,11 +8,11 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import TYPE_CHECKING, Literal, Union
+from typing import TYPE_CHECKING, Literal, TypedDict, Union
 
 import numpy as np
 import periodictable as pt
-from pydantic import RootModel, model_serializer, model_validator
+from pydantic import ConfigDict, RootModel, model_serializer, model_validator
 from pydantic.types import NonNegativeFloat  # noqa: TC002
 
 from matproplib.base import PMBaseModel, References
@@ -30,50 +30,56 @@ class ElementFraction(PMBaseModel):
     fraction: NonNegativeFloat
 
 
-ef_root_model = dict[str, ElementFraction | References | str | None]
+ef_root_model_full = dict[str, ElementFraction | float | int | References | str | None]
+ef_root_model = dict[str, ElementFraction]
+
+
+class _ElementsTD(TypedDict, total=False):  # noqa: PYI049
+    """Partial strict typing of Elements.root"""
+
+    _no_atoms: int
+    reference: References | None
+    fraction_type: Literal["atomic", "mass"]
 
 
 class Elements(RootModel):
     """Element grouping model"""
 
-    root: ef_root_model
+    root: ef_root_model_full
+    _no_atoms: int | None = None
     _reference: References | None = None
+    model_config = ConfigDict(validate_default=True)
 
     @model_validator(mode="before")
     def _element_pre_validation(self):
         if isinstance(self, str):
             # conversion is always fraction by atom "atomic"
             return convert_chemical_equation_to_elements(self)
-        if isinstance(self, dict):
-            new_self = copy.deepcopy(self)
-            ref = new_self.pop("reference", None)
-            return _from_fraction_type_conversion(
-                new_self.pop("fraction_type", "atomic"),
-                {
-                    k: v
-                    if isinstance(v, ElementFraction)
-                    else ElementFraction(**v)
-                    if isinstance(v, dict)
-                    else ElementFraction(element=k, fraction=v)
-                    for k, v in new_self.items()
-                },
-            ) | {"reference": ref}
-
+        if isinstance(self, ElementFraction):
+            return {self.element.element.symbol: self}
         if isinstance(self, list):
             if len(self) == 1 and isinstance(self[0], str):
-                return {self[0]: ElementFraction(element=self[0], fraction=1)}
+                return {self[0]: 1}
             ret = {}
             for e in self:
                 el = ElementFraction.model_validate(e)
                 ret[el.element.element.symbol] = el
             return ret
-
-        return {self.element.element.symbol: self}
+        return self
 
     @model_validator(mode="after")
     def _element_post_validation(self):
+        self._reference = self.root.pop("reference", None)
+        self._no_atoms = self.root.pop("no_atoms", None)
+        fraction_type = self.root.pop("fraction_type", "atomic")
+
+        for k, v in self.root.items():
+            if not isinstance(v, ElementFraction):
+                self.root[k] = ElementFraction(element=k, fraction=v)
+
+        self.root = _from_fraction_type_conversion(fraction_type, self.root)
+
         e_sum = 0
-        ref = self.root.pop("reference", None)
         for e in self.root.values():
             e_sum += e.fraction
 
@@ -82,7 +88,6 @@ class Elements(RootModel):
 
         if e_sum > 1 and not np.isclose(e_sum, 1, atol=1e-5, rtol=1e-5):
             raise ValueError(f"The fraction of elements is greater than 1: {e_sum:.5f}")
-        self._reference = ref
         return self
 
     @model_serializer
@@ -223,7 +228,7 @@ def most_abundant_isoptope(el: pt.core.Element) -> pt.core.Isotope:
 
 
 def _from_fraction_type_conversion(
-    fraction_type: str, ef_dict: ef_root_model
+    fraction_type: Literal["atomic", "mass"], ef_dict: ef_root_model
 ) -> ef_root_model:
     if fraction_type == "atomic":
         return ef_dict
@@ -447,6 +452,8 @@ def convert_chemical_equation_to_elements(formula: str) -> dict[str, ElementFrac
 
     elements = parse(parse_chemical_formula(formula), {})
     ttl_fraction = sum(e.fraction for e in elements.values())
+    no_atoms = 0
     for v in elements.values():
+        no_atoms += v.fraction
         v.fraction /= ttl_fraction
-    return elements
+    return {"no_atoms": int(no_atoms), **elements}

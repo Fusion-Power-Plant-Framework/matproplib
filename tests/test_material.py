@@ -334,12 +334,37 @@ class TestMixtures:
     @pytest.mark.parametrize(
         ("fraction", "elements"),
         [
-            ("atomic", {"H": 0.1, "O": 0.74, "C": 0.16}),
-            ("mass", {"H": 0.1544374, "O": 0.707337, "C": 0.138225}),
-            ("volume", {"H": 0.15443743, "O": 0.707337, "C": 0.138225}),
+            ("atomic", {"H": 0.5, "O": 0.5}),
+            ("mass", {"H": 0.94073, "O": 0.0592697}),
+            ("volume", {"H": 0.499576, "O": 0.500424}),
         ],
     )
-    def test_fractional_types(self, fraction, elements):
+    def test_fractional_type(self, fraction, elements):
+        m1 = material(
+            "m1",
+            elements="H2",
+            properties=props(density=0.08988 / 2),
+        )
+        m2 = material(
+            "m2",
+            elements="O",
+            properties=props(density=1.429 / 2),
+        )
+        mix = mixture("special", [(m1(), 0.5), (m2(), 0.5)], fraction_type=fraction)
+
+        assert mix.elements.model_dump() == pytest.approx(
+            Elements.model_validate(elements).model_dump()
+        )
+
+    @pytest.mark.parametrize(
+        ("fraction", "elements"),
+        [
+            ("atomic", {"H": 0.25, "O": 0.5, "C": 0.25}),
+            ("mass", {"H": 0.311105, "O": 0.5, "C": 0.1888953}),
+            ("volume", {"H": 3.75276e-7, "O": 0.779048, "C": 0.2209513}),
+        ],
+    )
+    def test_fractional_types_complex(self, fraction, elements):
         m1 = material(
             "m1",
             elements={"H": 0.5, "O": 0.5},
@@ -347,17 +372,15 @@ class TestMixtures:
         )
         m2 = material(
             "m2",
-            elements={"C": 0.2, "O": 0.8},
+            elements={"C": 0.5, "O": 0.5},
             properties=props(density=lambda op_cond: op_cond.pressure**2),
         )
 
-        mix = mixture("special", [(m1(), 0.2), (m2(), 0.8)], fraction_type=fraction)
+        mix = mixture("special", [(m1(), 0.5), (m2(), 0.5)], fraction_type=fraction)
 
         assert mix.elements.model_dump() == pytest.approx(
             Elements.model_validate(elements).model_dump()
         )
-        if fraction == "volume":
-            raise ValueError("This is the same as mass?!")
 
     def test_different_units_in_properties(self, test_condition, caplog):
         m1 = material(

@@ -423,12 +423,17 @@ def material(
     )
 
 
+class _PropertyInfo(TypedDict):
+    dpp: list[DependentPhysicalProperty]
+    fractions: list[float]
+
+
 def _get_properties_from_materials(
     property_: str,
     materials: Sequence[
         MaterialFraction[ConverterK] | tuple[Material[ConverterK], float]
     ],
-) -> dict[Literal["dpp", "fractions"], list[DependentPhysicalProperty] | list[float]]:
+) -> _PropertyInfo:
     dpp, fractions = [], []
     for mf in materials:
         fractions.append(mf.fraction)
@@ -451,6 +456,49 @@ def _ignore_undefined(ann):
 
 def _get_indexes(dpp: list[DependentPhysicalProperty], value=None):
     return [i for i in range(len(dpp)) if dpp[i] == value]
+
+
+def _atomic_to_inp_converter(
+    m_el: list[Elements],
+    input_frac: list[float],
+    conversion: Callable[[ef_root_model], ef_root_model],
+) -> ef_root_model:
+    elements = {}
+    for el, f in zip(m_el, input_frac, strict=False):
+        for k, elf in conversion(copy.deepcopy(el.root)).items():
+            if k in elements:
+                elements[k].fraction += elf.fraction * f
+            else:
+                elf.fraction *= f
+                elements[k] = elf
+    ttl = sum(e.fraction for e in elements.values())
+    for el in elements.values():
+        el.fraction /= ttl
+    return elements
+
+
+def _atomic_to_volume_converter(
+    m_el: list[Elements], input_frac: list[float], densities: list[float]
+) -> tuple[ef_root_model, dict[str, float]]:
+    elements = {}
+    vf_den = {}
+    for el, f, d in zip(m_el, input_frac, densities, strict=False):
+        for k, elf in atomic_fraction_to_volume_fraction(
+            copy.deepcopy(el.root), dict.fromkeys(el.root, d)
+        ).items():
+            if k in elements:
+                vf_den[k] += d * elf.fraction
+                elements[k].fraction += elf.fraction * f
+            else:
+                vf_den[k] = d * elf.fraction
+                elf.fraction *= f
+                elements[k] = elf
+
+    ttl = sum(e.fraction for e in elements.values())
+    for el in elements.values():
+        el.fraction /= ttl
+
+    return elements, vf_den
 
 
 def mixture(
@@ -541,57 +589,22 @@ def mixture(
         **prop_ann,
     )
 
-    fractions = [mf.fraction for mf in materials]
-    elements = [mf.material.elements for mf in materials]
-
-    def _conversion(
-        elements: list[Elements],
-        fractions: list[float],
-        conversion: Callable[[ef_root_model], ef_root_model]
-        | Callable[[ef_root_model, dict[str, float]], ef_root_model],
-        densities: list[dict[str, float]] | None = None,
-    ) -> ef_root_model:
-        new_elements = [
-            {
-                k: v.fraction * f
-                for k, v in (
-                    conversion(e.root)
-                    if densities is None
-                    else conversion(e.root, densities[no])
-                ).items()
-            }
-            for no, (e, f) in enumerate(zip(elements, fractions, strict=True))
-        ]
-        r_elements: ef_root_model = new_elements[0]
-        for el in new_elements[1:]:
-            for k, v in el.items():
-                r_elements[k] = r_elements.get(k, 0) + v
-        return r_elements
+    inp_frac = [mf.fraction for mf in materials]
+    mat_elements = [mf.material.elements for mf in materials]
 
     if fraction_type == "atomic":
-        elements = _conversion(elements, fractions, lambda ef_dict: ef_dict)
+        elements = _atomic_to_inp_converter(mat_elements, inp_frac, lambda inp: inp)
     elif fraction_type == "mass":
-        elements = _conversion(elements, fractions, atomic_fraction_to_mass_fraction)
+        elements = {}
+        elements = _atomic_to_inp_converter(
+            mat_elements, inp_frac, atomic_fraction_to_mass_fraction
+        )
         elements["fraction_type"] = "mass"
     elif fraction_type == "volume":
         volume_conditions = volume_conditions or STPConditions()
         densities = [mf.material.density(volume_conditions) for mf in materials]
-        volume_densities = [
-            dict.fromkeys(e.root, d) for e, d in zip(elements, densities, strict=True)
-        ]
-        vol_el = _conversion(
-            elements,
-            fractions,
-            atomic_fraction_to_volume_fraction,
-            volume_densities,
-        )
-        elements = volume_fraction_to_atomic_fraction(
-            Elements.model_validate(vol_el).root,
-            dict.fromkeys(
-                vol_el,
-                prop_val["density"](volume_conditions),
-            ),
-        )
+        elements, vf_den = _atomic_to_volume_converter(mat_elements, inp_frac, densities)
+        elements = volume_fraction_to_atomic_fraction(elements, vf_den)
     else:
         raise NotImplementedError(f"{fraction_type=} not a valid option")
 
