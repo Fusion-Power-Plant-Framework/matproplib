@@ -10,6 +10,3 @@ The main aim of this package is to unite structural, thermal, electro-magnetic a
 - [Operational conditions](conditions.md)
 - [Superconducting parameterisations](superconductors.md)
 - [Format Converters (Neutronics, FEM, etc.)](conversions.md)
-
-
-## User guide
