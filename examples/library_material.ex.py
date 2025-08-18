@@ -28,6 +28,7 @@ from matproplib.conditions import OperationalConditions
 from matproplib.library.copper import CryogenicCopper
 
 # %% [markdown]
+# # Library Materials
 # ### Material
 # We can import an existing material from the `matproplib` library. Here we use the
 # `CryogenicCopper` material, which is a collection of some material property

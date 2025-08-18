@@ -21,7 +21,7 @@
 """An example to show how to create a mixture in `matproplib`"""
 
 # %%[markdown]
-# ### Material Mixture
+# # Material Mixtures
 # In `matproplib`, we can create a mixture of materials using the `Mixture` class. This
 # allows us to define a material that is composed of multiple other materials,
 # each with its own properties.
