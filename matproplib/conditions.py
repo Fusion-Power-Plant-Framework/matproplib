@@ -8,8 +8,6 @@ from __future__ import annotations
 from typing import get_args
 
 import numpy as np
-from numpydantic import NDArray, Shape
-from numpydantic.dtype import Number
 from pint import Unit
 from pydantic import (
     ConfigDict,
@@ -21,7 +19,7 @@ from pydantic import (
     model_validator,
 )
 
-from matproplib.base import PMBaseModel, ureg
+from matproplib.base import ArrayFloat, PMBaseModel, ureg
 from matproplib.properties.independent import (
     MagneticField,
     NeutronDamage,
@@ -261,7 +259,7 @@ def modify_conditions(
                         f"Modified_{type(cond_v).__name__}",
                         __base__=PhysicalProperty,
                         value=(
-                            NDArray[Shape["* x"], Number] | float,
+                            ArrayFloat,
                             ureg.Quantity(cond_v.value, cond_v.unit).to(new_unit),
                         ),
                         unit=(Unit | str, new_unit),

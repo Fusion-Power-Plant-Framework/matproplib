@@ -399,9 +399,7 @@ class _PropertyInfo(TypedDict):
 
 def _get_properties_from_materials(
     property_: str,
-    materials: Sequence[
-        MaterialFraction[ConverterK] | tuple[Material[ConverterK], float]
-    ],
+    materials: Sequence[MaterialFraction[ConverterK]],
 ) -> _PropertyInfo:
     dpp, fractions = [], []
     for mf in materials:
@@ -429,7 +427,7 @@ def _get_indexes(dpp: list[DependentPhysicalProperty], value=None):
 
 def _atomic_to_inp_converter(
     m_el: list[Elements],
-    input_frac: list[float],
+    input_frac: Sequence[float],
     conversion: Callable[[ef_root_model], ef_root_model],
 ) -> ef_root_model:
     elements = {}
@@ -447,7 +445,7 @@ def _atomic_to_inp_converter(
 
 
 def _atomic_to_volume_converter(
-    m_el: list[Elements], input_frac: list[float], densities: list[float]
+    m_el: list[Elements], input_frac: Sequence[float], densities: list[float]
 ) -> tuple[ef_root_model, dict[str, float]]:
     elements = {}
     vf_den = {}
