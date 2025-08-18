@@ -368,6 +368,42 @@ class TestMixtures:
     @pytest.mark.parametrize(
         ("fraction", "elements"),
         [
+            ("atomic", {"H": 0.3749999, "O": 0.625}),
+            ("mass", {"H": 0.904972, "O": 0.095028}),
+            ("volume", {"H": 0.3746024, "O": 0.625397}),
+        ],
+    )
+    def test_fractional_type_with_void(self, fraction, elements, caplog):
+        m1 = material(
+            "m1",
+            elements="H2",
+            properties=props(density=0.08988 / 2),
+        )
+        m2 = material(
+            "m2",
+            elements="O",
+            properties=props(density=1.429 / 2),
+        )
+        mix = mixture("special", [(m1(), 0.3), (m2(), 0.5)], fraction_type=fraction)
+
+        assert mix.elements.model_dump() == pytest.approx(
+            Elements.model_validate(elements).model_dump()
+        )
+
+        if fraction == "volume":
+            rec = caplog.records
+            assert len(rec) == 1
+            assert rec[0].levelname == "INFO"
+            assert "fraction of 0.2" in rec[0].msg
+        else:
+            rec = caplog.records
+            assert len(rec) == 1
+            assert rec[0].levelname == "WARNING"
+            assert "not possible" in rec[0].msg
+
+    @pytest.mark.parametrize(
+        ("fraction", "elements"),
+        [
             ("atomic", {"H": 0.25, "O": 0.5, "C": 0.25}),
             ("mass", {"H": 0.311105, "O": 0.5, "C": 0.1888953}),
             ("volume", {"H": 3.75276e-7, "O": 0.779048, "C": 0.2209513}),

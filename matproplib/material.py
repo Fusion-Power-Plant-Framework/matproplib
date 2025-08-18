@@ -13,6 +13,7 @@ from collections.abc import Callable, Iterable, Sequence
 from functools import partial, reduce
 from typing import Any, Generic, Literal, Protocol, TypedDict, Union, get_args
 
+import numpy as np
 from pint import Unit
 from pydantic import (
     AliasChoices,
@@ -148,18 +149,6 @@ class Material(PMBaseModel, ABC, Generic[ConverterK]):
                         object.__setattr__(self, dp, AttributeErrorProperty(msg=msg))  # noqa: PLC2801
 
         return self
-
-    def _setup_property_mixture(self, dp: str):
-        materials_dpp, fractions = list(
-            zip(
-                *(
-                    (getattr(mf.material, dp), mf.fraction)
-                    for mf in self.material_fraction
-                ),
-                strict=True,
-            )
-        )
-        setattr(self, dp, Mixture(dpp=materials_dpp, fractions=fractions))
 
     def convert(self, name: ConverterK, op_cond: OperationalConditions, *args, **kwargs):
         """Convert material to another format"""  # noqa: DOC201
@@ -481,6 +470,31 @@ def _atomic_to_volume_converter(
     return elements, vf_den
 
 
+def _void_check(
+    materials: Sequence[MaterialFraction[ConverterK]], fraction_type: str
+) -> Sequence[float]:
+    inp_frac = np.asarray([mf.fraction for mf in materials])
+
+    if not np.isclose(np.sum(inp_frac), 1):
+        if fraction_type in {"mass", "atomic"}:
+            log.warning(
+                "Normalising input fraction, "
+                f"Voids are not possible for {fraction_type=}"
+            )
+            sum_frac = np.sum(inp_frac)
+
+            inp_frac /= sum_frac
+            for mf in materials:
+                mf.fraction /= sum_frac
+        else:
+            log.info(
+                "Material fractions do not sum to 1. "
+                f"Void fraction of {1 - np.sum(inp_frac):.2f}"
+            )
+
+    return inp_frac
+
+
 def mixture(
     name: str,
     materials: Sequence[
@@ -524,7 +538,9 @@ def mixture(
     AttributeError
         If one material has a property the others dont and there is no override provided
     """
-    materials = [MaterialFraction.model_validate(m) for m in materials]
+    materials: list[MaterialFraction[ConverterK]] = [
+        MaterialFraction.model_validate(m) for m in materials
+    ]
     all_fields = reduce(
         operator.or_,
         [type(m.material).model_fields for m in materials],
@@ -569,8 +585,9 @@ def mixture(
         **prop_ann,
     )
 
-    inp_frac = [mf.fraction for mf in materials]
     mat_elements = [mf.material.elements for mf in materials]
+
+    inp_frac = _void_check(materials, fraction_type)
 
     if fraction_type == "atomic":
         elements = _atomic_to_inp_converter(mat_elements, inp_frac, lambda inp: inp)
