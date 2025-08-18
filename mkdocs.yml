@@ -90,6 +90,5 @@ nav:
       - superconductors.md
       - conversions.md
   - Examples:
-      - examples.md
       - examples/*.ex.py
   - API Reference: source/reference/

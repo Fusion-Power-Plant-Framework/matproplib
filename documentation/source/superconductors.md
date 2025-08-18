@@ -5,9 +5,10 @@
 Superconductors are often characterised by their critical surface in terms of the current density as a function of applied temperature, magnetic field, and strain: $J_c(T,B,\varepsilon)$.
 
 Superconducting parameterisations take many forms. At present, three formulations are provided:
- - [Summers parameterisation](https://scispace.com/pdf/a-model-for-the-prediction-of-nb-sub-3-sn-critical-current-xoujezlpxh.pdf)
- - [Bottura-Bordini Nb<sub>3</sub>Sn parameterisation](https://doi.org/10.1109/TASC.2009.2018278)
- - [Bottura NbTi parameterisation](https://doi.org/10.1109/77.828413)
+
+ * [Summers parameterisation](https://scispace.com/pdf/a-model-for-the-prediction-of-nb-sub-3-sn-critical-current-xoujezlpxh.pdf)
+ * [Bottura-Bordini Nb<sub>3</sub>Sn parameterisation](https://doi.org/10.1109/TASC.2009.2018278)
+ * [Bottura NbTi parameterisation](https://doi.org/10.1109/77.828413)
 
  Each parameterisation takes a range of free parameters. For example, one can instantiate a superconducting parameterisation:
 
