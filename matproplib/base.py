@@ -10,12 +10,12 @@ import logging
 import operator
 from abc import ABC
 from functools import partial, reduce
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 from csl_reference import Reference
-from numpydantic import NDArray, Shape  # noqa: TC002
-from numpydantic.dtype import Number  # noqa: TC002
+from numpydantic import NDArray, Shape
+from numpydantic.dtype import Number
 from pint import Quantity, Unit, UnitRegistry
 from pint.errors import DimensionalityError
 from pydantic import (
@@ -54,12 +54,14 @@ class MaterialUnitRegistry(UnitRegistry):
 
     def __init__(self):
         super().__init__(fmt_locale="en_gb", autoconvert_offset_to_baseunit=True)
-        self.define("displacements_per_atom  = count = dpa")
+        self.define("displacements_per_atom = count = dpa")
 
 
 ureg = MaterialUnitRegistry()
 
 N_AVOGADRO = ureg.Quantity("avogadro_number").to_base_units().magnitude
+
+ArrayFloat = float | int | NDArray[Shape["* x"], Number]
 
 
 def unit_conversion(unitval: str | Quantity | Unit, default: str) -> float:
@@ -199,7 +201,7 @@ class PMBaseModel(BaseModel, ABC):
 class BasePhysicalProperty(PMBaseModel, ABC):
     """Physical properties of a material"""
 
-    value: NDArray[Shape["* x"], Number] | float  # noqa: F722
+    value: ArrayFloat
     unit: Unit | str
 
     model_config = ConfigDict(frozen=True)

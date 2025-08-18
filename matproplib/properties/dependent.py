@@ -17,8 +17,6 @@ from typing import (
 
 import numpy as np
 import periodictable as pt
-from numpydantic import NDArray, Shape
-from numpydantic.dtype import Number
 from pint import Unit  # noqa: TC002
 from pint.errors import DimensionalityError
 from pydantic import Field, field_serializer, model_validator
@@ -26,6 +24,7 @@ from pydantic_core import PydanticUndefinedType
 from typing_extensions import NotRequired
 
 from matproplib.base import (
+    ArrayFloat,
     BasePhysicalProperty,
     References,
     unit_conversion,
@@ -48,9 +47,6 @@ log = logging.getLogger("matproplib.base")
 
 
 class _NoDependence: ...
-
-
-ArrayFloat = float | int | NDArray[Shape["* x"], Number]
 
 
 class _WrapCallable:

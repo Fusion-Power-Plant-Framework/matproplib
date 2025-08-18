@@ -5,15 +5,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, Union
+from typing import TYPE_CHECKING, Generic, Literal, Union
 
-from numpydantic import NDArray, Shape
-from numpydantic.dtype import Number
 from pint import Unit
-from pydantic import ConfigDict, Field, create_model, field_validator
+from pydantic import ConfigDict, Field, SerializeAsAny, create_model, field_validator
 from pydantic_core import PydanticUndefined
 
 from matproplib.base import (
+    ArrayFloat,
     BaseGroup,
     References,
     SuperconductingParameterisation,
@@ -114,13 +113,7 @@ class DefaultProperties(Properties, Generic[SuperconductingParameterisationT_co]
     )
 
 
-Ldefine = (
-    UndefinedProperty
-    | DependentPhysicalPropertyTD
-    | float
-    | int
-    | NDArray[Shape["* x"], Number]
-)
+Ldefine = UndefinedProperty | DependentPhysicalPropertyTD | ArrayFloat
 
 
 def props(  # noqa: PLR0913
