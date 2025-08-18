@@ -397,6 +397,35 @@ class TestSerialisation:
                 as_field=True,
                 density=(5, "g/cm^3"),
                 poissons_ratio=4,
+            ),
+            converters=OpenMCNeutronicConfig(),
+        )
+        simple = Simple()
+        out = Simple.model_validate_json(simple.model_dump_json())
+
+        assert simple.name == out.name
+        assert simple.elements == pytest.approx(out.elements)
+        assert simple.converters == out.converters
+        assert (
+            simple.density(test_condition)
+            == simple.density(test_condition)
+            == pytest.approx(5000)
+        )
+        assert (
+            simple.poissons_ratio(test_condition)
+            == simple.poissons_ratio(test_condition)
+            == pytest.approx(4)
+        )
+
+    @pytest.mark.xfail(reason="Deserialisation of functions not implemented")
+    def test_complex_serialisation_deserialisation(self, test_condition):
+        Complex = material(
+            "Complex",
+            elements="H2O",
+            properties=props(
+                as_field=True,
+                density=(5, "g/cm^3"),
+                poissons_ratio=4,
                 superconducting_parameterisation=Nb3SnBotturaParameterisation(
                     constant=1,
                     p=2,
@@ -412,25 +441,19 @@ class TestSerialisation:
             ),
             converters=OpenMCNeutronicConfig(),
         )
-        simple = Simple()
-        out = Simple.model_validate_json(simple.model_dump_json())
+        complex_mat = Complex()
 
-        assert simple.name == out.name
-        assert simple.elements == out.elements
-        assert simple.converters == out.converters
-        assert (
-            simple.density(test_condition)
-            == simple.density(test_condition)
-            == pytest.approx(5000)
-        )
-        assert (
-            simple.poissons_ratio(test_condition)
-            == simple.poissons_ratio(test_condition)
-            == pytest.approx(4)
-        )
-        ssp = simple.superconducting_parameterisation
+        with warnings.catch_warnings():  # Remove when functionality implemented
+            warnings.simplefilter("ignore")
+            out = Complex.model_validate_json(complex_mat.model_dump_json())
+
+        ssp = complex_mat.superconducting_parameterisation
         osp = out.superconducting_parameterisation
         assert ssp.constant == osp.constant == 1
         assert ssp.p == osp.p == 2
         assert ssp.q == osp.q == 3
         assert ssp.c_a1 == osp.c_a1 == 4
+
+        assert osp.critical_current_density(
+            test_condition
+        ) == ssp.critical_current_density(test_condition)

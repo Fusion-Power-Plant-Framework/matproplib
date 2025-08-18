@@ -40,6 +40,7 @@ __all__ = [
     "PMBaseModel",
     "References",
     "SuperconductingParameterisation",
+    "UndefinedSuperconductingParameterisation",
     "rebuild",
     "unit_conversion",
     "ureg",
@@ -341,22 +342,39 @@ def rebuild(cls):
                     )
         else:
             raise NotImplementedError
-    return create_model(
+
+    model = create_model(
         cls.__name__,
         __base__=type("_DynamicParent", cls.__bases__, methods),
         **mf,
         **extras,
     )
+    return cls_vars(model, cls, methods)
+
+
+def cls_vars(model, orig_cls, methods):
+    classvars = {cv: getattr(orig_cls, cv) for cv in methods.get("__class_vars__", {})}
+    for name, val in classvars.items():
+        setattr(model, name, val)
+    return model
+
+
+def all_subclasses(cls):
+    return set(cls.__subclasses__()).union([
+        s for c in cls.__subclasses__() for s in all_subclasses(c)
+    ])
 
 
 class SuperconductingParameterisation(BaseGroup):
     """Superconducting Parameterisation base model"""
 
-    name: str = ""
+    name: ClassVar[Literal["base"]] = "base"
 
 
 class UndefinedSuperconductingParameterisation(SuperconductingParameterisation):
     """Undefined Superconducting Parameterisation base model"""
+
+    name: ClassVar[Literal["undef"]] = "undef"
 
 
 SuperconductingParameterisationT_co = TypeVar(

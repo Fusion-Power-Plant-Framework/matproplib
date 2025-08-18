@@ -107,6 +107,9 @@ class DefaultProperties(Properties, Generic[SuperconductingParameterisationT_co]
     superconducting_parameterisation: SuperconductingParameterisationT_co = (
         UndefinedSuperconductingParameterisation()
     )
+    superconducting_parameterisation: SerializeAsAny[
+        SuperconductingParameterisationT_co
+    ] = UndefinedSuperconductingParameterisation()
 
     field_validator("superconducting_parameterisation", mode="before")(
         _superconduction_validation
@@ -175,19 +178,25 @@ def props(  # noqa: PLR0913
         "average_yield_stress": average_yield_stress,
         "minimum_ultimate_tensile_stress": minimum_ultimate_tensile_stress,
         "average_ultimate_tensile_stress": average_ultimate_tensile_stress,
-        "superconducting_parameterisation": superconducting_parameterisation,
         **extra_values,
     }
 
-    validators = (
-        {}
-        if superconducting_parameterisation is None
-        else {
-            "_superconduction_validation": field_validator(
-                "superconducting_parameterisation", mode="before"
-            )(_superconduction_validation)
+    if superconducting_parameterisation is None:
+        validators = {}
+        sc = {}
+    else:
+        scp_n = "superconducting_parameterisation"
+        scp = superconducting_parameterisation
+        field = Field(
+            default=UndefinedSuperconductingParameterisation() if scp is True else scp,
+            validate_default=True,
+        )
+        sc = {scp_n: (SerializeAsAny[SuperconductingParameterisationT_co], field)}
+        validators = {
+            "_superconduction_validation": field_validator(scp_n, mode="before")(
+                _superconduction_validation
+            )
         }
-    )
     model = create_model(
         "DynamicProperties",
         __base__=(Properties, Generic[SuperconductingParameterisationT_co]),
@@ -195,11 +204,7 @@ def props(  # noqa: PLR0913
         reference=(References | None, reference),
         **{
             name: (
-                (
-                    SuperconductingParameterisationT_co
-                    if name == "superconducting_parameterisation"
-                    else property_group.model_fields[name].annotation
-                )
+                property_group.model_fields[name].annotation
                 if name in property_group.model_fields
                 else _get_dpp_type(name, value),
                 Field(
@@ -208,11 +213,20 @@ def props(  # noqa: PLR0913
                 ),
             )
             for name, value in data.items()
-            if value is not False and value is not None
+            if value is not False
         },
+        **sc,
     )
     if superconducting_parameterisation is not None:
-        model = model[Union[tuple(SuperconductingParameterisation.__subclasses__())]]  # noqa: UP007
+        model = model[
+            Union[  # noqa: UP007
+                tuple(
+                    sc
+                    for sc in all_subclasses(SuperconductingParameterisation)
+                    if not sc.__name__.startswith("_Dyn")
+                )
+            ]
+        ]
 
     if as_field:
         return Field(validate_default=True, default_factory=model)

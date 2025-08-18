@@ -49,13 +49,10 @@ def plot_superconductor(
     magnetic_fields = np.linspace(b_min, b_max, n_points)
 
     xx, yy = np.meshgrid(temperatures, magnetic_fields)
-    j_crit = np.zeros_like(xx)
-    for i in range(n_points):
-        for j in range(n_points):
-            op_cond = OperationalConditions(
-                temperature=xx[i, j], magnetic_field=yy[i, j], strain=strain
-            )
-            j_crit[i, j] = sc_parameterisation.critical_current_density(op_cond)
+    op_cond = OperationalConditions(
+        temperature=xx.flatten(), magnetic_field=yy.flatten(), strain=strain
+    )
+    j_crit = sc_parameterisation.critical_current_density(op_cond).reshape(xx.shape)
 
     f, ax = plt.subplots()
     cm = ax.contourf(xx, yy, j_crit, cmap="viridis")

@@ -5,7 +5,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar, Literal
 
 import numpy as np
 
@@ -36,6 +36,7 @@ class Nb3SnBotturaParameterisation(SuperconductingParameterisation):
         in IEEE Transactions on Applied Superconductivity, vol. 19, no. 3, pp. 1521-1524, June 2009
     """  # noqa: E501
 
+    name: ClassVar[Literal["Nb3SnBottura"]] = "Nb3SnBottura"
     constant: float  # Current density scaling constant
     p: float  # Low field exponent of the pinning force
     q: float  # High field exponent of the pinning force
@@ -108,6 +109,8 @@ class NbTiBotturaParameterisation(SuperconductingParameterisation):
         in IEEE Transactions on Applied Superconductivity, vol. 10, no. 1, pp. 1054-1057, March 2000,
     """  # noqa: E501
 
+    name: ClassVar[Literal["NbTiBottura"]] = "NbTiBottura"
+
     constant: float  # Current density scaling constant
     alpha: float  # Low field exponent of the pinning force
     beta: float  # High field exponent of the pinning force
@@ -151,6 +154,8 @@ class SummersParameterisation(SuperconductingParameterisation):
     see e.g. https://conferences.lbl.gov/event/979/contributions/5985/attachments/4069/3482/U9-U10_final.pdf, slide 25
 
     """  # noqa: E501
+
+    name: ClassVar[Literal["Summers"]] = "Summers"
 
     constant: float  # Current density scaling constant
     alpha: float  # Strain function exponent (Ekin-like)

@@ -11,7 +11,7 @@ import operator
 from abc import ABC
 from collections.abc import Callable, Iterable, Sequence
 from functools import partial, reduce
-from typing import Any, Generic, Literal, Protocol, Union, get_args
+from typing import Any, Generic, Literal, Protocol, TypedDict, Union, get_args
 
 from pint import Unit
 from pydantic import (
@@ -19,6 +19,7 @@ from pydantic import (
     AliasPath,
     ConfigDict,
     Field,
+    SerializeAsAny,
     create_model,
     field_validator,
     model_validator,
@@ -316,12 +317,12 @@ class FullMaterial(
     average_ultimate_tensile_stress: UndefinedProperty | Stress = field_alias_path(
         "average_ultimate_tensile_stress", "properties"
     )
-    superconducting_parameterisation: SuperconductingParameterisationT_co = (
-        field_alias_path(
-            "superconducting_parameterisation",
-            "properties",
-            default=UndefinedSuperconductingParameterisation(),
-        )
+    superconducting_parameterisation: SerializeAsAny[
+        SuperconductingParameterisationT_co
+    ] = field_alias_path(
+        "superconducting_parameterisation",
+        "properties",
+        default=UndefinedSuperconductingParameterisation(),
     )
 
     field_validator("superconducting_parameterisation", mode="before")(
@@ -392,8 +393,9 @@ def material(
         props_ = copy.deepcopy(props_.default_factory.model_fields)
         reference = combine_refs(reference, props_.pop("reference"))
 
-    print("TODO superconducting validation")
-
+    if "superconducting_parameterisation" in props_:
+        p = props_["superconducting_parameterisation"].annotation
+        props_["superconducting_parameterisation"].annotation = SerializeAsAny[p]
     return create_model(
         name,
         __base__=Material[ConverterK],
