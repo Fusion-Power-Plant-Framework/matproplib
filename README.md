@@ -22,4 +22,8 @@ Sadly, many material property parameterisations are not publicly available. For 
 
 ## Conventions
 
-`matproplib` uses SI units...
+`matproplib` uses SI units, which includes the use of K for temperature.
+
+Phase transitions are not generally not handled, although properties are available for some fluids through the `CoolProp` library.
+
+By default, material compositions are specified by atomic fractions. When used in neutronics, isotopes of elements default to natural abundances, unless otherwise specified.
