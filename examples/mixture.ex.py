@@ -85,5 +85,5 @@ recalculated_density = 0.7 * steel_density + 0.3 * water_density
 print(f"{steel_density=} kg/m^3")
 print(f"{water_density=} kg/m^3")
 print(f"{mixture_density=} kg/m^3")
-print(f"{mixture_density=} kg/m^3")
+print(f"{recalculated_density=} kg/m^3")
 print(f"{overriden_density=} kg/m^3")
