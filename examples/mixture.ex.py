@@ -19,6 +19,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 """An example to show how to create a mixture in `matproplib`"""
+
 # %% [markdown]
 # # Material Mixtures
 # In `matproplib`, we can create a mixture of materials using the `Mixture` class. This
