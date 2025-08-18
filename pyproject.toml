@@ -14,22 +14,22 @@ allow-direct-references = true  # remove after reference published
 
 [project]
 name = "matproplib"
-description = "Add your description here"
+description = "Materials that are dependent on conditions"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "LGPL-2.1-or-later"
 dynamic = ["version"]
 dependencies = [
-   "numpy >=1.26",
-   "matplotlib >=3.10",
-   "pint >=0.24",
-   "pydantic>=2",
-   "numpydantic",
-   "periodictable",
    "asttokens",
    "babel",
+   "CoolProp",
    "csl_reference @ git+https://git@github.com/Fusion-Power-Plant-Framework/csl-reference@main",
-   "CoolProp"
+   "matplotlib >=3.10",
+   "numpy >=1.26",
+   "numpydantic",
+   "periodictable",
+   "pint >=0.24",
+   "pydantic>=2",
    ]
 keywords = ["materials", "fusion", "structural", "electromagnetism", "neutronics"]
 classifiers = [

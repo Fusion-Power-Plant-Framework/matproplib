@@ -122,27 +122,6 @@ class Material(PMBaseModel, ABC, Generic[ConverterK]):
             )
         super().__init__(**kwargs)
 
-    @classmethod
-    def __pydantic_init_subclass__(cls, **kwargs):  # noqa: PLW3201
-        """Ensure default units are set for a property
-
-        Raises
-        ------
-        ValueError
-            Default unit not set on class
-        """
-        super().__pydantic_init_subclass__(**kwargs)
-
-        # if cls.__name__ in _registry:
-        #     raise
-
-        # # TODO weak-refy stuff
-        # _registry[cls.__name__] = cls
-
-    # def model_post_init(self, __context):
-    #     print(list(_registry.values()))
-    #     print(type(self).__name__)
-
     @model_validator(mode="after")
     def _mixture_validation(self):
         if self.mixture_fraction is None:
