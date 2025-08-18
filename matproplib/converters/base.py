@@ -9,9 +9,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from pydantic import Field, RootModel, model_validator
+from pydantic import Field, RootModel, SerializeAsAny, model_validator
 
-from matproplib.base import PMBaseModel
+from matproplib.base import PMBaseModel, all_subclasses
 
 if TYPE_CHECKING:
     from matproplib.conditions import OperationalConditions
@@ -28,7 +28,7 @@ class Converters(RootModel[ConverterK], Generic[ConverterK]):
     Collects all objects to convert materials into other formats
     """
 
-    root: dict[ConverterK, Converter] = Field(default_factory=dict)
+    root: SerializeAsAny[dict[ConverterK, Converter]] = Field(default_factory=dict)
 
     def add(self, converter: Converter):
         """Add a converter to the group"""
@@ -40,6 +40,13 @@ class Converters(RootModel[ConverterK], Generic[ConverterK]):
             return {conv.name: conv for conv in self}
         if isinstance(self, Converter):
             return {self.name: self}
+        if isinstance(self, dict):
+            return {
+                k: conv_cls.model_validate(self)
+                for k in self
+                for conv_cls in all_subclasses(Converter)
+                if hasattr(conv_cls, "name") and conv_cls.name == k
+            }
         return self
 
     def __iter__(self):  # noqa: D105
@@ -57,8 +64,6 @@ class Converters(RootModel[ConverterK], Generic[ConverterK]):
         if name == "root":
             super().__setattr__(name, value)
         self.root[name] = value
-        # TODO fix for subclass validation
-        # Converter.model_validate(value)
 
     def __repr__(self) -> str:  # noqa: D105
         converters = ", ".join(v.__repr__() for v in self.root.values())

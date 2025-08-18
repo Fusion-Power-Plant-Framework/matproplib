@@ -16,7 +16,7 @@ from matproplib.converters.neutronics import (
     global_id,
 )
 from matproplib.material import material
-from matproplib.tools.neutronics import NMM_FRACTION_TYPE_MAPPING
+from matproplib.tools.neutronics import NM_FRACTION_TYPE_MAPPING
 
 
 def empty_filter(lst: list[Any]) -> list[Any]:
@@ -54,7 +54,7 @@ class TestOpenMCNeutronics:
         assert out.temperature is None
         assert all(
             np.array([a.percent_type for a in out.nuclides])
-            == NMM_FRACTION_TYPE_MAPPING[percent_type]
+            == NM_FRACTION_TYPE_MAPPING[percent_type]
         )
 
     def test_material_with_bad_temperature(self, test_condition):

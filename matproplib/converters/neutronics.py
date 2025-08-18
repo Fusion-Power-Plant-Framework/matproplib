@@ -67,14 +67,12 @@ class OpenMCNeutronicConfig(NeutronicConfig):
 
     name: ClassVar[Literal["openmc"]] = "openmc"
     """Name of converter"""
-    zaid_suffix: str = ""
-    """The nuclear library to apply to the zaid, for example '.31c'"""
     material_id: int | None = None
     """The id number or mat number used in OpenMC materials,
     auto assigned by default within OpenMC."""
     packing_fraction: float = 1.0
     """Amount of unit packed volume of a material"""
-    percent_type: Literal["atomic", "mass", "volume"] = "atomic"
+    percent_type: Literal["atomic", "mass"] = "atomic"
     """Percent type of material"""
     enrichment: float | None = None
     """Enrichment percent of the target"""
@@ -88,8 +86,9 @@ class OpenMCNeutronicConfig(NeutronicConfig):
     volume_of_unit_cell: float | None = None
     """Volume of unit cell, used in combination with atoms_per_unit_cell for
     density fallback calculation"""
-    decimal_places: int = 8
-    """Precision of the material card"""
+    number_of_atoms_in_sample: int | None = None
+    """If a material is not specified with chemical formula
+    this number is used to calculate density with the unit cell fallback"""
 
     def convert(
         self,
@@ -104,6 +103,7 @@ class OpenMCNeutronicConfig(NeutronicConfig):
         :
             OpenMC material object
         """
+        no_atoms = material.elements._no_atoms or self.number_of_atoms_in_sample  # noqa: SLF001
         ef_dict = _to_fraction_conversion(self.percent_type, material.elements.root)
         # Isotope-element separation
         isotopes, elements = {}, {}
@@ -134,19 +134,18 @@ class OpenMCNeutronicConfig(NeutronicConfig):
             enrichment=self.enrichment,
             enrichment_target=self.enrichment_target,
             enrichment_type=self.enrichment_type,
-            zaid_suffix=self.zaid_suffix,
             volume_of_unit_cell=self.volume_of_unit_cell,
+            atoms_in_sample=no_atoms,
             atoms_per_unit_cell=self.atoms_per_unit_cell,
             packing_fraction=self.packing_fraction,
             temperature_to_neutronics_code=temperature_to_neutronics_code,
-            decimal_places=8,
         )
 
 
 def _get_mass_density(material: Material, op_cond: OperationalConditions) -> float:
     if not hasattr(material, "density") or material.density is None:
+        # Future: generic from unit cell?
         raise NotImplementedError
-        # TODO from unit cell?
     return material.density.value_as(op_cond, "g/cm^3")
 
 

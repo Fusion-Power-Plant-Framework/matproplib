@@ -5,8 +5,8 @@
 
 from __future__ import annotations
 
-import json
-import warnings
+import os
+import re
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Literal
 
@@ -28,70 +28,53 @@ __all__ = [
 ]
 
 
-def import_nmm():
-    """Don't hack my json, among other annoyances.
-
-    Returns
-    -------
-    :
-        The modified nmm module reference
-    """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", category=UserWarning)
-        import neutronics_material_maker as nmm  # noqa: PLC0415
-
-        # Really....
-        json.JSONEncoder.default = nmm.material._default.default  # noqa: SLF001
-
-    # hard coded value is out of date after 2019 redefinition
-    nmm.material.atomic_mass_unit_in_g = ureg.Quantity(1, "amu").to("g").magnitude
-
-    return nmm
-
-
-@contextmanager
-def patch_nmm_openmc():
-    """Avoid creating openmc material until necessary
-
-    Yields
-    ------
-    :
-        NeutronicsMaterialMaker package
-    """
-    nmm = import_nmm()
-    if value := nmm.material.OPENMC_AVAILABLE:
-        nmm.material.OPENMC_AVAILABLE = False
-    try:
-        yield nmm
-    finally:
-        if value:
-            nmm.material.OPENMC_AVAILABLE = True
-
-
-NMM_FRACTION_TYPE_MAPPING = {
+NM_FRACTION_TYPE_MAPPING = {
     "atomic": "ao",
     "mass": "wo",
     "volume": "vo",
 }
 
 
+def _enrichment_check(
+    enrichment: float | None, enrichment_target: str | None, enrichment_type: str | None
+) -> str | None:
+    if enrichment is None:
+        return None
+
+    if None not in {enrichment_type, enrichment_target}:
+        return re.split(r"(\d+)", enrichment_target)[0]
+
+    raise ValueError("enrichment_target and enrichment_type need to be set")
+
+
+@contextmanager
+def _get_openmc():
+    import openmc  # noqa: PLC0415
+
+    cs = os.environ.get("OPENMC_CROSS_SECTIONS")
+    if cs is not None:
+        del os.environ["OPENMC_CROSS_SECTIONS"]
+    yield openmc
+    if cs is not None:
+        os.environ["OPENMC_CROSS_SECTIONS"] = cs
+
+
 def to_openmc_material(
-    name: str | None = None,
+    name: str,
+    density_unit: str,
+    percent_type: Literal["atomic", "mass"],
     packing_fraction: float = 1.0,
     enrichment: float | None = None,
     enrichment_target: str | None = None,
     temperature: float | None = None,
     elements: dict[str, float] | None = None,
     isotopes: dict[str, float] | None = None,
-    percent_type: str | None = None,
     density: float | None = None,
-    density_unit: str | None = None,
+    atoms_in_sample: int | None = None,
     atoms_per_unit_cell: int | None = None,
     volume_of_unit_cell: float | None = None,
     enrichment_type: str | None = None,
-    zaid_suffix: str | None = None,
     material_id: int | None = None,
-    decimal_places: int = 8,
     *,
     temperature_to_neutronics_code: bool = True,
 ) -> openmc.Material:
@@ -115,71 +98,62 @@ def to_openmc_material(
             "density calculation requires 'atoms_per_unit_cell' and "
             "'volume_per_unit_cell' to be set when density is unset"
         )
+    percent_type = NM_FRACTION_TYPE_MAPPING[percent_type]
+    enrichment_type = NM_FRACTION_TYPE_MAPPING.get(enrichment_type)
+    en_el = _enrichment_check(enrichment, enrichment_target, enrichment_type)
+    volume_of_unit_cell_cm3 = (
+        None
+        if volume_of_unit_cell is None
+        else ureg.Quantity(volume_of_unit_cell, "m^3").to("cm^3").magnitude
+    )
 
-    with patch_nmm_openmc() as nmm:
-        return nmm.Material(
-            name=name,
-            packing_fraction=packing_fraction,
-            elements=elements,
-            isotopes=isotopes,
-            enrichment_type=NMM_FRACTION_TYPE_MAPPING.get(enrichment_type),
-            enrichment_target=enrichment_target,
-            enrichment=enrichment,
-            percent_type=NMM_FRACTION_TYPE_MAPPING[percent_type],
-            density=density,
-            density_unit=density_unit.replace("^", ""),
-            temperature=temperature,
-            temperature_to_neutronics_code=temperature_to_neutronics_code,
-            # fallback for density calculation
-            atoms_per_unit_cell=atoms_per_unit_cell,
-            volume_of_unit_cell_cm3=None
-            if volume_of_unit_cell is None
-            else ureg.Quantity(volume_of_unit_cell, "m^3").to("cm^3").magnitude,
-            zaid_suffix=zaid_suffix,
-            material_id=material_id,
-            decimal_places=decimal_places,
-        ).openmc_material
+    with _get_openmc() as openmc:
+        material = openmc.Material(name=name, material_id=material_id)
 
+        if isotopes:
+            for is_name, frac in isotopes.items():
+                material.add_nuclide(is_name, frac, percent_type)
 
-def to_openmc_material_mixture(
-    materials: list[openmc.Material],
-    fracs: list[float],
-    name: str | None = None,
-    material_id: int | None = None,
-    temperature: float | None = None,
-    percent_type: str = "volume",
-    packing_fraction: float = 1.0,
-    pressure: float | None = None,
-    comment: str | None = None,
-    zaid_suffix: str | None = None,
-    decimal_places: int = 8,
-    additional_end_lines: dict[str, list[str]] | None = None,
-    *,
-    temperature_to_neutronics_code: bool = True,
-) -> openmc.Material:
-    """Convert material mixture to OpenMC material mixture
+        if elements:
+            for el_name, frac in elements.items():
+                extra = (
+                    {
+                        "enrichment": enrichment,
+                        "enrichment_target": enrichment_target,
+                        "enrichment_type": enrichment_type,
+                    }
+                    if el_name == en_el
+                    else {}
+                )
+                material.add_element(el_name, frac, percent_type=percent_type, **extra)
 
-    Returns
-    -------
-    :
-        The openmc mixture
-    """
-    with patch_nmm_openmc() as nmm:
-        return nmm.Material.from_mixture(
-            name=name,
-            material_id=material_id,
-            materials=materials,
-            fracs=fracs,
-            percent_type=NMM_FRACTION_TYPE_MAPPING[percent_type],
-            packing_fraction=packing_fraction,
-            temperature=temperature,
-            temperature_to_neutronics_code=temperature_to_neutronics_code,
-            pressure=pressure,
-            comment=comment,
-            zaid_suffix=zaid_suffix,
-            decimal_places=decimal_places,
-            additional_end_lines=additional_end_lines,
-        ).openmc_material
+        # Ordering of nucleide can effect results
+        material._nuclides = sorted(material._nuclides)  # noqa: SLF001
+
+        if temperature_to_neutronics_code:
+            material.temperature = temperature
+
+        if density is not None:
+            pass
+        elif None not in {
+            atoms_in_sample,
+            atoms_per_unit_cell,
+            volume_of_unit_cell_cm3,
+        }:
+            molar_mass = atoms_in_sample * material.average_molar_masss
+            mass = (
+                atoms_per_unit_cell * molar_mass * ureg.Quantity("amu").to("g").magnitude
+            )
+            density = mass / volume_of_unit_cell_cm3
+        else:
+            raise ValueError(
+                "Density or atom_per_unt_cell, volume_of_unit_cell"
+                " and atoms_in_unit_cell must be provided"
+            )
+
+        material.set_density(density_unit.replace("^", ""), density * packing_fraction)
+
+    return material
 
 
 def to_fispact_material(

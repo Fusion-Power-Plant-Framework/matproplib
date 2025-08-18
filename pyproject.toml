@@ -49,7 +49,6 @@ Documentation = "https://github.com/Fusion-Power-Plant-Framework/matproplib#read
 Issues        = "https://github.com/Fusion-Power-Plant-Framework/matproplib/issues"
 
 [project.optional-dependencies]
-neutronics = ["neutronics-material-maker"]
 dev = ["pre-commit", "matproplib[test,docs,lint]"]
 test = [
   "pytest",
@@ -70,10 +69,7 @@ docs = [
   "mkdocs-doi-plugin @ {root:uri}/documentation/doi_plugin"
 ]
 lint = ["ruff==0.12.9", "ty"]
-all = ["matproplib[test,docs,lint,neutronics]"]
-
-[tool.pyfluids]
-units_system = "SI"
+all = ["matproplib[test,docs,lint]"]
 
 [tool.hatch.envs.default]
 features = ["dev", "test", "docs", "lint"]

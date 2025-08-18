@@ -10,13 +10,8 @@ We currently offer coverters to a few select neutronics packages but this area w
 ## Neutronics Converters
 
 We offer converters to OpenMC, Serpent, Fispact and MCNP6.
-The OpenMC converter requires OpenMC installed as it produces an OpenMC python material and our neutronics extras which can be installed with:
-
-```bash
-pip install 'matproplib[neutronics]'
-```
-
-All of the other converters output a text file and can be run without any extra dependencies.
+The OpenMC converter requires OpenMC installed as it produces an OpenMC python material.
+All of the other converters output a text string and can be run without any extra dependencies.
 
 ### Usage
 To use any converter they need to be added to a material, this can be done at definition or during use.
