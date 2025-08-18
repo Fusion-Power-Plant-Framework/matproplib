@@ -63,11 +63,12 @@ from matproplib.properties.dependent import (
     ResidualResistanceRatio,
     ShearModulus,
     SpecificHeatCapacity,
-    Stress,
+    TensileStress,
     ThermalConductivity,
     ThermalExpansionCoefficient,
     UndefinedProperty,
     ViscousRemanentMagnetism,
+    YieldStress,
     YoungsModulus,
 )
 from matproplib.properties.group import (
@@ -305,17 +306,17 @@ class FullMaterial(
     coercive_field: UndefinedProperty | CoerciveField = field_alias_path(
         "coercive_field", "properties"
     )
-    minimum_yield_stress: UndefinedProperty | Stress = field_alias_path(
+    minimum_yield_stress: UndefinedProperty | YieldStress = field_alias_path(
         "minimum_yield_stress", "properties"
     )
-    average_yield_stress: UndefinedProperty | Stress = field_alias_path(
+    average_yield_stress: UndefinedProperty | YieldStress = field_alias_path(
         "average_yield_stress", "properties"
     )
-    minimum_ultimate_tensile_stress: UndefinedProperty | Stress = field_alias_path(
-        "minimum_ultimate_tensile_stress", "properties"
+    minimum_ultimate_tensile_stress: UndefinedProperty | TensileStress = (
+        field_alias_path("minimum_ultimate_tensile_stress", "properties")
     )
-    average_ultimate_tensile_stress: UndefinedProperty | Stress = field_alias_path(
-        "average_ultimate_tensile_stress", "properties"
+    average_ultimate_tensile_stress: UndefinedProperty | TensileStress = (
+        field_alias_path("average_ultimate_tensile_stress", "properties")
     )
     superconducting_parameterisation: SerializeAsAny[
         SuperconductingParameterisationT_co
@@ -336,7 +337,7 @@ class FullMaterial(
         return self
 
 
-def material(
+def material(  # noqa: C901
     name: str,
     elements: Elements
     | str

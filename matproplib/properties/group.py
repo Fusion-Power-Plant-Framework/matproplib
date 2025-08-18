@@ -18,6 +18,7 @@ from matproplib.base import (
     SuperconductingParameterisation,
     SuperconductingParameterisationT_co,
     UndefinedSuperconductingParameterisation,
+    all_subclasses,
 )
 from matproplib.properties.dependent import (
     BulkModulus,
@@ -32,16 +33,17 @@ from matproplib.properties.dependent import (
     ResidualResistanceRatio,
     ShearModulus,
     SpecificHeatCapacity,
-    Stress,
+    TensileStress,
     ThermalConductivity,
     ThermalExpansionCoefficient,
     UndefinedProperty,
     ViscousRemanentMagnetism,
+    YieldStress,
     YoungsModulus,
 )
 
 if TYPE_CHECKING:
-    from matproplib.base.material import PropertiesT_co
+    from matproplib.material import PropertiesT_co
 
 
 class Properties(BaseGroup):
@@ -100,12 +102,13 @@ class DefaultProperties(Properties, Generic[SuperconductingParameterisationT_co]
         UndefinedProperty()
     )
     coercive_field: UndefinedProperty | CoerciveField = UndefinedProperty()
-    minimum_yield_stress: UndefinedProperty | Stress = UndefinedProperty()
-    average_yield_stress: UndefinedProperty | Stress = UndefinedProperty()
-    minimum_ultimate_tensile_stress: UndefinedProperty | Stress = UndefinedProperty()
-    average_ultimate_tensile_stress: UndefinedProperty | Stress = UndefinedProperty()
-    superconducting_parameterisation: SuperconductingParameterisationT_co = (
-        UndefinedSuperconductingParameterisation()
+    minimum_yield_stress: UndefinedProperty | YieldStress = UndefinedProperty()
+    average_yield_stress: UndefinedProperty | YieldStress = UndefinedProperty()
+    minimum_ultimate_tensile_stress: UndefinedProperty | TensileStress = (
+        UndefinedProperty()
+    )
+    average_ultimate_tensile_stress: UndefinedProperty | TensileStress = (
+        UndefinedProperty()
     )
     superconducting_parameterisation: SerializeAsAny[
         SuperconductingParameterisationT_co
@@ -135,11 +138,13 @@ def props(  # noqa: PLR0913
     magnetic_susceptibility: MagneticSusceptibility | Ldefine = False,
     viscous_remanent_magnetisation: ViscousRemanentMagnetism | Ldefine = False,
     coercive_field: CoerciveField | Ldefine = False,
-    minimum_yield_stress: Stress | Ldefine = False,
-    average_yield_stress: Stress | Ldefine = False,
-    minimum_ultimate_tensile_stress: Stress | Ldefine = False,
-    average_ultimate_tensile_stress: Stress | Ldefine = False,
-    superconducting_parameterisation: SuperconductingParameterisationT_co | None = None,
+    minimum_yield_stress: YieldStress | Ldefine = False,
+    average_yield_stress: YieldStress | Ldefine = False,
+    minimum_ultimate_tensile_stress: TensileStress | Ldefine = False,
+    average_ultimate_tensile_stress: TensileStress | Ldefine = False,
+    superconducting_parameterisation: SuperconductingParameterisationT_co
+    | Literal[True]
+    | None = None,
     property_group: type[PropertiesT_co] = DefaultProperties,
     reference: References | None = None,
     as_field: bool = False,

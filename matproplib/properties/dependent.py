@@ -339,10 +339,10 @@ class Density(DependentPhysicalProperty):
         return cls(value=tval, unit=unit.replace("atom", "amu"))
 
 
-class PoissonsRatio(DependentPhysicalProperty):
-    """Poisson's ratio"""
+class CoerciveField(DependentPhysicalProperty):
+    """Coercive Field"""
 
-    unit: Unit | str = ""
+    unit: Unit | str = "A/m"
 
 
 class ThermalConductivity(DependentPhysicalProperty):
@@ -351,22 +351,16 @@ class ThermalConductivity(DependentPhysicalProperty):
     unit: Unit | str = "W.m/K"
 
 
-class YoungsModulus(DependentPhysicalProperty):
-    """Youngs Modulus"""
+class MagneticSaturation(DependentPhysicalProperty):
+    """Magnetic Saturation"""
 
-    unit: Unit | str = "Pa"
-
-
-class ShearModulus(DependentPhysicalProperty):
-    """Shear Modulus"""
-
-    unit: Unit | str = "Pa"
+    unit: Unit | str = "A.m^2/kg"
 
 
-class BulkModulus(DependentPhysicalProperty):
-    """Bulk Modulus"""
+class ViscousRemanentMagnetism(DependentPhysicalProperty):
+    """Viscous remanent magnetism"""
 
-    unit: Unit | str = "Pa"
+    unit: Unit | str = "A.m^2/kg"
 
 
 class SpecificHeatCapacity(DependentPhysicalProperty):
@@ -387,43 +381,57 @@ class ElectricalResistivity(DependentPhysicalProperty):
     unit: Unit | str = "ohm.m"
 
 
-class MagneticSaturation(DependentPhysicalProperty):
-    """Magnetic Saturation"""
-
-    unit: Unit | str = "A.m^2/kg"
-
-
-class MagneticSusceptibility(DependentPhysicalProperty):
-    """Magnetic Susceptibility"""
-
-    unit: Unit | str = ""
-
-
-class ViscousRemanentMagnetism(DependentPhysicalProperty):
-    """Viscous remanent magnetism"""
-
-    unit: Unit | str = "A.m^2/kg"
-
-
-class CoerciveField(DependentPhysicalProperty):
-    """Coercive Field"""
-
-    unit: Unit | str = "A/m"
-
-
 class Stress(DependentPhysicalProperty):
     """Stress"""
 
     unit: Unit | str = "Pa"
 
 
-class DependentTemperature(DependentPhysicalProperty):
-    """Dependent Temperature"""
-
-    unit: Unit | str = "K"
+class YieldStress(Stress):
+    """Yield Stress"""
 
 
-class ResidualResistanceRatio(DependentPhysicalProperty):
+class TensileStress(Stress):
+    """Tensile Stress"""
+
+
+class Stiffness(DependentPhysicalProperty):
+    """Stiffness Property"""
+
+    unit: Unit | str = "Pa"
+
+
+class YoungsModulus(Stiffness):
+    """Youngs Modulus"""
+
+
+class ShearModulus(Stiffness):
+    """Shear Modulus"""
+
+
+class BulkModulus(Stiffness):
+    """Bulk Modulus"""
+
+
+class Ratio(DependentPhysicalProperty):
+    """A ratio property"""
+
+    unit: Unit | Literal[""] = ""
+
+
+class PoissonsRatio(Ratio):
+    """Poisson's ratio"""
+
+
+class ResidualResistanceRatio(Ratio):
     """Residual Resistance Ratio"""
 
-    unit: Unit | str = ""
+
+class Unitless(DependentPhysicalProperty):
+    """A unitless property"""
+
+    unit: Unit | Literal[""] = ""
+
+
+class MagneticSusceptibility(Unitless):
+    """Magnetic Susceptibility"""
