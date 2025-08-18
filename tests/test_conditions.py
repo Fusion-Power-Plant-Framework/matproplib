@@ -174,7 +174,7 @@ class TestConditionModification:
         with pytest.raises(ValueError, match="unknown"):
             DependentPropertyConditionConfig(volume=(1e6, 3e6))
 
-    def modification_of_STP(self):
+    def test_modification_of_STP(self):
         stp = STPConditions()
 
         not_stp = copy.copy(stp)
@@ -182,4 +182,4 @@ class TestConditionModification:
 
         assert not isinstance(not_stp, STPConditions)
         assert isinstance(not_stp, OperationalConditions)
-        assert not_stp.temperature == pytest.approx(10)
+        assert not_stp.temperature.value == pytest.approx(10)

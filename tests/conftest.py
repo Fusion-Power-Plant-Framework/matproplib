@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2025-present The Bluemira Developers <https://github.com/Fusion-Power-Plant-Framework/bluemira>
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
+import warnings
+
 import matplotlib as mpl
 import numpy as np
 import pytest
@@ -101,8 +103,14 @@ def _plot_show_and_close(request):
                 f"{fig.get_suptitle()} {clstitle}::"
                 f"{request.node.getparent(pytest.Function).name}"
             )
-        plt.show()
+        supress_warning_show(plt)
         plt.close()
+
+
+def supress_warning_show(plt):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        plt.show()
 
 
 @pytest.fixture(scope="class", autouse=True)
@@ -121,7 +129,7 @@ def _plot_show_and_close_class(request):
 
         for fig in list(map(plt.figure, plt.get_fignums())):
             fig.suptitle(f"{fig.get_suptitle()} {clstitle}")
-        plt.show()
+        supress_warning_show(plt)
         plt.close()
     else:
         yield

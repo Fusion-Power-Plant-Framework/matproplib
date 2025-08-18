@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2025-present The Bluemira Developers <https://github.com/Fusion-Power-Plant-Framework/bluemira>
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
+import warnings
+
 import pytest
 from csl_reference import Reference
 from pint import Unit
@@ -77,8 +79,19 @@ class TestMaterialFunctionalInit:
             else {1.0}
         )
 
-    def test_references_on_properties_group(self):
-        raise NotImplementedError
+    def test_references_on_properties_group_passed_to_material(self):
+        Simple = material(
+            "Simple",
+            properties=props(
+                density=5,
+                poissons_ratio=lambda oc: oc.temperature,
+                thermal_conductivity=True,
+                reference={"id": "test", "type": "article"},
+            ),
+        )
+
+        simple = Simple()
+        assert simple.reference["test"].type == "article"
 
     def test_element(self):
         Element = material("Element", elements=["H"])
@@ -164,9 +177,6 @@ class TestMaterialFunctionalInit:
 
         assert struct.reference[1] == Reference(id=1, type="article")
 
-    def test_combining_properties(self):
-        raise NotImplementedError
-
 
 class TestMaterialClassInit:
     def test_self_init(self):
@@ -210,9 +220,6 @@ class TestMaterialClassInit:
         assert {"name", "elements", "converters", "mixture_fraction"} ^ type(
             c3
         ).model_fields.keys() == DefaultProperties.model_fields.keys()
-
-    def test_properties_from_defaults_on_material(self):
-        raise NotImplementedError
 
     @pytest.mark.parametrize("op_cond_config", [None, {"temperature": {"unit": "degC"}}])
     def test_dependentphysicalproperty_decorator(self, op_cond_config):
@@ -295,7 +302,9 @@ class TestMixtures:
     def test_simple_combination(self, mats):
         mix = mixture("special", mats)
 
-        assert mix.elements == mix.mixture_fraction[0].material.elements
+        assert mix.elements.model_dump() == pytest.approx(
+            mix.mixture_fraction[0].material.elements.model_dump()
+        )
 
     def test_complex_combination(self, test_condition):
         test_condition.temperature = [289, 459]

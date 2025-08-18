@@ -114,4 +114,3 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
         ])
 
     # def __str__
-    # def unit
