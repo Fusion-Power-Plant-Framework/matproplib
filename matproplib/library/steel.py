@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Steel materials"""
 
-import numpy as np
 from pydantic import Field
 
 from matproplib.base import References, rebuild
@@ -95,25 +94,3 @@ class SS316_L(FullMaterial):
         coefficient_thermal_expansion=_ss316l_thermal_expansion_coefficient,
         thermal_conductivity=_ss316l_thermal_conductivity,
     )
-
-
-@dependentphysicalproperty(
-    Density,
-    op_cond_config={"temperature": ("degC", 20, 800)},
-    reference={
-        "id": "ss316_density",
-        "type": "report",
-        "title": "ITER_D_222RLN v3.3 Table A.S03.2.4-1",
-    },
-)
-def SS316_LN_density(op_cond: OperationalConditions):  # noqa: D103
-    # fmt: off
-    SS316_LN_density1 = [
-        20, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800
-    ]
-    SS316_LN_density2 = [
-        7930, 7919, 7899, 7879, 7858, 7837, 7815, 7793, 7770, 7747, 7724, 7701, 7677,
-        7654, 7630, 7606, 7582
-    ]
-    # fmt: on
-    return np.interp(op_cond.temperature, SS316_LN_density1, SS316_LN_density2)
