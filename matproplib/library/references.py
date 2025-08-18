@@ -90,3 +90,11 @@ CHOONG_1975 = {
     "url": "https://www.osti.gov/servlets/purl/4152287",
     "doi": "10.2172/4152287",
 }
+
+
+PLANSEE_2025 = {
+    "id": "plansee_w_2025",
+    "type": "report",
+    "author": [{"organisation": "Plansee"}],
+    "url": "https://www.plansee.com/download/?DOKNR=HPM-070-TD-025&DOKAR=QM1&DOKTL=100",
+}
