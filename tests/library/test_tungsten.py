@@ -28,6 +28,12 @@ class TestPlanseeTungsten:
         cte = W.coefficient_thermal_expansion(op_cond) * 1e6
         assert np.isclose(cte, expected_cte)
 
+    @pytest.mark.parametrize(("t", "expected_k"), [(25.401, 174.11), (801, 119.77)])
+    def test_k(self, t, expected_k):
+        op_cond = OperationalConditions(temperature=273.1499 + t)
+        k = W.thermal_conductivity(op_cond)
+        assert np.isclose(k, expected_k)
+
     @pytest.mark.parametrize(
         ("t", "expected_cp"), [(0, 0.131), (500, 0.144), (1100, 0.159)]
     )
@@ -43,3 +49,9 @@ class TestPlanseeTungsten:
         op_cond = OperationalConditions(temperature=273.15 + t)
         nu = W.electrical_resistivity(op_cond) * 1e6
         assert np.isclose(nu, expected_nu)
+
+    @pytest.mark.parametrize(("t", "expected_ym"), [(56.423, 407.78), (2002.1, 280.27)])
+    def test_ym(self, t, expected_ym):
+        op_cond = OperationalConditions(temperature=273.15 + t)
+        ym = W.youngs_modulus(op_cond) * 1e-9
+        assert np.isclose(ym, expected_ym)
