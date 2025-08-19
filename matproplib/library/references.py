@@ -98,3 +98,20 @@ PLANSEE_2025 = {
     "author": [{"organisation": "Plansee"}],
     "url": "https://www.plansee.com/download/?DOKNR=HPM-070-TD-025&DOKAR=QM1&DOKTL=100",
 }
+
+COOLPROP_7 = {
+    "doi": "10.1021/ie4033999",
+    "id": "coolprop_7",
+    "type": "article",
+    "journal": "Industrial & Engineering Chemistry Research",
+    "author": [
+        {
+            "family": "Bell, Ian H. and Wronski, Jorrit and Quoilin, Sylvain"
+            " and Lemort, Vincent"
+        }
+    ],
+    "title": "Pure and Pseudo-pure Fluid Thermophysical Property Evaluation and the "
+    "Open-Source Thermophysical Property Library CoolProp",
+    "event_date": {"raw": "2014"},
+    "url": "http://pubs.acs.org/doi/abs/10.1021/ie4033999",
+}

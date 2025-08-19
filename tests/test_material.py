@@ -16,7 +16,7 @@ from matproplib.conditions import (
 from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.copper import CryogenicCopper
-from matproplib.library.fluids import H2O, DDPlasma, DTPlasma
+from matproplib.library.fluids import DDPlasma, DTPlasma, Water
 from matproplib.library.steel import SS316_L
 from matproplib.material import (
     FullMaterial,
@@ -309,7 +309,7 @@ class TestMixtures:
     def test_complex_combination(self, test_condition):
         test_condition.temperature = [289, 459]
         mix = mixture(
-            "PlasmaWater", [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (H2O(), 0.2)]
+            "PlasmaWater", [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (Water(), 0.2)]
         )
 
         constit = [m.material.density(test_condition) for m in mix.mixture_fraction]
@@ -325,14 +325,14 @@ class TestMixtures:
     def test_overridden_properties_function(self, test_condition):
         mix = mixture(
             "PlasmaWater",
-            [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (H2O(), 0.2)],
+            [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (Water(), 0.2)],
             density=6,
         )
         assert mix.density(test_condition) == pytest.approx(6)
 
     def test_undefined_properties_on_one_material_raises(self, test_condition):
         steel = SS316_L()
-        water = H2O()
+        water = Water()
         my_mixture = mixture(
             "SteelWaterMixture", [(steel, 0.7), (water, 0.3)], fraction_type="mass"
         )

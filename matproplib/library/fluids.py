@@ -8,9 +8,14 @@ from pydantic import Field
 
 from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
+from matproplib.library.references import COOLPROP_7
 from matproplib.material import FullMaterial, material
 from matproplib.nucleides import Elements
-from matproplib.properties.dependent import Density
+from matproplib.properties.dependent import (
+    Density,
+    SpecificHeatCapacity,
+    ThermalConductivity,
+)
 from matproplib.properties.group import props
 
 
@@ -54,34 +59,168 @@ DDPlasma = material(
     converters=OpenMCNeutronicConfig(),
 )
 
-H2O = material(
-    "H2O",
+Water = material(
+    "Water (liquid to gas)",
     elements="H2O",
     properties=props(
         as_field=True,
         density=Density(
             value=lambda oc: PropsSI(
-                "D", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+                "DMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+            ),
+            op_cond_config={"temperature": ("K", 273.153)},
+        ),
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+            ),
+            op_cond_config={"temperature": ("K", 273.153)},
+        ),
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Water",
             ),
             op_cond_config={"temperature": ("K", 273.153)},
         ),
         youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
         poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
     ),
+    reference=COOLPROP_7,
 )
 
-He = material(
-    "He",
+Air = material(
+    "Air (gas)",
+    elements={
+        "N": 2 * 0.78 / 1.99,
+        "O": 2 * 0.21 / 1.99,
+        "Ar": 0.01 / 1.99,
+        "fraction_type": "atomic",
+    },
+    properties=props(
+        as_field=True,
+        density=Density(
+            value=lambda oc: PropsSI(
+                "DMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Air"
+            ),
+            op_cond_config={"temperature": ("K", 59.75)},
+        ),
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Air"
+            ),
+            op_cond_config={"temperature": ("K", 59.75)},
+        ),
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Air",
+            ),
+            op_cond_config={"temperature": ("K", 59.75)},
+        ),
+        youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
+        poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
+    ),
+    reference=COOLPROP_7,
+)
+
+Hydrogen = material(
+    "Hydrogen (liquid to gas)",
+    elements="H",
+    properties=props(
+        as_field=True,
+        density=Density(
+            value=lambda oc: PropsSI(
+                "D", "T", oc.temperature.value, "P", oc.pressure.value, "Hydrogen"
+            ),
+            op_cond_config={"temperature": ("K", 1.66685)},
+        ),
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Hydrogen"
+            ),
+            op_cond_config={"temperature": ("K", 1.66685)},
+        ),
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Hydrogen",
+            ),
+            op_cond_config={"temperature": ("K", 1.66685)},
+        ),
+        youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
+        poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
+    ),
+    reference=COOLPROP_7,
+)
+
+
+Helium = material(
+    "Helium (liquid to gas)",
     elements="He",
     properties=props(
         as_field=True,
         density=Density(
             value=lambda oc: PropsSI(
-                "D", "T", oc.temperature, "P", oc.pressure, "Helium"
+                "D", "T", oc.temperature.value, "P", oc.pressure.value, "Helium"
+            ),
+            op_cond_config={"temperature": ("K", 1.58842)},
+        ),
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Helium"
+            ),
+            op_cond_config={"temperature": ("K", 1.58842)},
+        ),
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Helium",
             ),
             op_cond_config={"temperature": ("K", 1.58842)},
         ),
         youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
         poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
     ),
+    reference=COOLPROP_7,
 )
