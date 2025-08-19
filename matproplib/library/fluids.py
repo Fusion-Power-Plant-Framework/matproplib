@@ -59,7 +59,7 @@ DDPlasma = material(
 )
 
 Water = material(
-    "Water",
+    "Water (liquid to gas)",
     elements="H2O",
     properties=props(
         as_field=True,
@@ -97,8 +97,52 @@ Water = material(
     ),
 )
 
-He = material(
-    "He",
+Air = material(
+    "Air (gas)",
+    elements={
+        "N": 2 * 0.78 / 1.99,
+        "O": 2 * 0.21 / 1.99,
+        "Ar": 0.01 / 1.99,
+        "fraction_type": "atomic",
+    },
+    properties=props(
+        as_field=True,
+        density=Density(
+            value=lambda oc: PropsSI(
+                "DMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Air"
+            ),
+            op_cond_config={"temperature": ("K", 59.75)},
+        ),
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Air"
+            ),
+            op_cond_config={"temperature": ("K", 59.75)},
+        ),
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Airr",
+            ),
+            op_cond_config={"temperature": ("K", 59.75)},
+        ),
+        youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
+        poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
+    ),
+)
+
+Helium = material(
+    "Helium (liquid to gas)",
     elements="He",
     properties=props(
         as_field=True,
@@ -108,7 +152,30 @@ He = material(
             ),
             op_cond_config={"temperature": ("K", 1.58842)},
         ),
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Helium"
+            ),
+            op_cond_config={"temperature": ("K", 1.58842)},
+        ),
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Helium",
+            ),
+            op_cond_config={"temperature": ("K", 1.58842)},
+        ),
         youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
         poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
     ),
 )
