@@ -141,6 +141,46 @@ Air = material(
     ),
 )
 
+Hydrogen = material(
+    "Hydrogen (liquid to gas)",
+    elements="H",
+    properties=props(
+        as_field=True,
+        density=Density(
+            value=lambda oc: PropsSI(
+                "D", "T", oc.temperature, "P", oc.pressure, "Hydrogen"
+            ),
+            op_cond_config={"temperature": ("K", 1.66685)},
+        ),
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Hydrogen"
+            ),
+            op_cond_config={"temperature": ("K", 1.66685)},
+        ),
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Hydrogen",
+            ),
+            op_cond_config={"temperature": ("K", 1.66685)},
+        ),
+        youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
+        poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
+    ),
+)
+
+
 Helium = material(
     "Helium (liquid to gas)",
     elements="He",
