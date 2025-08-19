@@ -8,6 +8,7 @@ from pydantic import Field
 
 from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
+from matproplib.library.references import COOLPROP_7
 from matproplib.material import FullMaterial, material
 from matproplib.nucleides import Elements
 from matproplib.properties.dependent import (
@@ -139,6 +140,7 @@ Air = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    reference=COOLPROP_7,
 )
 
 Hydrogen = material(
@@ -178,6 +180,7 @@ Hydrogen = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    reference=COOLPROP_7,
 )
 
 
@@ -218,4 +221,5 @@ Helium = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    reference=COOLPROP_7,
 )
