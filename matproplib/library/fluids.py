@@ -54,19 +54,31 @@ DDPlasma = material(
     converters=OpenMCNeutronicConfig(),
 )
 
-H2O = material(
-    "H2O",
+Water = material(
+    "Water",
     elements="H2O",
     properties=props(
         as_field=True,
         density=Density(
             value=lambda oc: PropsSI(
-                "D", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+                "DMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
             ),
             op_cond_config={"temperature": ("K", 273.153)},
         ),
+        specific_heat_capacity=lambda oc: PropsSI(
+            "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+        ),
+        thermal_conductivity=lambda oc: PropsSI(
+            "CONDUCTIVITY", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+        ),
         youngs_modulus=0,
+        bulk_modulus=0,
+        shear_modulus=0,
         poissons_ratio=0,
+        minimum_yield_stress=0,
+        average_yield_stress=0,
+        minimum_ultimate_tensile_stress=0,
+        average_ultimate_tensile_stress=0,
     ),
 )
 
