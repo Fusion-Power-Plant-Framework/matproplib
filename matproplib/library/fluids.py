@@ -127,7 +127,7 @@ Air = material(
                 oc.temperature.value,
                 "P",
                 oc.pressure.value,
-                "Airr",
+                "Air",
             ),
             op_cond_config={"temperature": ("K", 59.75)},
         ),
@@ -150,7 +150,7 @@ Hydrogen = material(
         as_field=True,
         density=Density(
             value=lambda oc: PropsSI(
-                "D", "T", oc.temperature, "P", oc.pressure, "Hydrogen"
+                "D", "T", oc.temperature.value, "P", oc.pressure.value, "Hydrogen"
             ),
             op_cond_config={"temperature": ("K", 1.66685)},
         ),
@@ -191,7 +191,7 @@ Helium = material(
         as_field=True,
         density=Density(
             value=lambda oc: PropsSI(
-                "D", "T", oc.temperature, "P", oc.pressure, "Helium"
+                "D", "T", oc.temperature.value, "P", oc.pressure.value, "Helium"
             ),
             op_cond_config={"temperature": ("K", 1.58842)},
         ),
