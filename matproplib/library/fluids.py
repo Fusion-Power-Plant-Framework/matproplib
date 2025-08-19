@@ -96,6 +96,7 @@ Water = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    reference=COOLPROP_7,
 )
 
 Air = material(
