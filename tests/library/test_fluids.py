@@ -18,7 +18,7 @@ class TestWater:
             (500, 1e5),
             (600, 1e6),
             (700, 1e6),
-            (100, 1e3),
+            (300, 1e3),
         ],
     )
     def test_density(self, t, p):
@@ -28,9 +28,21 @@ class TestWater:
             "DMASS", "T", op_cond.temperature.value, "P", op_cond.pressure.value, "Water"
         )
 
-    def test_specific_heat_capacity(self):
+    @pytest.mark.parametrize(
+        ("t", "p"),
+        [
+            (300, 1e5),
+            (350, 1e5),
+            (400, 1e5),
+            (500, 1e5),
+            (600, 1e6),
+            (700, 1e6),
+            (300, 1e3),
+        ],
+    )
+    def test_specific_heat_capacity(self, t, p):
         water = Water()
-        op_cond = OperationalConditions(temperature=300, pressure=1e5)
+        op_cond = OperationalConditions(temperature=t, pressure=p)
         assert water.specific_heat_capacity(op_cond) == PropsSI(
             "CPMASS",
             "T",
@@ -40,9 +52,21 @@ class TestWater:
             "Water",
         )
 
-    def test_thermal_conductivity(self):
+    @pytest.mark.parametrize(
+        ("t", "p"),
+        [
+            (300, 1e5),
+            (350, 1e5),
+            (400, 1e5),
+            (500, 1e5),
+            (600, 1e6),
+            (700, 1e6),
+            (300, 1e3),
+        ],
+    )
+    def test_thermal_conductivity(self, t, p):
         water = Water()
-        op_cond = OperationalConditions(temperature=300, pressure=1e5)
+        op_cond = OperationalConditions(temperature=t, pressure=p)
         assert water.thermal_conductivity(op_cond) == PropsSI(
             "CONDUCTIVITY",
             "T",
