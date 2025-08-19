@@ -10,7 +10,11 @@ from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.material import FullMaterial, material
 from matproplib.nucleides import Elements
-from matproplib.properties.dependent import Density
+from matproplib.properties.dependent import (
+    Density,
+    SpecificHeatCapacity,
+    ThermalConductivity,
+)
 from matproplib.properties.group import props
 
 
@@ -65,11 +69,22 @@ Water = material(
             ),
             op_cond_config={"temperature": ("K", 273.153)},
         ),
-        specific_heat_capacity=lambda oc: PropsSI(
-            "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+        specific_heat_capacity=SpecificHeatCapacity(
+            value=lambda oc: PropsSI(
+                "CPMASS", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+            ),
+            op_cond_config={"temperature": ("K", 273.153)},
         ),
-        thermal_conductivity=lambda oc: PropsSI(
-            "CONDUCTIVITY", "T", oc.temperature.value, "P", oc.pressure.value, "Water"
+        thermal_conductivity=ThermalConductivity(
+            value=lambda oc: PropsSI(
+                "CONDUCTIVITY",
+                "T",
+                oc.temperature.value,
+                "P",
+                oc.pressure.value,
+                "Water",
+            ),
+            op_cond_config={"temperature": ("K", 273.153)},
         ),
         youngs_modulus=0,
         bulk_modulus=0,
