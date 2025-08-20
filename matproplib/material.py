@@ -155,6 +155,11 @@ class Material(PMBaseModel, ABC, Generic[ConverterK]):
         """Convert material to another format"""  # noqa: DOC201
         return self.converters[name].convert(self, op_cond, *args, **kwargs)
 
+    @property
+    def is_superconductor(self):
+        """Does the material have any superconducting parameterisation"""
+        return hasattr(self, "superconducting_parameterisation")
+
     def __getattr__(self, value: str) -> Any:
         """Override attribute access for shorthand to nested attributes"""  # noqa: DOC201
         try:

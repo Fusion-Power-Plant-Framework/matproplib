@@ -34,7 +34,10 @@ from matproplib.properties.dependent import (
     YoungsModulus,
 )
 from matproplib.properties.group import DefaultProperties, props
-from matproplib.superconduction import Nb3SnBotturaParameterisation
+from matproplib.superconduction import (
+    Nb3SnBotturaParameterisation,
+    SummersParameterisation,
+)
 
 
 class TestMaterialFunctionalInit:
@@ -176,6 +179,21 @@ class TestMaterialFunctionalInit:
         struct = material("Struct", properties=prop)()
 
         assert struct.reference[1] == Reference(id=1, type="article")
+
+    def test_superconducting_check(self):
+        Struct = material(
+            "Struct",
+            properties={
+                "density": 5,
+                "poissons_ratio": lambda oc: oc.temperature**2,
+                "youngs_modulus": True,
+                "superconducting_parameterisation": SummersParameterisation(
+                    constant=1, alpha=2, t_c0m=3, b_c20m=4
+                ),
+            },
+        )
+        struct = Struct()
+        assert struct.is_superconductor
 
 
 class TestMaterialClassInit:
@@ -355,7 +373,7 @@ class TestMixtures:
             "SteelWaterMixture", [(steel, 0.7), (water, 0.3)], fraction_type="mass"
         )
 
-        with pytest.raises(AttributeError, match="is undefined on H2O"):
+        with pytest.raises(AttributeError, match="is undefined on Water"):
             my_mixture.coefficient_thermal_expansion(test_condition)
 
     @pytest.mark.parametrize(
