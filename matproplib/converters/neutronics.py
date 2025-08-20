@@ -15,8 +15,8 @@ import periodictable as pt
 from matproplib.base import N_AVOGADRO
 from matproplib.converters.base import Converter
 from matproplib.nucleides import (
+    ElementsTD,
     atomic_fraction_to_mass_fraction,
-    ef_root_model,
 )
 from matproplib.properties.independent import Volume  # noqa: TC001
 from matproplib.tools import (
@@ -38,7 +38,7 @@ class NeutronicConfig(Converter, ABC):
     """Base neutronic property model"""
 
 
-def _to_fraction_conversion(fraction_type: str, ef_dict: ef_root_model) -> ef_root_model:
+def _to_fraction_conversion(fraction_type: str, ef_dict: ElementsTD) -> ElementsTD:
     if fraction_type == "atomic":
         return ef_dict
 

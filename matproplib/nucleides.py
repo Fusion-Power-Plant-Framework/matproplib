@@ -8,12 +8,13 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import TYPE_CHECKING, Literal, TypedDict, Union
+from typing import TYPE_CHECKING, Literal, Union
 
 import numpy as np
 import periodictable as pt
 from pydantic import ConfigDict, RootModel, model_serializer, model_validator
 from pydantic.types import NonNegativeFloat  # noqa: TC002
+from typing_extensions import TypedDict
 
 from matproplib.base import PMBaseModel, References
 
@@ -30,12 +31,11 @@ class ElementFraction(PMBaseModel):
     fraction: NonNegativeFloat
 
 
-ef_root_model_full = dict[str, ElementFraction | float | int | References | str | None]
-ef_root_model = dict[str, ElementFraction]
+_ef_root_model = dict[str, ElementFraction | float | int | References | str | None]
 
 
-class _ElementsTD(TypedDict, total=False):  # noqa: PYI049
-    """Partial strict typing of Elements.root"""
+class ElementsTD(TypedDict, total=False, extra_items=ElementFraction):
+    """Strict typing of Elements.root, not yet supported by pydantic as type"""
 
     _no_atoms: int
     reference: References | None
@@ -45,7 +45,7 @@ class _ElementsTD(TypedDict, total=False):  # noqa: PYI049
 class Elements(RootModel):
     """Element grouping model"""
 
-    root: ef_root_model_full
+    root: _ef_root_model
     _no_atoms: int | None = None
     _reference: References | None = None
     model_config = ConfigDict(validate_default=True)
@@ -228,8 +228,8 @@ def most_abundant_isoptope(el: pt.core.Element) -> pt.core.Isotope:
 
 
 def _from_fraction_type_conversion(
-    fraction_type: Literal["atomic", "mass"], ef_dict: ef_root_model
-) -> ef_root_model:
+    fraction_type: Literal["atomic", "mass"], ef_dict: ElementsTD
+) -> ElementsTD:
     if fraction_type == "atomic":
         return ef_dict
 
@@ -240,8 +240,8 @@ def _from_fraction_type_conversion(
 
 
 def _converter(
-    ef_dict: ef_root_model, conversion: Callable[[ElementFraction], float]
-) -> ef_root_model:
+    ef_dict: ElementsTD, conversion: Callable[[ElementFraction], float]
+) -> ElementsTD:
     ttl = 0
     new = {}
     for n_ef, ef in ef_dict.items():
@@ -256,7 +256,7 @@ def _converter(
     return new_ef_dict
 
 
-def mass_fraction_to_atomic_fraction(ef_dict: ef_root_model) -> ef_root_model:
+def mass_fraction_to_atomic_fraction(ef_dict: ElementsTD) -> ElementsTD:
     """
     Returns
     -------
@@ -266,7 +266,7 @@ def mass_fraction_to_atomic_fraction(ef_dict: ef_root_model) -> ef_root_model:
     return _converter(ef_dict, lambda ef: ef.fraction / ef.element.element.mass)
 
 
-def atomic_fraction_to_mass_fraction(ef_dict: ef_root_model) -> ef_root_model:
+def atomic_fraction_to_mass_fraction(ef_dict: ElementsTD) -> ElementsTD:
     """
     Returns
     -------
@@ -277,8 +277,8 @@ def atomic_fraction_to_mass_fraction(ef_dict: ef_root_model) -> ef_root_model:
 
 
 def mass_fraction_to_volume_fraction(
-    ef_dict: ef_root_model, densities: dict[str, float]
-) -> ef_root_model:
+    ef_dict: ElementsTD, densities: dict[str, float]
+) -> ElementsTD:
     """
     Returns
     -------
@@ -291,8 +291,8 @@ def mass_fraction_to_volume_fraction(
 
 
 def volume_fraction_to_mass_fraction(
-    ef_dict: ef_root_model, densities: dict[str, float]
-) -> ef_root_model:
+    ef_dict: ElementsTD, densities: dict[str, float]
+) -> ElementsTD:
     """
     Returns
     -------
@@ -305,8 +305,8 @@ def volume_fraction_to_mass_fraction(
 
 
 def atomic_fraction_to_volume_fraction(
-    ef_dict: ef_root_model, densities: dict[str, float]
-) -> ef_root_model:
+    ef_dict: ElementsTD, densities: dict[str, float]
+) -> ElementsTD:
     """
     Returns
     -------
@@ -322,8 +322,8 @@ def atomic_fraction_to_volume_fraction(
 
 
 def volume_fraction_to_atomic_fraction(
-    ef_dict: ef_root_model, densities: dict[str, float]
-) -> ef_root_model:
+    ef_dict: ElementsTD, densities: dict[str, float]
+) -> ElementsTD:
     """
     Returns
     -------

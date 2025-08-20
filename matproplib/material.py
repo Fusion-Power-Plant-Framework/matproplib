@@ -47,9 +47,9 @@ from matproplib.converters.base import Converter, ConverterK, Converters
 from matproplib.nucleides import (
     ElementFraction,
     Elements,
+    ElementsTD,
     atomic_fraction_to_mass_fraction,
     atomic_fraction_to_volume_fraction,
-    ef_root_model,
     volume_fraction_to_atomic_fraction,
 )
 from matproplib.properties.dependent import (
@@ -366,6 +366,7 @@ def material(  # noqa: C901
     if "superconducting_parameterisation" in props_:
         p = props_["superconducting_parameterisation"].annotation
         props_["superconducting_parameterisation"].annotation = SerializeAsAny[p]
+
     return create_model(
         name,
         __base__=Material[ConverterK],
@@ -429,8 +430,8 @@ def _get_indexes(dpp: list[DependentPhysicalProperty], value=None):
 def _atomic_to_inp_converter(
     m_el: list[Elements],
     input_frac: Sequence[float],
-    conversion: Callable[[ef_root_model], ef_root_model],
-) -> ef_root_model:
+    conversion: Callable[[ElementsTD], ElementsTD],
+) -> ElementsTD:
     elements = {}
     for el, f in zip(m_el, input_frac, strict=False):
         for k, elf in conversion(copy.deepcopy(el.root)).items():
@@ -447,7 +448,7 @@ def _atomic_to_inp_converter(
 
 def _atomic_to_volume_converter(
     m_el: list[Elements], input_frac: Sequence[float], densities: list[float]
-) -> tuple[ef_root_model, dict[str, float]]:
+) -> tuple[ElementsTD, dict[str, float]]:
     elements = {}
     vf_den = {}
     for el, f, d in zip(m_el, input_frac, densities, strict=False):
