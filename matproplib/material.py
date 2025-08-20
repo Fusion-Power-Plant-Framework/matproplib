@@ -158,7 +158,7 @@ class Material(PMBaseModel, ABC, Generic[ConverterK]):
     @property
     def is_superconductor(self):
         """Does the material have any superconducting parameterisation"""
-        return hasattr(self, "superconducting_parameterisation")
+        return hasattr(self, "critical_current_density")
 
     def __getattr__(self, value: str) -> Any:
         """Override attribute access for shorthand to nested attributes"""  # noqa: DOC201
