@@ -65,6 +65,10 @@ N_AVOGADRO = ureg.Quantity("avogadro_number").to_base_units().magnitude
 ArrayFloat = float | int | NDArray[Shape["* x"], Number]
 
 
+class _Wrapped:
+    """Class for type checking dpp decorator use"""
+
+
 def unit_conversion(unitval: str | Quantity | Unit, default: str) -> float:
     """Convertion of a unit wrapping pint
 

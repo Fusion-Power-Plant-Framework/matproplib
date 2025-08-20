@@ -27,6 +27,7 @@ from matproplib.base import (
     ArrayFloat,
     BasePhysicalProperty,
     References,
+    _Wrapped,
     unit_conversion,
     ureg,
 )
@@ -166,6 +167,14 @@ class DependentPhysicalProperty(BasePhysicalProperty):
     @model_validator(mode="before")
     def _from_static_value(self):
         """Static value validation"""  # noqa: DOC201
+        if isinstance(self, _Wrapped):
+            model = getattr(self, f"_{type(self).__name__}__model")
+            return {
+                "value": model.value,
+                "unit": model.unit,
+                "op_cond_config": model.op_cond_config,
+            }
+
         if not isinstance(self, DependentPhysicalProperty):
             if not isinstance(self, dict):
                 # Single number or a function not wrapped in a dictionary
@@ -294,6 +303,8 @@ class UndefinedProperty(DependentPhysicalProperty):
         """Call for Undefined property is undefined"""
         raise NotImplementedError("")
 
+    value_as = __call__
+
 
 class AttributeErrorProperty(UndefinedProperty):
     """Raise AttributeError on access"""
@@ -303,6 +314,8 @@ class AttributeErrorProperty(UndefinedProperty):
     def __call__(self, op_cond: OperationalConditions, *args, **kwargs):  # noqa: ARG002
         """Call for Undefined property is undefined"""  # noqa: DOC501
         raise AttributeError(self.msg)
+
+    value_as = __call__
 
 
 class Density(DependentPhysicalProperty):

@@ -287,6 +287,24 @@ class TestMaterialClassInit:
             != empty_dict_keys
         )
 
+    def test_setting_dpp_on_existing_material(self, test_condition):
+        @dependentphysicalproperty(Density)
+        def thing(self, op_cond: OperationalConditions) -> float:
+            return self.poissons_ratio(op_cond) * op_cond.temperature.value
+
+        @rebuild
+        class DepMat3(FullMaterial):
+            name: str = "DepMat2"
+
+            poissons_ratio: PoissonsRatio = 5
+
+        dm3 = DepMat3()
+        dm3.density = thing
+
+        assert dm3.density(test_condition) == pytest.approx(
+            test_condition.temperature * 5
+        )
+
 
 class TestMixtures:
     @pytest.mark.parametrize(

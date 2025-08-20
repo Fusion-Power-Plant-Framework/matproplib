@@ -35,6 +35,7 @@ from matproplib.base import (
     PMBaseModel,
     References,
     SuperconductingParameterisationT_co,
+    _Wrapped,
 )
 from matproplib.conditions import (
     DependentPropertyConditionConfig,
@@ -405,7 +406,7 @@ def _get_properties_from_materials(
     for mf in materials:
         fractions.append(mf.fraction)
         # fail later if property isnt defined so property overrides can be used
-        dpp.append(getattr(mf.material, property_, None))
+        dpp.append(getattr(mf.material, property_, UndefinedProperty()))
     return {"dpp": dpp, "fractions": fractions}
 
 
@@ -661,7 +662,7 @@ def dependentphysicalproperty(
     if unit is None and dunit is None:
         raise ValueError("Unit must be specified for function output")
 
-    class Wrap(Generic[_T]):
+    class Wrap(_Wrapped, Generic[_T]):
         """Wrap a function to make a DependentPhysicalProperty
 
         Returns
