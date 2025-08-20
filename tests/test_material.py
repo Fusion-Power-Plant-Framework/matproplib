@@ -207,6 +207,10 @@ class TestMaterialFunctionalInit:
         struct = Struct()
         assert not struct.is_superconductor
 
+    def test_not_superconducting_full_material_check(self):
+        copper = CryogenicCopper()
+        assert not copper.is_superconductor
+
 
 class TestMaterialClassInit:
     def test_self_init(self):
