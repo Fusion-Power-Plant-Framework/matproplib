@@ -195,6 +195,18 @@ class TestMaterialFunctionalInit:
         struct = Struct()
         assert struct.is_superconductor
 
+    def test_not_superconducting_check(self):
+        Struct = material(
+            "Struct",
+            properties={
+                "density": 5,
+                "poissons_ratio": lambda oc: oc.temperature**2,
+                "youngs_modulus": True,
+            },
+        )
+        struct = Struct()
+        assert not struct.is_superconductor
+
 
 class TestMaterialClassInit:
     def test_self_init(self):
