@@ -205,7 +205,7 @@ class MaterialBaseModel(PMBaseModel, ABC):
         return self
 
 
-class BasePhysicalProperty(MaterialBaseModel, ABC):
+class BasePhysicalProperty(PMBaseModel, ABC):
     """Physical properties of a material"""
 
     value: ArrayFloat
