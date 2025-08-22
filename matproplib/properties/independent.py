@@ -64,6 +64,10 @@ class PhysicalProperty(BasePhysicalProperty, np.lib.mixins.NDArrayOperatorsMixin
         :
             The property instance
         """
+        dunit = type(self).model_fields["unit"].default
+        if isinstance(dunit, Unit) and self.unit == dunit:
+            return self
+
         unit_val, default = super()._unitify()
 
         if unit_val.units != default or not np.isclose(unit_val.magnitude, 1):
@@ -163,7 +167,7 @@ def pp(name: str, unit: str | Unit) -> PhysicalProperty:
 class Temperature(PhysicalProperty):
     """Temperature of a material"""
 
-    unit: Unit | str = "K"
+    unit: Unit | str = ureg.Unit("K")
 
     @model_validator(mode="after")
     def _k_below_0(self):
@@ -187,13 +191,13 @@ class Temperature(PhysicalProperty):
 class Pressure(PhysicalProperty):
     """Pressure on a material"""
 
-    unit: Unit | str = "Pa"
+    unit: Unit | str = ureg.Unit("Pa")
 
 
 class MagneticField(PhysicalProperty):
     """Magnetic field on a material"""
 
-    unit: Unit | str = "T"
+    unit: Unit | str = ureg.Unit("T")
 
 
 class Strain(PhysicalProperty):
