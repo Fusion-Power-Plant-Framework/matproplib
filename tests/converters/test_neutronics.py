@@ -235,7 +235,7 @@ class TestSerpentNeutronics:
                 temperature_to_neutronics_code=True,
             )
             .split("\n")[0]
-            .endswith("tmp 10.0")
+            .endswith("tmp 10.00")
         )
 
 

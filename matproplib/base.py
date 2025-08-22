@@ -29,6 +29,7 @@ from pydantic import (
     model_validator,
 )
 from pydantic.fields import FieldInfo
+from pydantic_core import PydanticUndefinedType
 from typing_extensions import TypeVar
 
 if TYPE_CHECKING:
@@ -160,7 +161,7 @@ class PMBaseModel(BaseModel, ABC):
             if not k.startswith("_") and k != "reference"
         ]
         extra = self.__pydantic_extra__
-        if extra:
+        if extra and extra.get("__pydantic_extra__", None) != {}:
             yield from extra.items()
 
     def __dir__(self) -> set[str]:
@@ -229,20 +230,31 @@ class BasePhysicalProperty(PMBaseModel, ABC):
 
     def _unitify(self) -> Quantity:
         dunit = type(self).model_fields["unit"].default
-        default = (
-            ureg.Quantity(dunit or "dimensionless")
-            if isinstance(dunit, str)
-            else ureg.Quantity(1, dunit)
-        )
-        dmag = default.magnitude
-        default = default.units
-        if not np.isclose(dmag, 1):
+        if isinstance(dunit, Unit) and self.unit == dunit:
+            return None
+        if isinstance(dunit, PydanticUndefinedType):
+            raise NotImplementedError("default unit must be provided on class")
+        if isinstance(dunit, Unit):
+            dmag = 1
+            default = dunit
+        else:
+            default = (
+                ureg.Quantity(dunit or "dimensionless")
+                if isinstance(dunit, str)
+                else ureg.Quantity(1, dunit)
+            )
+            dmag = default.magnitude
+            default = default.units
+        if not (dmag == 1 or np.isclose(dmag, 1)):
             log.debug(
                 f"default unit for {type(self).__name__} has multiplier."
                 f" Return value will converted to {default: ~P}"
             )
-        unitval = ureg.Quantity(f"{self.unit or 'dimensionless'}")
-        return unitval, default
+        if self.unit == "":  # noqa: PLC1901
+            return ureg.Quantity(1, self.unit), default
+        if isinstance(self.unit, str) and self.unit[0].isdigit():
+            return ureg.Quantity(f"{self.unit}"), default
+        return ureg.Quantity(1, self.unit), default
 
     @field_serializer("unit")
     @staticmethod

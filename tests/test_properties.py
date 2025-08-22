@@ -65,7 +65,7 @@ class TestIndependentPhysicalProperty:
     @props
     @pytest.mark.parametrize("unit", ["K", "Pa", "T"])
     def test_bad_property_units(self, prop, unit):
-        if prop.model_fields["unit"].default != unit:
+        if prop.model_fields["unit"].default != ureg.Unit(unit):
             with pytest.raises(ValueError, match="1 valid"):
                 prop(value=1, unit=unit)
 
@@ -77,10 +77,11 @@ class TestIndependentPhysicalProperty:
         assert prop(value=1, unit=unit).value == result
 
     def test_bad_new_property(self):
-        with pytest.raises(ValueError, match="No default"):
+        class NewProperty(PhysicalProperty):
+            pass
 
-            class NewProperty(PhysicalProperty):
-                pass
+        with pytest.raises(ValueError, match="validation"):
+            NewProperty()
 
     def test_weird_unit_new_property(self):
         class NewProperty(PhysicalProperty):
