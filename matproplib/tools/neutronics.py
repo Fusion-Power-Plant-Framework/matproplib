@@ -221,7 +221,7 @@ def to_serpent_material(
             raise ValueError(
                 "Only singular temperature value can be passed into neutronics material"
             )
-        mat_card[0] += f" tmp {temperature}"
+        mat_card[0] += f" tmp {temperature:.2f}"
 
     return _mcnp_serpert_ending(
         mat_card, nucleides, zaid_suffix, decimal_places, additional_end_lines

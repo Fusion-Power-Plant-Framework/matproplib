@@ -29,6 +29,7 @@ from pydantic import (
     model_validator,
 )
 from pydantic.fields import FieldInfo
+from pydantic_core import PydanticUndefinedType
 from typing_extensions import TypeVar
 
 if TYPE_CHECKING:
@@ -144,6 +145,37 @@ class PMBaseModel(BaseModel, ABC):
             )
         )
 
+    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
+        """Iteration for Base model ignoring 'reference'
+
+        Yields
+        ------
+        :
+            field name
+        :
+            field value
+        """
+        yield from [
+            (k, v)
+            for (k, v) in self.__dict__.items()
+            if not k.startswith("_") and k != "reference"
+        ]
+        extra = self.__pydantic_extra__
+        if extra and extra.get("__pydantic_extra__", None) != {}:
+            yield from extra.items()
+
+    def __dir__(self) -> set[str]:
+        """List methods only if they dont exist in pydantic basemodel
+
+        Returns
+        -------
+        :
+            subset of attributes
+        """
+        return set(super().__dir__()).difference(dir(BaseModel))
+
+
+class MaterialBaseModel(PMBaseModel, ABC):
     @model_validator(mode="after")
     def _inject_group(self):
         from matproplib.properties.dependent import (  # noqa: PLC0415
@@ -173,35 +205,6 @@ class PMBaseModel(BaseModel, ABC):
 
         return self
 
-    def __iter__(self) -> Generator[tuple[str, Any], None, None]:
-        """Iteration for Base model ignoring 'reference'
-
-        Yields
-        ------
-        :
-            field name
-        :
-            field value
-        """
-        yield from [
-            (k, v)
-            for (k, v) in self.__dict__.items()
-            if not k.startswith("_") and k != "reference"
-        ]
-        extra = self.__pydantic_extra__
-        if extra:
-            yield from extra.items()
-
-    def __dir__(self) -> set[str]:
-        """List methods only if they dont exist in pydantic basemodel
-
-        Returns
-        -------
-        :
-            subset of attributes
-        """
-        return set(super().__dir__()).difference(dir(BaseModel))
-
 
 class BasePhysicalProperty(PMBaseModel, ABC):
     """Physical properties of a material"""
@@ -227,20 +230,31 @@ class BasePhysicalProperty(PMBaseModel, ABC):
 
     def _unitify(self) -> Quantity:
         dunit = type(self).model_fields["unit"].default
-        default = (
-            ureg.Quantity(dunit or "dimensionless")
-            if isinstance(dunit, str)
-            else ureg.Quantity(1, dunit)
-        )
-        dmag = default.magnitude
-        default = default.units
-        if not np.isclose(dmag, 1):
+        if isinstance(dunit, Unit) and self.unit == dunit:
+            return None
+        if isinstance(dunit, PydanticUndefinedType):
+            raise NotImplementedError("default unit must be provided on class")
+        if isinstance(dunit, Unit):
+            dmag = 1
+            default = dunit
+        else:
+            default = (
+                ureg.Quantity(dunit or "dimensionless")
+                if isinstance(dunit, str)
+                else ureg.Quantity(1, dunit)
+            )
+            dmag = default.magnitude
+            default = default.units
+        if not (dmag == 1 or np.isclose(dmag, 1)):
             log.debug(
                 f"default unit for {type(self).__name__} has multiplier."
                 f" Return value will converted to {default: ~P}"
             )
-        unitval = ureg.Quantity(f"{self.unit or 'dimensionless'}")
-        return unitval, default
+        if self.unit == "":  # noqa: PLC1901
+            return ureg.Quantity(1, self.unit), default
+        if isinstance(self.unit, str) and self.unit[0].isdigit():
+            return ureg.Quantity(f"{self.unit}"), default
+        return ureg.Quantity(1, self.unit), default
 
     @field_serializer("unit")
     @staticmethod
@@ -263,7 +277,7 @@ class BasePhysicalProperty(PMBaseModel, ABC):
         return hash((type(self).name, self.value, self.unit))
 
 
-class BaseGroup(PMBaseModel):
+class BaseGroup(MaterialBaseModel):
     """Base properties grouping class"""
 
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)

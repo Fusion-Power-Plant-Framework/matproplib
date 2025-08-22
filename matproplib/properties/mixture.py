@@ -59,6 +59,9 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
                 f"are not the same across mixture. Outputting in {self.unit:~P}."
             )
             self._unit_warn = True
+            self.__call__ = lambda *args, unit=self.unit, **kwargs: self.value_as(
+                *args, unit=unit, **kwargs
+            )
 
         return self
 
@@ -109,8 +112,6 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
         :
             Property value at conditons
         """
-        return self._fractional_calc([
-            d.value_as(op_cond, self.unit, *args, **kwargs) for d in self.dpp
-        ])
+        return self._fractional_calc([d(op_cond, *args, **kwargs) for d in self.dpp])
 
     # def __str__

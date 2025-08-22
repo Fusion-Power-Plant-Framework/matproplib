@@ -12,7 +12,6 @@ import numpy as np
 from pint import Quantity, Unit
 from pint.errors import DimensionalityError
 from pydantic import Field, create_model, model_validator
-from pydantic_core import PydanticUndefinedType
 
 from matproplib.base import BasePhysicalProperty, unit_conversion, ureg
 
@@ -27,29 +26,106 @@ __all__ = [
 ]
 
 
-class PhysicalProperty(BasePhysicalProperty, np.lib.mixins.NDArrayOperatorsMixin):
-    """Independent Physical Property model"""
+class UnVerifiedPhysicalProperty(np.lib.mixins.NDArrayOperatorsMixin):
+    def __init__(self, value, unit):
+        self.value = value
+        self.unit = unit
 
-    def __init__(self, **kwargs):
-        if type(self) is PhysicalProperty:
-            raise NotImplementedError("Cannot initialise PhysicalProperty directly")
-        super().__init__(**kwargs)
-
-    @classmethod
-    def __pydantic_init_subclass__(cls, **kwargs):  # noqa: PLW3201
-        """Ensure default units are set for a property
+    def __eq__(self, other: PhysicalProperty | UnVerifiedPhysicalProperty) -> bool:
+        """
+        Returns
+        -------
+        :
+            The boolean of equality
 
         Raises
         ------
-        ValueError
-            Default unit not set on class
+        TypeError
+            Unable to complete equality check
         """
-        super().__pydantic_init_subclass__(**kwargs)
-        if isinstance(cls.model_fields["unit"].default, PydanticUndefinedType):
-            raise ValueError(  # noqa: TRY004
-                f"No default unit set on {cls}."
-                " Please set a default unit attribute 'unit: Unit | str = \"myunit\"'"
+        if type(self) is not type(other):
+            try:
+                return not np.allclose(self.value, other)
+            except TypeError:
+                if hasattr(other, "__eq__"):
+                    return other.__eq__(self.value)
+                raise
+        else:
+            return not (
+                not np.allclose(self.value, other.value) or not self.unit == other.unit
             )
+
+    def __hash__(self):
+        """
+        Returns
+        -------
+        :
+            hash of object
+        """
+        return hash((self.value, self.unit))
+
+    def __abs__(self):
+        return np.abs(self.value)
+
+    def __array_ufunc__(  # noqa: PLW3201
+        self, ufunc: np.ufunc, method: str, *inputs: Any, **kwargs: Any
+    ) -> float | tuple[float, ...]:
+        """Array options for physical properties"""  # noqa: DOC201
+        out = kwargs.get("out", ())
+        for x in inputs + out:
+            if not isinstance(
+                x, np.ndarray | Number | PhysicalProperty | UnVerifiedPhysicalProperty
+            ):
+                return NotImplemented
+
+        inputs = tuple(
+            x.value
+            if isinstance(x, PhysicalProperty | UnVerifiedPhysicalProperty)
+            else x
+            for x in inputs
+        )
+        if out:
+            kwargs["out"] = tuple(
+                x.value
+                if isinstance(x, PhysicalProperty | UnVerifiedPhysicalProperty)
+                else x
+                for x in out
+            )
+
+        result = getattr(ufunc, method)(*inputs, **kwargs)
+
+        if isinstance(result, tuple):
+            return tuple(
+                x.value
+                if isinstance(x, PhysicalProperty | UnVerifiedPhysicalProperty)
+                else x
+                for x in result
+            )
+        if isinstance(result, type(self)):
+            return result.value
+        return result
+
+    def __array_function__(self, func, types: tuple[type, ...], args, kwargs) -> float:  # noqa: PLW3201
+        """Array options for physical properties"""  # noqa: DOC201
+        if not all(
+            issubclass(
+                t, PhysicalProperty | UnVerifiedPhysicalProperty | Number | np.ndarray
+            )
+            for t in types
+        ):
+            return NotImplemented
+
+        args = tuple(
+            x.value
+            if isinstance(x, PhysicalProperty | UnVerifiedPhysicalProperty)
+            else x
+            for x in args
+        )
+        return func(*args, **kwargs)
+
+
+class PhysicalProperty(BasePhysicalProperty, UnVerifiedPhysicalProperty):
+    """Independent Physical Property model"""
 
     @model_validator(mode="before")
     def _value_entry(self):
@@ -86,9 +162,15 @@ class PhysicalProperty(BasePhysicalProperty, np.lib.mixins.NDArrayOperatorsMixin
         :
             The property instance
         """
+        dunit = type(self).model_fields["unit"].default
+        if isinstance(dunit, Unit) and self.unit == dunit:
+            return self
+
         unit_val, default = super()._unitify()
 
-        if unit_val.units != default or not np.isclose(unit_val.magnitude, 1):
+        if unit_val.units != default or not (
+            unit_val.magnitude == 1 or np.isclose(unit_val.magnitude, 1)
+        ):
             object.__setattr__(  # noqa: PLC2801
                 self, "value", unit_conversion(unit_val * self.value, default)
             )
@@ -115,64 +197,6 @@ class PhysicalProperty(BasePhysicalProperty, np.lib.mixins.NDArrayOperatorsMixin
                 f"({de.args[2]}) to '{de.args[1]}' ({de.args[3]})"
             ) from None
 
-    def __eq__(self, other: PhysicalProperty) -> bool:
-        """
-        Returns
-        -------
-        :
-            The boolean of equality
-        """
-        return not (
-            type(self) is not type(other)
-            or not np.allclose(self.value, other.value)
-            or not self.unit == other.unit
-        )
-
-    def __hash__(self):
-        """
-        Returns
-        -------
-        :
-            hash of object
-        """
-        return hash((self.value, self.unit))
-
-    def __abs__(self):  # noqa: D105
-        return np.abs(self.value)
-
-    def __array_ufunc__(  # noqa: PLW3201
-        self, ufunc: np.ufunc, method: str, *inputs: Any, **kwargs: Any
-    ) -> float | tuple[float, ...]:
-        """Array options for physical properties"""  # noqa: DOC201
-        out = kwargs.get("out", ())
-        for x in inputs + out:
-            if not isinstance(x, np.ndarray | Number | PhysicalProperty):
-                return NotImplemented
-
-        inputs = tuple(x.value if isinstance(x, PhysicalProperty) else x for x in inputs)
-        if out:
-            kwargs["out"] = tuple(
-                x.value if isinstance(x, PhysicalProperty) else x for x in out
-            )
-
-        result = getattr(ufunc, method)(*inputs, **kwargs)
-
-        if isinstance(result, tuple):
-            return tuple(
-                x.value if isinstance(x, PhysicalProperty) else x for x in result
-            )
-        if isinstance(result, type(self)):
-            return result.value
-        return result
-
-    def __array_function__(self, func, types: tuple[type, ...], args, kwargs) -> float:  # noqa: PLW3201
-        """Array options for physical properties"""  # noqa: DOC201
-        if not all(issubclass(t, PhysicalProperty | Number | np.ndarray) for t in types):
-            return NotImplemented
-
-        args = tuple(x.value if isinstance(x, PhysicalProperty) else x for x in args)
-        return func(*args, **kwargs)
-
 
 def pp(name: str, unit: str | Unit) -> PhysicalProperty:
     return create_model(
@@ -185,7 +209,7 @@ def pp(name: str, unit: str | Unit) -> PhysicalProperty:
 class Temperature(PhysicalProperty):
     """Temperature of a material"""
 
-    unit: Unit | str = "K"
+    unit: Unit | str = ureg.Unit("K")
 
     @model_validator(mode="after")
     def _k_below_0(self):
@@ -209,13 +233,13 @@ class Temperature(PhysicalProperty):
 class Pressure(PhysicalProperty):
     """Pressure on a material"""
 
-    unit: Unit | str = "Pa"
+    unit: Unit | str = ureg.Unit("Pa")
 
 
 class MagneticField(PhysicalProperty):
     """Magnetic field on a material"""
 
-    unit: Unit | str = "T"
+    unit: Unit | str = ureg.Unit("T")
 
 
 class Strain(PhysicalProperty):

@@ -30,7 +30,7 @@
 
 # %%
 from matproplib.conditions import OperationalConditions
-from matproplib.library.fluids import H2O
+from matproplib.library.fluids import Water
 from matproplib.library.steel import SS316_L
 from matproplib.material import mixture
 
@@ -39,7 +39,7 @@ from matproplib.material import mixture
 
 # %%
 steel = SS316_L()
-water = H2O()
+water = Water()
 
 # %% [markdown]
 # Now we can create a mixture of these two materials. We will define the mass fractions

@@ -1,12 +1,14 @@
 # SPDX-FileCopyrightText: 2025-present The Bluemira Developers <https://github.com/Fusion-Power-Plant-Framework/bluemira>
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
+
 import copy
 
 import numpy as np
 import pytest
-from pint import Quantity
+from pydantic_core import ValidationError
 
+from matproplib.base import ureg
 from matproplib.conditions import (
     DependentPropertyConditionConfig,
     OperationalConditions,
@@ -16,7 +18,10 @@ from matproplib.conditions import (
     check_conditions,
     modify_conditions,
 )
-from matproplib.properties.independent import Volume
+from matproplib.properties.independent import (
+    PhysicalProperty,  # noqa: F401
+    Volume,
+)
 from tests import _np_and_value_test
 
 
@@ -31,7 +36,7 @@ class TestOperationalConditions:
             _np_and_value_test(cond.pressure, inp)
 
     @pytest.mark.parametrize(
-        ("inp", "out"), [((1, "degC"), 274.15), (Quantity(1, "degR"), 0.555555)]
+        ("inp", "out"), [((1, "degC"), 274.15), (ureg.Quantity(1, "degR"), 0.555555)]
     )
     def test_operational_condition_val_and_unit(self, inp, out):
         for cond in [
@@ -44,10 +49,10 @@ class TestOperationalConditions:
         "temp",
         [
             (1, "degC"),
-            Quantity(1, "degC"),
+            ureg.Quantity(1, "degC"),
             {"value": 1, "unit": "degC"},
             274.15,
-            {"value": Quantity(1, "degC")},
+            {"value": ureg.Quantity(1, "degC")},
             {"value": (1, "degC")},
         ],
     )
@@ -77,10 +82,11 @@ class TestOperationalConditions:
         assert ext.b.value == 1
 
     def test_bad_operation_condition_type(self):
-        with pytest.raises(TypeError, match="field types must be"):
+        class ExtensionCondition(OperationalConditions):
+            b: int = 4
 
-            class ExtensionCondition(OperationalConditions):
-                b: int = 4
+        with pytest.raises(ValidationError):
+            ExtensionCondition()
 
     def test_stp_conditions(self):
         stp = STPConditions()
@@ -100,7 +106,7 @@ class TestOperationalConditions:
             pressure: Pressure = Pressure(value=np.array([4, 5, 6]))
 
         temp = ExtensionCondition()
-        json_temp_schema = temp.model_json_schema()["properties"]
+        json_temp_schema = temp.model_json_schema(mode="serialization")["properties"]
         assert json_temp_schema["temperature"]["default"]["unit"] == "K"
         assert json_temp_schema["pressure"]["default"]["value"] == [4, 5, 6]
 
@@ -127,11 +133,9 @@ class TestConditionModification:
 
         for name, moc in mod_op_cond:
             if name == prop:
-                assert moc.unit == getattr(op_cond_config, name).unit
-                assert moc.value == pytest.approx(value)
-                assert moc != getattr(op_cond, name)
+                assert moc == pytest.approx(value)
             else:
-                assert moc == getattr(op_cond, name)
+                assert moc == pytest.approx(getattr(op_cond, name).value)
 
     @pytest.mark.parametrize(
         ("op_cond_config", "does_raise", "does_match"),
