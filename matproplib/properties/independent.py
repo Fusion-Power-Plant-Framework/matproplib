@@ -12,7 +12,6 @@ import numpy as np
 from pint import Quantity, Unit
 from pint.errors import DimensionalityError
 from pydantic import Field, create_model, model_validator
-from pydantic_core import PydanticUndefinedType
 
 from matproplib.base import BasePhysicalProperty, unit_conversion, ureg
 
@@ -29,27 +28,6 @@ __all__ = [
 
 class PhysicalProperty(BasePhysicalProperty, np.lib.mixins.NDArrayOperatorsMixin):
     """Independent Physical Property model"""
-
-    def __init__(self, **kwargs):
-        if type(self) is PhysicalProperty:
-            raise NotImplementedError("Cannot initialise PhysicalProperty directly")
-        super().__init__(**kwargs)
-
-    @classmethod
-    def __pydantic_init_subclass__(cls, **kwargs):  # noqa: PLW3201
-        """Ensure default units are set for a property
-
-        Raises
-        ------
-        ValueError
-            Default unit not set on class
-        """
-        super().__pydantic_init_subclass__(**kwargs)
-        if isinstance(cls.model_fields["unit"].default, PydanticUndefinedType):
-            raise ValueError(  # noqa: TRY004
-                f"No default unit set on {cls}."
-                " Please set a default unit attribute 'unit: Unit | str = \"myunit\"'"
-            )
 
     @model_validator(mode="before")
     def _value_entry(self):

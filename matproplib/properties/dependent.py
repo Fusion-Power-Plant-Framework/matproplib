@@ -33,6 +33,7 @@ from matproplib.base import (
 )
 from matproplib.conditions import (
     DependentPropertyConditionConfig,
+    ModifiedOperationalConditions,
     OperationalConditions,
     check_conditions,
     modify_conditions,
@@ -248,8 +249,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
             Failed unit conversion
         """
         if self.op_cond_config is not None:
-            op_cond = modify_conditions(op_cond, self.op_cond_config)
-            check_conditions(op_cond, self.op_cond_config)
+            _modify_and_check(op_cond, self.op_cond_config)
 
         try:
             return (
@@ -280,8 +280,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
             Property value at conditons
         """
         if self.op_cond_config is not None:
-            op_cond = modify_conditions(op_cond, self.op_cond_config)
-            check_conditions(op_cond, self.op_cond_config)
+            _modify_and_check(op_cond, self.op_cond_config)
         return self.value(op_cond, *args, **kwargs)
 
     def __str__(self) -> str:  # noqa: D105
@@ -291,6 +290,14 @@ class DependentPhysicalProperty(BasePhysicalProperty):
             f"op_cond_config={self.op_cond_config}, "
             f"reference={self.reference.__str__()})"
         )
+
+
+def _modify_and_check(
+    op_cond: OperationalConditions, op_cond_config: DependentPropertyConditionConfig
+) -> ModifiedOperationalConditions:
+    new_op_cond = modify_conditions(op_cond, op_cond_config)
+    check_conditions(new_op_cond, op_cond_config)
+    return new_op_cond
 
 
 class UndefinedProperty(DependentPhysicalProperty):

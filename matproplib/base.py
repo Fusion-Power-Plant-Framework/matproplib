@@ -144,35 +144,6 @@ class PMBaseModel(BaseModel, ABC):
             )
         )
 
-    @model_validator(mode="after")
-    def _inject_group(self):
-        from matproplib.properties.dependent import (  # noqa: PLC0415
-            DependentPhysicalProperty,
-            _NoDependence,
-            _WrapCallable,
-        )
-
-        for prop in filter(
-            lambda x: not x.startswith("_"), set(dir(self)).difference(dir(BaseGroup))
-        ):
-            attr = getattr(self, prop)
-            if (
-                isinstance(attr, DependentPhysicalProperty)
-                and attr.value is not None
-                and not isinstance(attr.value, partial)
-                and not isinstance(attr.value, _NoDependence)
-            ):
-                if isinstance(attr.value, _WrapCallable) and _injection_check(
-                    attr.value.value
-                ):
-                    object.__setattr__(  # noqa: PLC2801
-                        attr.value, "value", partial(attr.value.value, self)
-                    )
-                elif _injection_check(attr.value):
-                    object.__setattr__(attr, "value", partial(attr.value, self))  # noqa: PLC2801
-
-        return self
-
     def __iter__(self) -> Generator[tuple[str, Any], None, None]:
         """Iteration for Base model ignoring 'reference'
 
@@ -203,7 +174,38 @@ class PMBaseModel(BaseModel, ABC):
         return set(super().__dir__()).difference(dir(BaseModel))
 
 
-class BasePhysicalProperty(PMBaseModel, ABC):
+class MaterialBaseModel(PMBaseModel, ABC):
+    @model_validator(mode="after")
+    def _inject_group(self):
+        from matproplib.properties.dependent import (  # noqa: PLC0415
+            DependentPhysicalProperty,
+            _NoDependence,
+            _WrapCallable,
+        )
+
+        for prop in filter(
+            lambda x: not x.startswith("_"), set(dir(self)).difference(dir(BaseGroup))
+        ):
+            attr = getattr(self, prop)
+            if (
+                isinstance(attr, DependentPhysicalProperty)
+                and attr.value is not None
+                and not isinstance(attr.value, partial)
+                and not isinstance(attr.value, _NoDependence)
+            ):
+                if isinstance(attr.value, _WrapCallable) and _injection_check(
+                    attr.value.value
+                ):
+                    object.__setattr__(  # noqa: PLC2801
+                        attr.value, "value", partial(attr.value.value, self)
+                    )
+                elif _injection_check(attr.value):
+                    object.__setattr__(attr, "value", partial(attr.value, self))  # noqa: PLC2801
+
+        return self
+
+
+class BasePhysicalProperty(MaterialBaseModel, ABC):
     """Physical properties of a material"""
 
     value: ArrayFloat
@@ -263,7 +265,7 @@ class BasePhysicalProperty(PMBaseModel, ABC):
         return hash((type(self).name, self.value, self.unit))
 
 
-class BaseGroup(PMBaseModel):
+class BaseGroup(MaterialBaseModel):
     """Base properties grouping class"""
 
     model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)

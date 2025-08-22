@@ -32,6 +32,7 @@ from typing_extensions import TypeVar
 
 from matproplib.base import (
     BaseGroup,
+    MaterialBaseModel,
     PMBaseModel,
     References,
     SuperconductingParameterisationT_co,
@@ -101,7 +102,7 @@ class MaterialFraction(PMBaseModel, Generic[ConverterK]):
         return self
 
 
-class Material(PMBaseModel, ABC, Generic[ConverterK]):
+class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
     """The Material Class, container for all attributes of a material"""
 
     model_config = ConfigDict(

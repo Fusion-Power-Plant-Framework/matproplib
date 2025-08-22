@@ -5,21 +5,18 @@
 
 from __future__ import annotations
 
-from typing import get_args
-
 import numpy as np
 from pint import Unit
 from pydantic import (
     ConfigDict,
     Field,
-    create_model,
     field_serializer,
     field_validator,
     model_serializer,
     model_validator,
 )
 
-from matproplib.base import ArrayFloat, PMBaseModel, ureg
+from matproplib.base import PMBaseModel, ureg
 from matproplib.properties.independent import (
     MagneticField,
     NeutronDamage,
@@ -49,35 +46,14 @@ class OperationalConditions(PMBaseModel):
     strain: Strain | None = None
     neutron_damage: NeutronDamage | None = None
     neutron_fluence: NeutronFluence | None = None
-    model_config = ConfigDict(arbitrary_types_allowed=True, validate_assignment=True)
+
+    __pydantic_extra__: dict[str, PhysicalProperty] = Field(init=False)
+    model_config = ConfigDict(
+        extra="allow", arbitrary_types_allowed=True, validate_assignment=True
+    )
 
     def __str__(self) -> str:  # noqa: D105
         return f"{type(self).__name__}({super().__str__()})"
-
-    @classmethod
-    def __pydantic_init_subclass__(cls, **kwargs):  # noqa: PLW3201
-        """Ensure all attributes are Physical Properties
-
-        Raises
-        ------
-        TypeError
-            If the attribute is not a physical property
-        """
-        super().__pydantic_init_subclass__(**kwargs)
-
-        pm_fields = PMBaseModel.model_fields.keys()
-        for f_name, field in cls.model_fields.items():
-            if f_name not in pm_fields and not issubclass(
-                field.annotation, PhysicalProperty
-            ):
-                for ann_type in get_args(field.annotation):
-                    if issubclass(ann_type, PhysicalProperty):
-                        break
-                else:
-                    raise TypeError(
-                        "OperationalCondition field types must be"
-                        " PhysicalProperty types or None"
-                    )
 
     @model_validator(mode="before")
     def _value_only(self):
@@ -97,50 +73,53 @@ class OperationalConditions(PMBaseModel):
                 self[k] = {"value": v}
         return self
 
-    @model_validator(mode="after")
-    def _all_values_same_length(self):
-        """Validate ther are the same number of conditions
+    # @model_validator(mode="after")
+    # def _all_values_same_length(self):
+    #     """Validate ther are the same number of conditions
 
-        Returns
-        -------
-        :
-            the operating conditions instance
+    #     Returns
+    #     -------
+    #     :
+    #         the operating conditions instance
 
-        Raises
-        ------
-        ValueError
-            If value sizes are not compatible
-        """
-        fields = dict(iter(self))
-        values = list(fields.values())
-        old_length = length = (
-            values[0].value.size if isinstance(values[0].value, np.ndarray) else 1
-        )
-        for v in values[1:]:
-            if v is not None and isinstance(v.value, np.ndarray):
-                if length == 1:
-                    length = v.value.size
-                elif v.value.size != length:
-                    raise ValueError(
-                        "All values must be of equal size or a singular value"
-                    )
-            else:
-                old_length = 0
+    #     Raises
+    #     ------
+    #     ValueError
+    #         If value sizes are not compatible
+    #     """
+    #     fields = dict(iter(self))
+    #     values = list(fields.values())
+    #     old_length = length = (
+    #         values[0].value.size if isinstance(values[0].value, np.ndarray) else 1
+    #     )
+    #     for v in values[1:]:
+    #         if v is not None and isinstance(v.value, np.ndarray):
+    #             if length == 1:
+    #                 length = v.value.size
+    #             elif v.value.size != length:
+    #                 raise ValueError(
+    #                     "All values must be of equal size or a singular value"
+    #                 )
+    #         else:
+    #             old_length = 0
 
-        if old_length != length:
-            for k, v in fields.items():
-                if v is not None and (
-                    not isinstance(v.value, np.ndarray) or v.value.size == 1
-                ):
-                    v_dat = v.model_dump()
-                    val = v_dat.pop("value")
-                    value = np.full(
-                        length, val.magnitude if isinstance(val, ureg.Quantity) else val
-                    )
-                    object.__setattr__(  # noqa: PLC2801
-                        self, k, type(v)(value=value, **v_dat)
-                    )
-        return self
+    #     if old_length != length:
+    #         for k, v in fields.items():
+    #             if v is not None and (
+    #                 not isinstance(v.value, np.ndarray) or v.value.size == 1
+    #             ):
+    #                 v_dat = v.model_dump()
+    #                 val = v_dat.pop("value")
+    #                 value = np.full(
+    #                     length, val.magnitude if isinstance(val, ureg.Quantity) else val
+    #                 )
+    #                 object.__setattr__(
+    #                     self, k, type(v)(value=value, **v_dat)
+    #                 )
+    #     return self
+
+    def __hash__(self) -> int:
+        return hash(self.model_dump().values())
 
 
 class PropertyConfig(PMBaseModel):
@@ -234,10 +213,13 @@ class DependentPropertyConditionConfig(PMBaseModel):
         cls = type(self)
         return {k: v for k, v in self if v != cls.model_fields[k].default_factory()}
 
+    def __hash__(self) -> int:
+        return hash(self.model_dump().values())
+
 
 def modify_conditions(
     op_cond: OperationalConditions, op_cond_config: DependentPropertyConditionConfig
-) -> OperationalConditions:
+) -> ModifiedOperationalConditions:
     """
     Modify conditions to fit unit of condition configuration
 
@@ -246,34 +228,24 @@ def modify_conditions(
     :
         Modified conditions
     """
-    models = {}
-
+    mc = ModifiedOperationalConditions()
     cond_unit_names = [c[0] for c in op_cond_config]
     for cond_n, cond_v in op_cond:
         if cond_v is not None:
-            entry = getattr(op_cond, cond_n)
-            if cond_n in cond_unit_names:
-                new_unit = getattr(op_cond_config, cond_n).unit
-                if new_unit != cond_v.unit:
-                    models[cond_n] = create_model(
-                        f"Modified_{type(cond_v).__name__}",
-                        __base__=PhysicalProperty,
-                        value=(
-                            ArrayFloat,
-                            ureg.Quantity(cond_v.value, cond_v.unit).to(new_unit),
-                        ),
-                        unit=(Unit | str, new_unit),
-                    )()
+            setattr(
+                mc,
+                cond_n,
+                ureg.Quantity(cond_v.value, cond_v.unit).to(new_unit).magnitude
+                if cond_n in cond_unit_names
+                and (new_unit := getattr(op_cond_config, cond_n).unit) != cond_v.unit
+                else getattr(op_cond, cond_n).value,
+            )
+    return mc
 
-                else:
-                    models[cond_n] = entry
-            else:
-                models[cond_n] = entry
-    return create_model(
-        "ModifiedOperationalConditions",
-        __base__=OperationalConditions,
-        **{name: (type(model), model) for name, model in models.items()},
-    )()
+
+class ModifiedOperationalConditions:
+    def __iter__(self):
+        return iter(self.__dict__.items())
 
 
 def _format_value(cond: PhysicalProperty | float, unit: Unit | None = None) -> str:
@@ -289,7 +261,8 @@ def _format_value(cond: PhysicalProperty | float, unit: Unit | None = None) -> s
 
 
 def check_conditions(
-    op_cond: OperationalConditions, op_cond_config: DependentPropertyConditionConfig
+    op_cond: ModifiedOperationalConditions,
+    op_cond_config: DependentPropertyConditionConfig,
 ):
     """Check condtions are within range of condition configuration
 
