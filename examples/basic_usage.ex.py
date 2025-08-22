@@ -33,7 +33,11 @@ from matproplib.converters.neutronics import (
     OpenMCNeutronicConfig,
 )
 from matproplib.material import FullMaterial, dependentphysicalproperty, material
-from matproplib.properties.dependent import Density, SpecificHeatCapacity
+from matproplib.properties.dependent import (
+    Density,
+    ResidualResistanceRatio,
+    SpecificHeatCapacity,
+)
 from matproplib.properties.group import DefaultProperties, Properties, props
 from matproplib.properties.independent import PhysicalProperty, pp
 from matproplib.superconduction import NbTiBotturaParameterisation
@@ -336,7 +340,7 @@ class MyProperties(Properties):
     specific_heat_capacity: SpecificHeatCapacity = 7
     superconducting_parameterisation: NbTiBotturaParameterisation | None = None
 
-    @dependentphysicalproperty(unit="")
+    @dependentphysicalproperty(ResidualResistanceRatio)
     def residual_resistance_ratio(self, op_cond):
         """Default residual_resistance_ratio dependent property"""
         return self.density(op_cond) * op_cond.temperature

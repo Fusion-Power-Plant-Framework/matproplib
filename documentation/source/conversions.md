@@ -18,7 +18,8 @@ To use any converter they need to be added to a material, this can be done at de
 The individual converters have some configuration options if required.
 
 ```python
-from matproplib.converters.neutronics import MCNPNeutronicConfig, OpenMCNeutronicsConfig
+from matproplib.converters.neutronics import MCNPNeutronicConfig, OpenMCNeutronicConfig
+from matproplib.properties.group import props
 from matproplib.material import material
 
 Steel = material(
@@ -32,7 +33,7 @@ Steel = material(
 )
 
 my_steel = Steel()
-my_steel.converters.add(OpenMCNeutronicsConfig())
+my_steel.converters.add(OpenMCNeutronicConfig())
 
 ```
 
