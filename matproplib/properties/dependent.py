@@ -54,13 +54,12 @@ class _NoDependence: ...
 class _WrapCallable:
     def __init__(self, value, unit_val, default):
         self.value = value
-        self.unit_val = unit_val
-        self.default = default
         # for pickling
         self.__name__ = self.value.__name__
+        self.conversion = unit_conversion(unit_val, default)
 
     def __call__(self, *args, **kwargs):
-        return unit_conversion(self.value(*args, **kwargs) * self.unit_val, self.default)
+        return self.value(*args, **kwargs) * self.conversion
 
 
 def _no_dependence(value: float) -> Callable[[OperationalConditions], float]:
@@ -73,7 +72,8 @@ def _no_dependence(value: float) -> Callable[[OperationalConditions], float]:
             The setup value at all operational conditions
         """
 
-        def __call__(self, op_cond, *args, **kwargs) -> float:  # noqa: ARG002
+        @staticmethod
+        def __call__(*args, **kwargs) -> float:  # noqa: ARG004
             return value
 
         def __repr__(self) -> str:
@@ -220,7 +220,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
 
         if unit_val.units != default or not np.isclose(unit_val.magnitude, 1):
             log.debug("Non default unit used, wrapping value")
-            if type(self.value).__name__ == "NoDependence":
+            if isinstance(self.value, _NoDependence):
                 wrap_callable = _no_dependence(
                     unit_conversion(unit_val * self.value(None), default)
                 )

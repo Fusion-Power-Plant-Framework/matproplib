@@ -31,7 +31,7 @@ Be12Ti = material(
 
 @dependentphysicalproperty(
     CoefficientThermalExpansion,
-    unit="1e-6/T",
+    unit="1e-6/K",
     op_cond_config={"temperature": ("degC", 25, 800)},
     reference={
         "id": "bepb_cte",

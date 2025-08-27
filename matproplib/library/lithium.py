@@ -69,7 +69,7 @@ Li4SiO4 = material(
         specific_heat_capacity=Li4SiO4_specific_heat_capacity,
         coefficient_thermal_expansion=CoefficientThermalExpansion(
             value=lambda oc: 0.768 + 4.96e-4 * oc.temperature + 0.045 * oc.strain,
-            unit="1e-6/T",
+            unit="1e-6/K",
             op_cond_config={"temperature": ("degC", 25, 800)},
             reference={
                 "id": "liso4_cte",

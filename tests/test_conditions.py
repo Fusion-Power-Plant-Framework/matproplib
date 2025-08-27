@@ -19,7 +19,7 @@ from matproplib.conditions import (
     modify_conditions,
 )
 from matproplib.properties.independent import (
-    PhysicalProperty,  # noqa: F401
+    PhysicalProperty,  # noqa: F401 # pydantic bug
     Volume,
 )
 from tests import _np_and_value_test

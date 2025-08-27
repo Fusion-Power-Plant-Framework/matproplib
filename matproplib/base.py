@@ -202,7 +202,6 @@ class MaterialBaseModel(PMBaseModel, ABC):
                     )
                 elif _injection_check(attr.value):
                     object.__setattr__(attr, "value", partial(attr.value, self))  # noqa: PLC2801
-
         return self
 
 

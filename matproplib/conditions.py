@@ -252,7 +252,7 @@ def modify_conditions(
                 (
                     ureg.Quantity(cond_v.value, cond_v.unit).to(new_unit).magnitude
                     if new_unit != cond_v.unit
-                    else getattr(op_cond, cond_n).value,
+                    else cond_v.value,
                     new_unit,
                 ),
             )
