@@ -57,6 +57,7 @@ class _WrapCallable:
         # for pickling
         self.__name__ = self.value.__name__
         self.conversion = unit_conversion(unit_val, default)
+        self.unit_val = unit_val
 
     def __call__(self, *args, **kwargs):
         return self.value(*args, **kwargs) * self.conversion
