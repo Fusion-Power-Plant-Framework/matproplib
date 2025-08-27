@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-"""Physical material tools"""
+"""matproplib tools"""
 
 from matproplib.tools.neutronics import (
     to_fispact_material,
