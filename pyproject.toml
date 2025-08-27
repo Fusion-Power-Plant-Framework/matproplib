@@ -94,6 +94,9 @@ deploy = "mkdocs gh-deploy"
 detached     = true                           # Don't inherit from default (does not download project dependencies)
 dependencies = ["pre-commit", "ruff", "ty"]
 
+[tool.hatch.envs.lint.scripts]
+fmt    = ["pre-commit run --all-files --hook-stage manual"]
+
 [tool.ty.terminal]
 output-format = "concise"
 
