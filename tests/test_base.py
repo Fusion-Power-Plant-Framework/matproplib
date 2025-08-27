@@ -12,3 +12,9 @@ class TestReferences:
 
         assert ref.root["one"].id == "one"
         assert ref.root["two"].id == "two"
+
+
+def test_ci_fail():
+    import pytest
+
+    pytest.fail("CI test")
