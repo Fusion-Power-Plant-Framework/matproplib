@@ -90,6 +90,10 @@ build = "mkdocs build"
 serve = "mkdocs serve"
 deploy = "mkdocs gh-deploy"
 
+[tool.hatch.envs.lint]
+detached     = true                           # Don't inherit from default (does not download project dependencies)
+dependencies = ["pre-commit", "ruff", "ty"]
+
 [tool.ty.terminal]
 output-format = "concise"
 
