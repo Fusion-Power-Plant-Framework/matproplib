@@ -45,7 +45,7 @@ from matproplib.tools.serialisation import (
     stringify_function,
 )
 
-log = logging.getLogger("matproplib.base")
+log = logging.getLogger(__name__)
 
 
 class _NoDependence: ...

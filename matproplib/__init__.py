@@ -25,6 +25,5 @@ __all__ = [
     "props",
 ]
 
-logging.basicConfig()
-logger = logging.getLogger("matproplib")
-logger.setLevel(logging.INFO)
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
