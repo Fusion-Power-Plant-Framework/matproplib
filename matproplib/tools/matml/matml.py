@@ -6,6 +6,8 @@
 
 from __future__ import annotations
 
+from collections import Counter
+
 from pydantic import BaseModel, ConfigDict
 from xsdata_pydantic.bindings import XmlParser, XmlSerializer
 from xsdata_pydantic.fields import field
@@ -821,6 +823,8 @@ class Metadata(MatMLBase):
         A description of measurement techniques
     parameter_details:
         A description of a parameter referenced in PropertyData
+    property_details:
+        A description of a property referenced in PropertyData
     source_details:
         A description of the source of a material or component
     specimen_details:
@@ -998,41 +1002,28 @@ class ComponentDetails(MatMLBase):
     name:
         component name
     class:
-
+        list of component classes
     subclass:
-
+        list of component subclasses
     specification:
-
+        list of specifications
     souce:
-
+        source information
     form:
-
+        the form of the component
     processing_details:
-
-    characterisation
+        list of processing steps on component
+    characterisation:
+        The formula, chemical composition, phase composition, and
+        dimensional details
+    property_data:
+        property data for the component
+    association_details:
+        Description of a relationship to other components
+    component_details:
+        list of sub component details
     id:
         identifier  useful for complex systems such as composite laminates.
-
-    Class contains the component's class
-    Subclass contains the component's subclass(es)
-    Specification contains the component's specification(s) and has one
-    optional attribute, authority, for identifying an authoritative
-    source of component specifications.
-    Source contains the name of the source of the component
-    Form contains the form of the component
-    ProcessingDetails contains a description of a processing step for
-    the component
-    Characterisation contains the characterisation of the component,
-    including the formula, chemical composition, phase composition, and
-    dimensional details.
-    PropertyData contains the property data for the component
-    AssociationDetails contains a description of a relationship of the
-    component to another component
-    notes:
-        Any additional information on the component details
-    ComponentDetails contains a description of a component within the
-    component and is used to support encoding of information for
-    complex materials systems such as composites.
     """
 
     name: Name = field(metadata=n_name | req | t_element)
@@ -1065,6 +1056,15 @@ class ComponentDetails(MatMLBase):
     id: str | None = field(default=None, metadata=t_attr)
 
 
+mat_id = Counter({"material": 1})
+
+
+def material_id():
+    new_id = f"{mat_id['material']}"
+    mat_id["material"] += 1
+    return new_id
+
+
 class Material(MatMLBase):
     """
     Material model
@@ -1088,6 +1088,11 @@ class Material(MatMLBase):
         identification specifier for the local material orientation relative to the
         global frame of reference, useful for complex systems
         such as anisotropic materials.
+
+    Notes
+    -----
+    In a departure from spec id will be created if not provided and is not optional.
+    The default will be an increasing counter
     """
 
     bulk_details: BulkDetails = field(metadata={"name": "BulkDetails"} | req | t_element)
@@ -1098,7 +1103,7 @@ class Material(MatMLBase):
     glossary: Glossary | None = field(
         default=None, metadata={"name": "Glossary"} | t_element
     )
-    id: str | None = field(default=None, metadata=t_attr)
+    id: str = field(default_factory=material_id, metadata=t_attr)
     layers: int | None = field(default=None, metadata=t_attr)
     local_frame_of_reference: str | None = field(default=None, metadata=t_attr)
 

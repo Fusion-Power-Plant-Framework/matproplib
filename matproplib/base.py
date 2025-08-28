@@ -230,7 +230,7 @@ class BasePhysicalProperty(PMBaseModel, ABC):
     def _unitify(self) -> Quantity:
         dunit = type(self).model_fields["unit"].default
         if isinstance(dunit, Unit) and self.unit == dunit:
-            return None
+            return ureg.Quantity(1, self.unit), dunit
         if isinstance(dunit, PydanticUndefinedType):
             raise NotImplementedError("default unit must be provided on class")
         if isinstance(dunit, Unit):
