@@ -547,6 +547,16 @@ def mixture(
     materials: list[MaterialFraction[ConverterK]] = [
         MaterialFraction.model_validate(m) for m in materials
     ]
+    if len(materials) == 1:
+        single = materials[0].material
+        return single.model_copy(
+            update=dict(
+                name=name,
+                reference=reference or single.reference,
+                converters=converters or single.converters,
+                **property_overrides,
+            )
+        )
     all_fields = reduce(
         operator.or_,
         [type(m.material).model_fields for m in materials],

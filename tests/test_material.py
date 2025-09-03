@@ -509,8 +509,13 @@ class TestMixtures:
         assert len(caplog.records) == 1
 
     def test_single_sc_mixture(self):
-        m = mixture("single sc", [MaterialFraction(material=Nb3Sn(), fraction=1.0)])
-        assert m.name == "single sc"
+        nb = Nb3Sn()
+        m = mixture("single sc", [MaterialFraction(material=nb, fraction=1.0)])
+        # Check that the mixture still behaves as a mixture
+        assert hasattr(m, "mixture_fraction")
+        op_cond = OperationalConditions(temperature=10)
+        assert nb.density(op_cond) == m.density(op_cond)
+
 
 class TestSerialisation:
     def test_numerical_serialisation_deserialisation(self, test_condition):
