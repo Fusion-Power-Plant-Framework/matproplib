@@ -18,6 +18,7 @@ from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.copper import CryogenicCopper
 from matproplib.library.fluids import DDPlasma, DTPlasma, Water
 from matproplib.library.steel import SS316_L
+from matproplib.library.superconductors import Nb3Sn
 from matproplib.material import (
     FullMaterial,
     Material,
@@ -507,6 +508,9 @@ class TestMixtures:
         ])
         assert len(caplog.records) == 1
 
+    def test_single_sc_mixture(self):
+        m = mixture("single sc", [MaterialFraction(material=Nb3Sn(), fraction=1.0)])
+        assert m.name == "single sc"
 
 class TestSerialisation:
     def test_numerical_serialisation_deserialisation(self, test_condition):
