@@ -544,6 +544,7 @@ def mixture(
     AttributeError
         If one material has a property the others dont and there is no override provided
     """
+    # ruff: noqa: PLR0914
     materials: list[MaterialFraction[ConverterK]] = [
         MaterialFraction.model_validate(m) for m in materials
     ]
@@ -621,6 +622,7 @@ def mixture(
     else:
         raise NotImplementedError(f"{fraction_type=} not a valid option")
 
+    # ruff: enable=PLR0914
     return model[ConverterK](
         **prop_val,
         elements=elements,
