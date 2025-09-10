@@ -413,7 +413,15 @@ def _get_properties_from_materials(
     for mf in materials:
         fractions.append(mf.fraction)
         # fail later if property isnt defined so property overrides can be used
-        dpp.append(getattr(mf.material, property_, UndefinedProperty()))
+        dpp.append(
+            getattr(
+                mf.material,
+                property_,
+                UndefinedSuperconductingParameterisation()
+                if property_ == "superconducting_parameterisation"
+                else UndefinedProperty(),
+            )
+        )
     return {"dpp": dpp, "fractions": fractions}
 
 
@@ -501,7 +509,13 @@ def _void_check(
     return inp_frac
 
 
-def mixture(
+class AttributeErrorSCParameterisation(UndefinedSuperconductingParameterisation):
+    """Attribute Error superconducting parameterisation"""
+
+    critical_current_density: AttributeErrorProperty
+
+
+def mixture(  # noqa: PLR0912
     name: str,
     materials: Sequence[
         MaterialFraction[ConverterK] | tuple[Material[ConverterK], float]
@@ -544,7 +558,6 @@ def mixture(
     AttributeError
         If one material has a property the others dont and there is no override provided
     """
-    # ruff: noqa: PLR0914
     materials: list[MaterialFraction[ConverterK]] = [
         MaterialFraction.model_validate(m) for m in materials
     ]
@@ -555,6 +568,7 @@ def mixture(
                 name=name,
                 reference=reference or single.reference,
                 converters=converters or single.converters,
+                mixture_fraction=materials,
                 **property_overrides,
             )
         )
@@ -572,9 +586,7 @@ def mixture(
             prop_val[prp] = property_overrides[prp]
             continue
         for dpp in mix_properties["dpp"]:
-            if isinstance(
-                dpp, UndefinedProperty | UndefinedSuperconductingParameterisation
-            ):
+            if isinstance(dpp, UndefinedProperty):
                 prop_val[prp] = dpp
                 break
         else:
@@ -583,17 +595,27 @@ def mixture(
                     **mix_properties, unit=mix_properties["dpp"][0].unit
                 )
             except ValidationError:
-                ind = _get_indexes(mix_properties["dpp"])
-                miss_materials = [materials[i] for i in ind]
                 mats = "".join(
-                    f"{i}: {mat.material.name}"
-                    for i, mat in zip(ind, miss_materials, strict=True)
+                    f"{i}: {materials[i].material.name}"
+                    for i in _get_indexes(mix_properties["dpp"])
                 )
                 msg = (
                     f"Material property '{prp}' not defined and not overidden at {mats} "
                 )
                 prop_val[prp] = AttributeErrorProperty(msg=msg)
                 log.debug(msg)
+            except AttributeError:
+                if all(
+                    isinstance(sc, UndefinedSuperconductingParameterisation)
+                    for sc in mix_properties["dpp"]
+                ):
+                    prop_val[prp] = mix_properties["dpp"][0]
+                else:
+                    msg = "Superconducting properties cannot be mixed"
+                    prop_val[prp] = AttributeErrorSCParameterisation(
+                        critical_current_density=AttributeErrorProperty(msg=msg)
+                    )
+                    log.debug(msg)
 
     model = create_model(
         name,
@@ -622,7 +644,6 @@ def mixture(
     else:
         raise NotImplementedError(f"{fraction_type=} not a valid option")
 
-    # ruff: enable=PLR0914
     return model[ConverterK](
         **prop_val,
         elements=elements,

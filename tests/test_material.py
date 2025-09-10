@@ -513,7 +513,31 @@ class TestMixtures:
         m = mixture("single sc", [MaterialFraction(material=nb, fraction=1.0)])
         # Check that the mixture still behaves as a mixture
         assert hasattr(m, "mixture_fraction")
+        assert m.mixture_fraction[0].material == nb
+
+        op_cond = OperationalConditions(
+            temperature=10, magnetic_field=0.002, strain=0.01
+        )
+        assert nb.critical_current_density(op_cond) == m.critical_current_density(
+            op_cond
+        )
+        assert nb.density(op_cond) == m.density(op_cond)
+
+    def test_multiple_sc_mixture(self):
+        nb = Nb3Sn()
+        nb2 = Nb3Sn()
+        m = mixture(
+            "multi sc",
+            [
+                MaterialFraction(material=nb, fraction=0.5),
+                MaterialFraction(material=nb2, fraction=0.5),
+            ],
+        )
         op_cond = OperationalConditions(temperature=10)
+
+        with pytest.raises(AttributeError, match="Superconducting"):
+            m.critical_current_density(op_cond)
+
         assert nb.density(op_cond) == m.density(op_cond)
 
 
