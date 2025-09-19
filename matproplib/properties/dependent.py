@@ -369,7 +369,7 @@ class CoerciveField(DependentPhysicalProperty):
 class ThermalConductivity(DependentPhysicalProperty):
     """Thermal conductivity"""
 
-    unit: Unit | str = "W.m/K"
+    unit: Unit | str = "W/(m.K)"
 
 
 class MagneticSaturation(DependentPhysicalProperty):
