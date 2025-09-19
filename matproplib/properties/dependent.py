@@ -175,7 +175,6 @@ class DependentPhysicalProperty(BasePhysicalProperty):
                 "unit": model.unit,
                 "op_cond_config": model.op_cond_config,
             }
-
         if not isinstance(self, DependentPhysicalProperty):
             if not isinstance(self, dict):
                 # Single number or a function not wrapped in a dictionary
@@ -222,7 +221,12 @@ class DependentPhysicalProperty(BasePhysicalProperty):
             log.debug("Non default unit used, wrapping value")
             if isinstance(self.value, _NoDependence):
                 wrap_callable = _no_dependence(
-                    unit_conversion(unit_val * self.value(None), default)
+                    unit_conversion(
+                        ureg.Quantity(
+                            unit_val.magnitude * self.value(None), unit_val.units
+                        ),
+                        default,
+                    )
                 )
             else:
                 wrap_callable = _WrapCallable(self.value, unit_val, default)

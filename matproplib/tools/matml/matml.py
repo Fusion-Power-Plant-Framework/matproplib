@@ -7,8 +7,10 @@
 from __future__ import annotations
 
 from collections import Counter
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict
+from lxml import etree
+from pydantic import BaseModel, ConfigDict, model_validator
 from xsdata_pydantic.bindings import XmlParser, XmlSerializer
 from xsdata_pydantic.fields import field
 
@@ -26,11 +28,11 @@ class MatMLBase(BaseModel):
     model_config = ConfigDict(defer_build=True)
 
 
-t_attr = {"type": "Attribute"}
-t_element = {"type": "Element"}
-req = {"required": True}
-n_name = {"name": "Name"}
-n_note = {"name": "Notes"}
+t_attr: dict[Literal["type"], Literal["Attribute"]] = {"type": "Attribute"}
+t_element: dict[Literal["type"], Literal["Element"]] = {"type": "Element"}
+req: dict[Literal["required"], bool] = {"required": True}
+n_name: dict[Literal["name"], Literal["Name"]] = {"name": "Name"}
+n_note: dict[Literal["name"], Literal["Notes"]] = {"name": "Notes"}
 
 
 class AssociationDetails(MatMLBase):
@@ -720,7 +722,7 @@ class PropertyData(MatMLBase):
         ID that links to SpecimenDetails
     test:
         ID that links to TestConditionDetails
-    delimieter:
+    delimiter:
         Separator for multiple values in
         [Data, Qualifier, Uncertainty, and ParameterValue]
     quote:
@@ -759,6 +761,16 @@ class PropertyData(MatMLBase):
 
         value: str = field(default="", metadata=req)
         format: DataFormat = field(metadata=t_attr | req)
+
+    @model_validator(mode="after")
+    def _qualifier_validation(self):
+        if len(self.qualifier) == 1:
+            self.qualifier = self.qualifier[0].split(self.delimiter)
+
+        for p in self.parameter_value:
+            if len(p.qualifier) == 1:
+                p.qualifier = p.qualifier[0].split(self.delimiter)
+        return self
 
 
 class ConditionTestDetails(MatMLBase):
@@ -1060,6 +1072,7 @@ mat_id = Counter({"material": 1})
 
 
 def material_id():
+    """Material ID incrementer"""  # noqa: DOC201
     new_id = f"{mat_id['material']}"
     mat_id["material"] += 1
     return new_id
@@ -1108,6 +1121,10 @@ class Material(MatMLBase):
     local_frame_of_reference: str | None = field(default=None, metadata=t_attr)
 
 
+class MatMLParserError(ValueError):
+    """ValueError when xml file is out of spec"""
+
+
 class MatMLXML(MatMLBase):
     """
     MatML model
@@ -1138,11 +1155,35 @@ class MatMLXML(MatMLBase):
 
     @classmethod
     def from_file(cls, filename):
-        """Import xml file"""  # noqa: DOC201
-        parser = XmlParser()
+        """Import xml file
 
-        with open(filename, "rb") as xml:
-            return parser.parse(xml, cls)
+        Raises
+        ------
+        NotImplementedError
+            More than one material in xml file
+        MatMLParserError
+            Out of spec MatML 3.1 xml file
+        """  # noqa: DOC201
+
+        def find_xml_node(node, tag_name):
+            matches = []
+            if node.tag.lower() == tag_name.lower():
+                matches.append(node)
+                return matches
+            for child in node:
+                matches.extend(find_xml_node(child, tag_name))
+            return matches
+
+        found_nodes = find_xml_node(etree.parse(filename).getroot(), "MatML_Doc")
+        if len(found_nodes) > 1:
+            raise NotImplementedError("More than one MatML material found in xml file")
+
+        try:
+            return XmlParser().parse(found_nodes[0], cls)
+        except ValueError as pe:
+            raise MatMLParserError(
+                f"MatML3.1 xml file not in spec, {pe.args[0]}"
+            ) from pe
 
     def export(self, filename):
         """Export model to xml file"""
