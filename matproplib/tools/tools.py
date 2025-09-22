@@ -3,11 +3,13 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Miscellaneous tools for matproplib package"""
 
+from collections.abc import Sequence
 from copy import deepcopy
 
 import numpy as np
 
 from matproplib.base import References
+from matproplib.conditions import OpCondT
 
 
 def annotate_reference(reference: References, annotation: str) -> References:
@@ -19,11 +21,7 @@ def annotate_reference(reference: References, annotation: str) -> References:
     """
     reference = deepcopy(reference)
     reference["id"] += annotation
-
-    if reference.get("annote") is not None:
-        reference["annote"] += f" {annotation}"
-    else:
-        reference["annote"] = annotation
+    reference["annote"] = f"{reference.get('annote', '')} {annotation}".strip(" ")
     return reference
 
 
@@ -76,3 +74,26 @@ def kludge_linear_spline(x: float, x_kludge: float, width: float) -> float:
     if x < x1:
         return _kludge_spline(x, x0, x1, y0, y1, p0)
     return x
+
+
+class From1DData:
+    """1-D Data interpolation from condition
+
+    Parameters
+    ----------
+    x:
+        Array of condition
+    y:
+        Array of resultant quantity
+    condition:
+        condition name
+    """
+
+    def __init__(self, x: Sequence[float], y: Sequence[float], condition: str):
+        self.x = np.asarray(x)
+        self.y = np.asarray(y)
+        self.condition = condition
+
+    def __call__(self, op_cond: OpCondT):
+        """Call the interpolator"""  # noqa: DOC201
+        return np.interp(getattr(op_cond, self.condition), self.x, self.y)

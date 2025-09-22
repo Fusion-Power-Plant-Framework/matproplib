@@ -14,6 +14,7 @@ from matproplib.properties.dependent import (
     SpecificHeatCapacity,
 )
 from matproplib.properties.group import props
+from matproplib.tools.tools import From1DData
 
 __all__ = ["Be12Ti", "BePebbleBed"]
 
@@ -84,25 +85,29 @@ def BePB_CTE(op_cond: OpCondT) -> float:
     )
 
 
+# fmt: off
+BP_SHC = From1DData(
+    [
+        0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700,
+        750, 800, 850, 900, 950, 1000
+    ],
+    [
+        1741.8, 1900.97, 2045.53, 2176.44, 2294.66, 2401.14, 2496.83, 2582.71, 2659.71,
+        2728.79, 2790.93, 2847.05, 2898.14, 2945.13, 2988.99, 3030.68, 3071.14, 3111.34,
+        3152.22, 3194.76, 3239.9
+    ],
+    "temperature"
+)
+# fmt: on
+
+
 @dependentphysicalproperty(
     dpp=SpecificHeatCapacity,
     op_cond_config={"temperature": ("degC", 0, 1000)},
     reference=FOKKENS_2003,
 )
 def BePB_specific_heat_capacity(op_cond: OpCondT):
-    # fmt: off
-    SHC_BePB1 = [
-        0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700,
-        750, 800, 850, 900, 950, 1000
-    ]
-    SHC_BePB2 = [
-        1741.8, 1900.97, 2045.53, 2176.44, 2294.66, 2401.14, 2496.83, 2582.71, 2659.71,
-        2728.79, 2790.93, 2847.05, 2898.14, 2945.13, 2988.99, 3030.68, 3071.14, 3111.34,
-        3152.22, 3194.76, 3239.9
-    ]
-    # fmt: on
-
-    return np.interp(op_cond.temperature, SHC_BePB1, SHC_BePB2)
+    return BP_SHC(op_cond)
 
 
 BePebbleBed = material(

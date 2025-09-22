@@ -5,7 +5,7 @@
 import numpy as np
 import pytest
 
-from matproplib.tools.tools import kludge_linear_spline
+from matproplib.tools.tools import From1DData, kludge_linear_spline
 
 
 @pytest.mark.parametrize(
@@ -32,3 +32,8 @@ def test_kludge_linear_spline_inside_kludge():
 
     for i in range(len(x) - 1):
         assert y_new[i + 1] <= y_new[i]
+
+
+def test_1d_interpolator(condition):
+    func = From1DData(np.linspace(290, 300, 5), np.linspace(0, 1, 5), "temperature")
+    assert func(condition) == pytest.approx(0.8)
