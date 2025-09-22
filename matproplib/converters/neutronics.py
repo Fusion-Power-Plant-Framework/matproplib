@@ -29,7 +29,7 @@ from matproplib.tools import (
 if TYPE_CHECKING:
     import openmc
 
-    from matproplib.conditions import OperationalConditions
+    from matproplib.conditions import OpCondT
     from matproplib.material import Material
     from matproplib.nucleides import ElementFraction
 
@@ -93,7 +93,7 @@ class OpenMCNeutronicConfig(NeutronicConfig):
     def convert(
         self,
         material: Material,
-        op_cond: OperationalConditions,
+        op_cond: OpCondT,
         *,
         temperature_to_neutronics_code: bool = False,
     ) -> openmc.Material:
@@ -142,7 +142,7 @@ class OpenMCNeutronicConfig(NeutronicConfig):
         )
 
 
-def _get_mass_density(material: Material, op_cond: OperationalConditions) -> float:
+def _get_mass_density(material: Material, op_cond: OpCondT) -> float:
     if not hasattr(material, "density") or material.density is None:
         # Future: generic from unit cell?
         raise NotImplementedError
@@ -166,7 +166,7 @@ class FispactNeutronicConfig(NeutronicConfig):
     def convert(
         self,
         material: Material,
-        op_cond: OperationalConditions,
+        op_cond: OpCondT,
         *,
         additional_end_lines: list[str] | None = None,
     ) -> str:
@@ -211,7 +211,7 @@ class MCNPNeutronicConfig(NeutronicConfig):
     def convert(
         self,
         material: Material,
-        op_cond: OperationalConditions,
+        op_cond: OpCondT,
         *,
         additional_end_lines: list[str] | None = None,
     ) -> str:
@@ -261,7 +261,7 @@ class SerpentNeutronicConfig(NeutronicConfig):
     def convert(
         self,
         material: Material,
-        op_cond: OperationalConditions,
+        op_cond: OpCondT,
         *,
         additional_end_lines: list[str] | None = None,
         temperature_to_neutronics_code: bool = False,

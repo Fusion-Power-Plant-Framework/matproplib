@@ -22,7 +22,7 @@ from matproplib.properties.independent import (
 from matproplib.tools.tools import kludge_linear_spline
 
 if TYPE_CHECKING:
-    from matproplib.conditions import OperationalConditions
+    from matproplib.conditions import OpCondT
 
 
 @rebuild
@@ -48,7 +48,7 @@ class Nb3SnBotturaParameterisation(SuperconductingParameterisation):
     t_c0max: Temperature  # Critical temperature at zero field and strain
 
     @dependentphysicalproperty(unit="A/m^2")
-    def critical_current_density(self, op_cond: OperationalConditions) -> float:
+    def critical_current_density(self, op_cond: OpCondT) -> float:
         """
         Calculate the critical current density as a function of temperature,
         magnetic field, and strain.
@@ -119,7 +119,7 @@ class NbTiBotturaParameterisation(SuperconductingParameterisation):
     b_c20: MagneticField  # Upper critical flux density at zero temperature
 
     @dependentphysicalproperty(unit="A/m^2")
-    def critical_current_density(self, op_cond: OperationalConditions) -> float:
+    def critical_current_density(self, op_cond: OpCondT) -> float:
         """
         Calculate the critical current density as a function of temperature
         and magnetic field.
@@ -165,7 +165,7 @@ class SummersParameterisation(SuperconductingParameterisation):
     )
 
     @dependentphysicalproperty(unit="A/m^2")
-    def critical_current_density(self, op_cond: OperationalConditions) -> float:
+    def critical_current_density(self, op_cond: OpCondT) -> float:
         """
         Calculate the critical current density as a function of temperature,
         magnetic field, and strain.

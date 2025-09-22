@@ -13,9 +13,7 @@ from pint import Unit
 from pydantic import Field, field_validator, model_validator
 
 from matproplib.base import PMBaseModel
-from matproplib.conditions import (
-    OperationalConditions,
-)
+from matproplib.conditions import OpCondT
 from matproplib.properties.dependent import DependentPhysicalProperty
 
 DependentPhysicalPropertyT = TypeVar(
@@ -77,13 +75,7 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
             self.fractions,
         )
 
-    def value_as(
-        self,
-        op_cond: OperationalConditions,
-        unit: str | Unit,
-        *args,
-        **kwargs,
-    ) -> float:
+    def value_as(self, op_cond: OpCondT, unit: str | Unit, *args, **kwargs) -> float:
         """
         Returns
         -------
@@ -99,12 +91,7 @@ class Mixture(PMBaseModel, Generic[DependentPhysicalPropertyT]):
             d.value_as(op_cond, unit, *args, **kwargs) for d in self.dpp
         ])
 
-    def __call__(
-        self,
-        op_cond: OperationalConditions,
-        *args,
-        **kwargs,
-    ) -> float:
+    def __call__(self, op_cond: OpCondT, *args, **kwargs) -> float:
         """Helper to inject and modify conditions as required
 
         Returns

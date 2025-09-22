@@ -41,7 +41,7 @@ from matproplib.base import (
 from matproplib.conditions import (
     DependentPropertyConditionConfig,
     DependentPropertyConditionConfigTD,
-    OperationalConditions,
+    OpCondT,
     STPConditions,
 )
 from matproplib.converters.base import Converter, ConverterK, Converters
@@ -152,7 +152,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
 
         return self
 
-    def convert(self, name: ConverterK, op_cond: OperationalConditions, *args, **kwargs):
+    def convert(self, name: ConverterK, op_cond: OpCondT, *args, **kwargs):
         """Convert material to another format"""  # noqa: DOC201
         return self.converters[name].convert(self, op_cond, *args, **kwargs)
 
@@ -524,7 +524,7 @@ def mixture(  # noqa: PLR0912
     converters: Converters[ConverterK] | None = None,
     reference: References | None = None,
     *,
-    volume_conditions: OperationalConditions | None = None,
+    volume_conditions: OpCondT | None = None,
     **property_overrides: DependentPhysicalProperty,
 ) -> Material[ConverterK]:
     """
@@ -717,8 +717,7 @@ def dependentphysicalproperty(
 
         def __init__(
             self,
-            func: Callable[[Material, OperationalConditions], float]
-            | Callable[[OperationalConditions], float],
+            func: Callable[[Material, OpCondT], float] | Callable[[OpCondT], float],
         ):
             self.__create_model(func)
 
@@ -727,7 +726,7 @@ def dependentphysicalproperty(
                 func.__name__,
                 __base__=dpp,
                 value=(
-                    Callable[[Material, OperationalConditions], float],
+                    Callable[[Material, OpCondT], float],
                     Field(default=func, validate_default=True),
                 ),
                 unit=(

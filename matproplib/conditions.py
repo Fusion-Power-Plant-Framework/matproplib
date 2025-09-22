@@ -227,7 +227,7 @@ class DependentPropertyConditionConfig(PMBaseModel):
 
 
 def modify_conditions(
-    op_cond: OperationalConditions, op_cond_config: DependentPropertyConditionConfig
+    op_cond: OpCondT, op_cond_config: DependentPropertyConditionConfig
 ) -> ModifiedOperationalConditions:
     """
     Modify conditions to fit unit of condition configuration
@@ -338,3 +338,6 @@ class STPConditions(OperationalConditions):
         return OperationalConditions(
             temperature=md.pop("temperature"), pressure=md.pop("pressure"), **md
         )
+
+
+OpCondT = OperationalConditions | ModifiedOperationalConditions

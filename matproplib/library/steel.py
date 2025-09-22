@@ -6,9 +6,7 @@
 from pydantic import Field
 
 from matproplib.base import References, rebuild
-from matproplib.conditions import (
-    OperationalConditions,
-)
+from matproplib.conditions import OpCondT
 from matproplib.library.references import CHOONG_1975
 from matproplib.material import (
     FullMaterial,
@@ -31,7 +29,7 @@ from matproplib.tools.tools import annotate_reference
     op_cond_config={"temperature": ("degK", 300, 1170)},
     reference=annotate_reference(CHOONG_1975, "Equation 7"),
 )
-def _ss316l_specific_heat_capacity(op_cond: OperationalConditions) -> float:
+def _ss316l_specific_heat_capacity(op_cond: OpCondT) -> float:
     """Specific heat capacity of SS316L as a function of temperature."""  # noqa: DOC201
     # Orginal formula given in calories
     return 4.184 * (0.1097 + 3.174e-5 * op_cond.temperature)
@@ -42,7 +40,7 @@ def _ss316l_specific_heat_capacity(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degK", 300, 1600)},
     reference=annotate_reference(CHOONG_1975, "Equation 18"),
 )
-def _ss316l_density(op_cond: OperationalConditions) -> float:
+def _ss316l_density(op_cond: OpCondT) -> float:
     """Density of SS316L as a function of temperature."""  # noqa: DOC201
     return 8084.2 - 4.2086e-1 * op_cond.temperature - 3.8942e-5 * op_cond.temperature**2
 
@@ -52,7 +50,7 @@ def _ss316l_density(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degK", 300, 1600)},
     reference=annotate_reference(CHOONG_1975, "Equation 24"),
 )
-def _ss316l_thermal_expansion_coefficient(op_cond: OperationalConditions) -> float:
+def _ss316l_thermal_expansion_coefficient(op_cond: OpCondT) -> float:
     """Thermal expansion cofficient of SS316L as a function of temperature."""  # noqa: DOC201
     return (
         1.7887e-5 + 2.3977e-9 * op_cond.temperature + 3.2692e-13 * op_cond.temperature**2
@@ -64,7 +62,7 @@ def _ss316l_thermal_expansion_coefficient(op_cond: OperationalConditions) -> flo
     op_cond_config={"temperature": ("degK", 300, 1600)},
     reference=annotate_reference(CHOONG_1975, "Equation 30"),
 )
-def _ss316l_thermal_conductivity(op_cond: OperationalConditions) -> float:
+def _ss316l_thermal_conductivity(op_cond: OpCondT) -> float:
     """Thermal conductivity of SS316L as a function of temperature."""  # noqa: DOC201
     return 9.248 + 1.571e-2 * op_cond.temperature
 

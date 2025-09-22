@@ -14,7 +14,7 @@ from pydantic import Field, RootModel, SerializeAsAny, model_validator
 from matproplib.base import PMBaseModel, all_subclasses
 
 if TYPE_CHECKING:
-    from matproplib.conditions import OperationalConditions
+    from matproplib.conditions import OpCondT
     from matproplib.material import Material
 
 
@@ -76,5 +76,5 @@ class Converter(PMBaseModel, ABC):
     name: str
 
     @abstractmethod
-    def convert(self, material: Material, op_cond: OperationalConditions):
+    def convert(self, material: Material, op_cond: OpCondT):
         """Function to convert material to secondary format"""

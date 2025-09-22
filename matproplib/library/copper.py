@@ -9,7 +9,7 @@ import numpy as np
 from pydantic import Field
 
 from matproplib.base import References, rebuild
-from matproplib.conditions import OperationalConditions
+from matproplib.conditions import OpCondT
 from matproplib.library.references import HUST_1984, SIMON_1992
 from matproplib.material import (
     FullMaterial,
@@ -49,7 +49,7 @@ class Bronze(FullMaterial):
     op_cond_config={"temperature": ("degK", 4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 6-1"),
 )
-def _copper_youngs_modulus(op_cond: OperationalConditions) -> float:
+def _copper_youngs_modulus(op_cond: OpCondT) -> float:
     return 1e9 * (137.0 - 1.27e-4 * op_cond.temperature**2)
 
 
@@ -58,7 +58,7 @@ def _copper_youngs_modulus(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degK", 4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 6-3"),
 )
-def _copper_shear_modulus(op_cond: OperationalConditions) -> float:
+def _copper_shear_modulus(op_cond: OpCondT) -> float:
     return 1e9 * (51.0 - 4.63e-5 * op_cond.temperature**2)
 
 
@@ -67,7 +67,7 @@ def _copper_shear_modulus(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degK", 4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 6-5"),
 )
-def _copper_bulk_modulus(op_cond: OperationalConditions) -> float:
+def _copper_bulk_modulus(op_cond: OpCondT) -> float:
     return 1e9 * (142.0 - 5.7e-5 * op_cond.temperature**2)
 
 
@@ -76,7 +76,7 @@ def _copper_bulk_modulus(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degK", 4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 6-6"),
 )
-def _copper_poisson_ratio(op_cond: OperationalConditions) -> float:
+def _copper_poisson_ratio(op_cond: OpCondT) -> float:
     return 0.339 + 7.03e-6 * op_cond.temperature**2
 
 
@@ -85,9 +85,7 @@ def _copper_poisson_ratio(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degK", 1, 300)},
     reference=annotate_reference(HUST_1984, "Equation 1.1.3"),
 )
-def _copper_thermal_conductivity(
-    self: Material, op_cond: OperationalConditions
-) -> float:
+def _copper_thermal_conductivity(self: Material, op_cond: OpCondT) -> float:
     p1: Final[float] = 1.754e-8
     p2: Final[float] = 2.763
     p3: Final[float] = 1102.0
@@ -141,7 +139,7 @@ def _copper_thermal_conductivity(
     op_cond_config={"temperature": ("degK", 4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 7-1"),
 )
-def _copper_specific_heat_capacity(op_cond: OperationalConditions) -> float:
+def _copper_specific_heat_capacity(op_cond: OpCondT) -> float:
     """
     Calculate the specific heat capacity of cryogenic copper (temperature-dependent).
 
@@ -150,7 +148,7 @@ def _copper_specific_heat_capacity(op_cond: OperationalConditions) -> float:
 
     Parameters
     ----------
-    op_cond : OperationalConditions
+    op_cond:
         The operational conditions, including temperature, for which
         the specific heat capacity is to be calculated.
 
@@ -182,7 +180,7 @@ def _copper_specific_heat_capacity(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degK", 4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 7-3"),
 )
-def _copper_thermal_expansion_coefficient(op_cond: OperationalConditions) -> float:
+def _copper_thermal_expansion_coefficient(op_cond: OpCondT) -> float:
     poly_coeffs: Final[list[float]] = [
         -11.27,
         37.36,
@@ -202,7 +200,7 @@ def _copper_thermal_expansion_coefficient(op_cond: OperationalConditions) -> flo
     op_cond_config={"temperature": ("degK", 1.4, 300)},
     reference=annotate_reference(SIMON_1992, "Equation 8-8"),
 )
-def _copper_magnetic_susceptibility(op_cond: OperationalConditions) -> float:
+def _copper_magnetic_susceptibility(op_cond: OpCondT) -> float:
     return 1e6 * (-9.84 + 3.59 / op_cond.temperature + 6.66e-4 * op_cond.temperature)
 
 
@@ -356,9 +354,7 @@ def _copper_magneto_resistivity(resistivity: float, field: float) -> float:
     },
     reference=annotate_reference(SIMON_1992, "Equation 8-1, 8-7"),
 )
-def _copper_electrical_resistivity(
-    self: Material, op_cond: OperationalConditions
-) -> float:
+def _copper_electrical_resistivity(self: Material, op_cond: OpCondT) -> float:
     """
     Calculate the electrical resistivity of cryogenic copper with combined effects.
 

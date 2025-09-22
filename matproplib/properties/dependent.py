@@ -34,7 +34,7 @@ from matproplib.base import (
 from matproplib.conditions import (
     DependentPropertyConditionConfig,
     ModifiedOperationalConditions,
-    OperationalConditions,
+    OpCondT,
     check_conditions,
     modify_conditions,
 )
@@ -63,7 +63,7 @@ class _WrapCallable:
         return self.value(*args, **kwargs) * self.conversion
 
 
-def _no_dependence(value: float) -> Callable[[OperationalConditions], float]:
+def _no_dependence(value: float) -> Callable[[OpCondT], float]:
     class NoDependence(_NoDependence):
         """Invariant physical property
 
@@ -88,7 +88,7 @@ class DependentCallable(Protocol):
 
     def __call__(  # noqa: D102
         self,
-        op_cond: OperationalConditions,
+        op_cond: OpCondT,
         *args,
         **kwargs,
     ) -> float: ...
@@ -97,7 +97,7 @@ class DependentCallable(Protocol):
 class DependentPhysicalPropertyTD(TypedDict):
     """DependentPhysicalProperty typing"""
 
-    value: Callable[[OperationalConditions], ArrayFloat] | ArrayFloat
+    value: Callable[[OpCondT], ArrayFloat] | ArrayFloat
     unit: NotRequired[Unit | str]
     op_cond_config: NotRequired[
         DependentPropertyConditionConfig
@@ -110,7 +110,7 @@ class DependentPhysicalPropertyTD(TypedDict):
 class DependentPhysicalProperty(BasePhysicalProperty):
     """A property that is dependent on operating conditions"""
 
-    value: Callable[[OperationalConditions], ArrayFloat]
+    value: Callable[[OpCondT], ArrayFloat]
     op_cond_config: DependentPropertyConditionConfig | None = None
 
     @classmethod
@@ -132,8 +132,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
     @field_serializer("value")
     @classmethod
     def _serialise_value(
-        cls,
-        value: Callable[[OperationalConditions], ArrayFloat] | None,
+        cls, value: Callable[[OpCondT], ArrayFloat] | None
     ) -> ArrayFloat | bool | dict[str, float | bool] | None:
         """
         Returns
@@ -231,13 +230,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
         object.__setattr__(self, "unit", default)  # noqa: PLC2801
         return self
 
-    def value_as(
-        self,
-        op_cond: OperationalConditions,
-        unit: str | Unit,
-        *args,
-        **kwargs,
-    ) -> float:
+    def value_as(self, op_cond: OpCondT, unit: str | Unit, *args, **kwargs) -> float:
         """
         Returns
         -------
@@ -267,12 +260,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
                 f"({de.args[2]}) to '{de.args[1]}' ({de.args[3]})"
             ) from None
 
-    def __call__(
-        self,
-        op_cond: OperationalConditions,
-        *args,
-        **kwargs,
-    ) -> float:
+    def __call__(self, op_cond: OpCondT, *args, **kwargs) -> float:
         """Helper to inject and modify conditions as required
 
         Returns
@@ -294,7 +282,7 @@ class DependentPhysicalProperty(BasePhysicalProperty):
 
 
 def _modify_and_check(
-    op_cond: OperationalConditions, op_cond_config: DependentPropertyConditionConfig
+    op_cond: OpCondT, op_cond_config: DependentPropertyConditionConfig
 ) -> ModifiedOperationalConditions:
     new_op_cond = modify_conditions(op_cond, op_cond_config)
     check_conditions(new_op_cond, op_cond_config)
@@ -307,7 +295,7 @@ class UndefinedProperty(DependentPhysicalProperty):
     value: None = Field(default=None, frozen=True)
     unit: Literal[""] = Field(default="", frozen=True)
 
-    def __call__(self, op_cond: OperationalConditions, *args, **kwargs):
+    def __call__(self, op_cond: OpCondT, *args, **kwargs):
         """Call for Undefined property is undefined"""
         raise NotImplementedError("")
 
@@ -319,7 +307,7 @@ class AttributeErrorProperty(UndefinedProperty):
 
     msg: str = Field(default="", frozen=True)
 
-    def __call__(self, op_cond: OperationalConditions, *args, **kwargs):  # noqa: ARG002
+    def __call__(self, op_cond: OpCondT, *args, **kwargs):  # noqa: ARG002
         """Call for Undefined property is undefined"""  # noqa: DOC501
         raise AttributeError(self.msg)
 
