@@ -156,10 +156,6 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         """Convert material to another format"""  # noqa: DOC201
         return self.converters[name].convert(self, op_cond, *args, **kwargs)
 
-    @classmethod
-    def import_from(cls, converter: Converter):
-        return converter.import_from(material_cls=cls)
-
     @property
     def is_superconductor(self):
         """Does the material have any superconducting parameterisation"""
