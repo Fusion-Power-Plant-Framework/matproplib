@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Tungsten materials"""
 
-import numpy as np
 from pydantic import Field
 
 from matproplib.base import References, rebuild
@@ -23,49 +22,29 @@ from matproplib.properties.dependent import (
     YoungsModulus,
 )
 from matproplib.properties.group import props
+from matproplib.tools.tools import From1DData
 
-
-@dependentphysicalproperty(
-    CoefficientThermalExpansion,
-    op_cond_config={"temperature": ("degC", 200, 1400)},
-    reference=PLANSEE_2025,
+_w_cte = From1DData(
+    [200, 400, 600, 800, 1000, 1200, 1400],
+    [4.38, 4.41, 4.54, 4.68, 4.83, 4.96, 5.10],
+    "temperature",
 )
-def _w_coefficient_thermal_expansion(op_cond: OpCondT) -> float:
-    temperature_c = [200, 400, 600, 800, 1000, 1200, 1400]
-    cte = [4.38, 4.41, 4.54, 4.68, 4.83, 4.96, 5.10]
-    return np.interp(op_cond.temperature, temperature_c, cte) * 1e-6
 
-
-@dependentphysicalproperty(
-    SpecificHeatCapacity,
-    op_cond_config={"temperature": ("degC", 0, 1100)},
-    reference=PLANSEE_2025,
+_w_shc = From1DData(
+    [0, 100, 300, 500, 700, 900, 1100],
+    [0.131, 0.135, 0.140, 0.144, 0.149, 0.154, 0.159],
+    "temperature",
 )
-def _w_specific_heat_capacity(op_cond: OpCondT) -> float:
-    temperature_c = [0, 100, 300, 500, 700, 900, 1100]
-    c_p = [0.131, 0.135, 0.140, 0.144, 0.149, 0.154, 0.159]
-    return np.interp(op_cond.temperature, temperature_c, c_p) * 1e3
 
-
-@dependentphysicalproperty(
-    ThermalConductivity,
-    op_cond_config={"temperature": ("degC", 25.4, 801)},
-    reference=PLANSEE_2025,
+_w_tc = From1DData(
+    [25.4, 101, 201, 401, 601, 801],
+    [174.11, 164.18, 153.67, 136.21, 125.78, 119.77],
+    "temperature",
 )
-def _w_thermal_conductivity(op_cond: OpCondT) -> float:
-    temperature_c = [25.4, 101, 201, 401, 601, 801]
-    k = [174.11, 164.18, 153.67, 136.21, 125.78, 119.77]
-    return np.interp(op_cond.temperature, temperature_c, k)
 
-
-@dependentphysicalproperty(
-    ElectricalResistivity,
-    op_cond_config={"temperature": ("degC", 0, 3369.33)},
-    reference=PLANSEE_2025,
-)
-def _w_electrical_resistivity(op_cond: OpCondT) -> float:
-    # fmt: off
-    temperature_c = [
+# fmt: off
+_w_er = From1DData(
+    [
         0.0, 12.6468, 38.6373, 68.1125, 97.5877, 127.063, 156.538, 186.013,
         215.488, 244.964, 274.439, 303.914, 333.389, 362.864, 392.34, 421.815, 451.29,
         480.765, 510.24, 539.715, 569.191, 598.666, 628.141, 657.616, 687.091, 716.567,
@@ -79,8 +58,8 @@ def _w_electrical_resistivity(op_cond: OpCondT) -> float:
         2632.45, 2396.65, 2661.93, 2691.4, 2720.88, 2750.35, 2779.83, 2809.3, 2838.78,
         2868.26, 2897.73, 2927.21, 2956.68, 2986.16, 3015.63, 3045.11, 3074.58, 3104.06,
         3133.53, 3163.01, 3192.48, 3221.96, 3251.43, 3280.91, 3310.38, 3339.86, 3369.33
-    ]
-    nu = [
+    ],
+    [
         0.04, 0.04, 0.05, 0.06, 0.07, 0.08, 0.08, 0.09, 0.1, 0.11, 0.12, 0.12, 0.13,
         0.14, 0.15, 0.16, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.21, 0.22, 0.23, 0.24,
         0.25, 0.26, 0.27, 0.28, 0.28, 0.29, 0.3, 0.31, 0.32, 0.33, 0.34, 0.35, 0.36,
@@ -90,9 +69,60 @@ def _w_electrical_resistivity(op_cond: OpCondT) -> float:
         0.76, 0.77, 0.78, 0.79, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.89, 0.8,
         0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.99, 1.0, 1.01, 1.02, 1.03,
         1.04, 1.05, 1.06, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.15, 1.16, 1.17
-    ]
-    # fmt: on
-    return np.interp(op_cond.temperature, temperature_c, nu) * 1e-6
+    ],
+    "temperature",
+)
+
+_w_ym = From1DData(
+    [
+        56.423, 194.1, 291.33, 388.57, 485.8, 583.04, 680.27, 777.51, 874.75, 971.98,
+        1069.2, 1166.5, 1263.7, 1360.9, 1458.2, 1555.4, 1652.6, 1749.9, 1847.1,
+        1944.3, 2002.1
+    ],
+    [
+        407.78, 401.38, 397.45, 393.16, 388.75, 384.29, 379.47, 374.6, 369.61, 366.14,
+        362.85, 359.5, 354.51, 348.41, 342.3, 336.2, 326.59, 313.7, 300.87, 287.81,
+        280.27
+    ],
+    "temperature",
+)
+# fmt: on
+
+
+@dependentphysicalproperty(
+    CoefficientThermalExpansion,
+    op_cond_config={"temperature": ("degC", 200, 1400)},
+    reference=PLANSEE_2025,
+)
+def _w_coefficient_thermal_expansion(op_cond: OpCondT) -> float:
+    return _w_cte(op_cond) * 1e-6
+
+
+@dependentphysicalproperty(
+    SpecificHeatCapacity,
+    op_cond_config={"temperature": ("degC", 0, 1100)},
+    reference=PLANSEE_2025,
+)
+def _w_specific_heat_capacity(op_cond: OpCondT) -> float:
+    return _w_shc(op_cond) * 1e3
+
+
+@dependentphysicalproperty(
+    ThermalConductivity,
+    op_cond_config={"temperature": ("degC", 25.4, 801)},
+    reference=PLANSEE_2025,
+)
+def _w_thermal_conductivity(op_cond: OpCondT) -> float:
+    return _w_tc(op_cond)
+
+
+@dependentphysicalproperty(
+    ElectricalResistivity,
+    op_cond_config={"temperature": ("degC", 0, 3369.33)},
+    reference=PLANSEE_2025,
+)
+def _w_electrical_resistivity(op_cond: OpCondT) -> float:
+    return _w_er(op_cond) * 1e-6
 
 
 @dependentphysicalproperty(
@@ -101,19 +131,7 @@ def _w_electrical_resistivity(op_cond: OpCondT) -> float:
     reference=PLANSEE_2025,
 )
 def _w_youngs_modulus(op_cond: OpCondT) -> float:
-    # fmt: off
-    temperature_c = [
-        56.423, 194.1, 291.33, 388.57, 485.8, 583.04, 680.27, 777.51, 874.75, 971.98,
-        1069.2, 1166.5, 1263.7, 1360.9, 1458.2, 1555.4, 1652.6, 1749.9, 1847.1,
-        1944.3, 2002.1
-    ]
-    y_m = [
-        407.78, 401.38, 397.45, 393.16, 388.75, 384.29, 379.47, 374.6, 369.61, 366.14,
-        362.85, 359.5, 354.51, 348.41, 342.3, 336.2, 326.59, 313.7, 300.87, 287.81,
-        280.27
-    ]
-    # fmt: on
-    return np.interp(op_cond.temperature, temperature_c, y_m) * 1e9
+    return _w_ym(op_cond) * 1e9
 
 
 @rebuild
