@@ -1173,7 +1173,7 @@ class MatMLXML(MatMLBase):
     class Meta:
         """Name of model"""
 
-        name = "MatMLXML"
+        name = "MatML_Doc"
 
     material: list[Material] = field(
         default_factory=list,
@@ -1204,7 +1204,7 @@ class MatMLXML(MatMLBase):
                 matches.extend(find_xml_node(child, tag_name))
             return matches
 
-        found_nodes = find_xml_node(etree.parse(filename).getroot(), "MatML_Doc")
+        found_nodes = find_xml_node(etree.parse(filename).getroot(), cls.Meta.name)
         if len(found_nodes) > 1:
             raise NotImplementedError("More than one MatML material found in xml file")
 
