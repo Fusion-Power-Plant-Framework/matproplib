@@ -5,7 +5,7 @@
 
 import numpy as np
 
-from matproplib.conditions import OperationalConditions
+from matproplib.conditions import OpCondT
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import FOKKENS_2003
 from matproplib.material import dependentphysicalproperty, material
@@ -39,7 +39,7 @@ Be12Ti = material(
         "doi": "10.1016/S0920-3796(02)00165-5",
     },
 )
-def BePB_CTE(op_cond: OperationalConditions) -> float:
+def BePB_CTE(op_cond: OpCondT) -> float:
     """
     .. doi:: 10.1016/S0920-3796(02)00165-5
 
@@ -89,7 +89,7 @@ def BePB_CTE(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degC", 0, 1000)},
     reference=FOKKENS_2003,
 )
-def BePB_specific_heat_capacity(op_cond: OperationalConditions):
+def BePB_specific_heat_capacity(op_cond: OpCondT):
     # fmt: off
     SHC_BePB1 = [
         0, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700,

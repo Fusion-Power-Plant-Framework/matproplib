@@ -5,7 +5,7 @@
 
 from typing import Final
 
-from matproplib.conditions import OperationalConditions
+from matproplib.conditions import OpCondT
 from matproplib.library.references import CORATO_2016, FERRACIN_2022
 from matproplib.material import dependentphysicalproperty, material
 from matproplib.properties.dependent import SpecificHeatCapacity
@@ -91,7 +91,7 @@ NB3SN_CERN_STRAND = SummersParameterisation(
         ),
     },
 )
-def nbti_specific_heat_capacity(op_cond: OperationalConditions) -> float:
+def nbti_specific_heat_capacity(op_cond: OpCondT) -> float:
     """
     Calculates the specific heat capacity of NbTi as a function of temperature.
     Provides the temperature-dependent specific heat capacity [J/(kg·K)] of the A15
@@ -144,7 +144,7 @@ NbTi = material(
         ),
     },
 )
-def nb3sn_specific_heat_capacity(op_cond: OperationalConditions) -> float:
+def nb3sn_specific_heat_capacity(op_cond: OpCondT) -> float:
     """
     Calculates the specific heat capacity of Nb₃Sn as a function of temperature.
     Provides the temperature-dependent specific heat capacity [J/(kg·K)] of the A15

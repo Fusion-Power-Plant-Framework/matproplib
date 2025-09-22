@@ -7,9 +7,7 @@ import numpy as np
 from pydantic import Field
 
 from matproplib.base import References, rebuild
-from matproplib.conditions import (
-    OperationalConditions,
-)
+from matproplib.conditions import OpCondT
 from matproplib.library.references import PLANSEE_2025
 from matproplib.material import (
     FullMaterial,
@@ -32,7 +30,7 @@ from matproplib.properties.group import props
     op_cond_config={"temperature": ("degC", 200, 1400)},
     reference=PLANSEE_2025,
 )
-def _w_coefficient_thermal_expansion(op_cond: OperationalConditions) -> float:
+def _w_coefficient_thermal_expansion(op_cond: OpCondT) -> float:
     temperature_c = [200, 400, 600, 800, 1000, 1200, 1400]
     cte = [4.38, 4.41, 4.54, 4.68, 4.83, 4.96, 5.10]
     return np.interp(op_cond.temperature, temperature_c, cte) * 1e-6
@@ -43,7 +41,7 @@ def _w_coefficient_thermal_expansion(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degC", 0, 1100)},
     reference=PLANSEE_2025,
 )
-def _w_specific_heat_capacity(op_cond: OperationalConditions) -> float:
+def _w_specific_heat_capacity(op_cond: OpCondT) -> float:
     temperature_c = [0, 100, 300, 500, 700, 900, 1100]
     c_p = [0.131, 0.135, 0.140, 0.144, 0.149, 0.154, 0.159]
     return np.interp(op_cond.temperature, temperature_c, c_p) * 1e3
@@ -54,7 +52,7 @@ def _w_specific_heat_capacity(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degC", 25.4, 801)},
     reference=PLANSEE_2025,
 )
-def _w_thermal_conductivity(op_cond: OperationalConditions) -> float:
+def _w_thermal_conductivity(op_cond: OpCondT) -> float:
     temperature_c = [25.4, 101, 201, 401, 601, 801]
     k = [174.11, 164.18, 153.67, 136.21, 125.78, 119.77]
     return np.interp(op_cond.temperature, temperature_c, k)
@@ -65,7 +63,7 @@ def _w_thermal_conductivity(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degC", 0, 3369.33)},
     reference=PLANSEE_2025,
 )
-def _w_electrical_resistivity(op_cond: OperationalConditions) -> float:
+def _w_electrical_resistivity(op_cond: OpCondT) -> float:
     # fmt: off
     temperature_c = [
         0.0, 12.6468, 38.6373, 68.1125, 97.5877, 127.063, 156.538, 186.013,
@@ -102,7 +100,7 @@ def _w_electrical_resistivity(op_cond: OperationalConditions) -> float:
     op_cond_config={"temperature": ("degC", 0, 2190.33)},
     reference=PLANSEE_2025,
 )
-def _w_youngs_modulus(op_cond: OperationalConditions) -> float:
+def _w_youngs_modulus(op_cond: OpCondT) -> float:
     # fmt: off
     temperature_c = [
         56.423, 194.1, 291.33, 388.57, 485.8, 583.04, 680.27, 777.51, 874.75, 971.98,
