@@ -6,10 +6,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, ClassVar, Literal
+from typing import TYPE_CHECKING, Any, ClassVar, Literal
 
 import numpy as np
 
+from matproplib.conditions import (
+    DependentPropertyConditionConfigTD,
+    OperationalConditions,
+)
 from matproplib.converters.base import Converter
 from matproplib.material import material
 from matproplib.properties.group import props
@@ -21,11 +25,14 @@ from matproplib.tools.matml.utilities import (
     to_data,
     to_unit,
 )
+from matproplib.tools.tools import From1DData
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    import numpy.typing as npt
     from pint import Unit
 
-    from matproplib.conditions import OperationalConditions
     from matproplib.material import Material
     from matproplib.properties.dependent import DependentPhysicalPropertyTD
 
@@ -58,21 +65,71 @@ def rename(name: str) -> str:
     return name_pattern.sub("_", name).lower().replace("'", "").replace("-", "_")
 
 
+def _single_multi_value(val: Sequence[Any]):
+    if len(val) == 1:
+        return val[0]
+    if isinstance(val[0], float):
+        return np.array(val)
+    return val
+
+
+def _op_cond_config_creator(
+    name: str, value: npt.NDArray, unit: Unit
+) -> DependentPropertyConditionConfigTD:
+    if name in OperationalConditions.model_fields.keys() ^ {"reference"}:
+        n_unit = (
+            OperationalConditions.model_fields[name]
+            .annotation.model_fields["unit"]
+            .default
+        )
+        if unit == n_unit:
+            return {name: {"lower": value.min(), "upper": value.max()}}
+    return {name: {"unit": unit, "lower": value.min(), "upper": value.max()}}
+
+
 def convert_to_properties(
     prop_in: dict[str, dict[str, dict[str, float | Unit]]],
 ) -> dict[str, DependentPhysicalPropertyTD]:
-    """Convert data to dependent property dictionary"""  # noqa: DOC201
+    """Convert data to dependent property dictionary
+
+    Raises
+    ------
+    ValueError
+        No independent property found for interpolation
+    """  # noqa: DOC201
     properties = {}
     for v in prop_in.values():
+        prop_out = {}
         for k, _pa in v.items():
-            if _pa and _pa["dependent"]:
-                if len(_pa["value"]) == 1:
-                    _pa["value"] = _pa["value"][0]
-                elif isinstance(_pa["value"][0], float):
-                    # TODO @je-cook: Create interpolation function
-                    # 1
-                    _pa["value"] = np.array(_pa["value"])
-                properties[NAME_TRANSLATIONS.get(k, k)] = _pa
+            if _pa.get("dependent") is not None:
+                prop_out["name"] = k
+                prop_out["value"] = _single_multi_value(_pa["value"])
+                prop_out["unit"] = _pa["unit"]
+
+            if _pa.get("independent") is not None:
+                prop_out["indep"] = {
+                    "name": k,
+                    "unit": _pa["unit"],
+                    "value": _single_multi_value(_pa["value"]),
+                }
+
+        if prop_out.get("value") is not None:
+            if prop_out.get("indep") is not None:
+                indep = prop_out.pop("indep")
+                name = NAME_TRANSLATIONS.get(indep["name"], indep["name"])
+                prop_out["value"] = From1DData(
+                    prop_out["indep"]["value"],
+                    prop_out["value"],
+                    name,
+                )
+                prop_out["op_cond_config"] = _op_cond_config_creator(
+                    name, prop_out["value"].x, prop_out["indep"]["unit"]
+                )
+            elif isinstance(prop_out["value"], np.ndarray):
+                raise ValueError("No independent property to fit against")
+
+            name = prop_out.pop("name")
+            properties[NAME_TRANSLATIONS.get(name, name)] = prop_out
     return properties
 
 
