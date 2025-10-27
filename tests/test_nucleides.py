@@ -83,11 +83,11 @@ class TestElements:
 
 
 def test_weight_volume_fraction_conversion():
-    densities = {"H": 5.1, "C": 6}
+    densities = {"H": 5.1, "C13": 6}
     vf = mass_fraction_to_volume_fraction(
         {
             "H": ElementFraction(element="H", fraction=0.201131),
-            "C": ElementFraction(element="C", fraction=0.798869),
+            "C13": ElementFraction(element="C13", fraction=0.798869),
         },
         densities,
     )
@@ -95,4 +95,4 @@ def test_weight_volume_fraction_conversion():
     wf = volume_fraction_to_mass_fraction(vf, densities)
 
     assert wf["H"].fraction == pytest.approx(0.201131)
-    assert wf["C"].fraction == pytest.approx(0.798869)
+    assert wf["C13"].fraction == pytest.approx(0.798869)

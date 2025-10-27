@@ -276,6 +276,14 @@ def atomic_fraction_to_mass_fraction(ef_dict: ElementsTD) -> ElementsTD:
     return _converter(ef_dict, lambda ef: ef.fraction * ef.element.element.mass)
 
 
+def _get_dn(densities: dict[str, float], el: Element):
+    if isinstance(el.element, pt.core.Element):
+        return densities[el.element.symbol]
+
+    elm = el.element
+    return densities[f"{elm.symbol}{elm.isotope}"]
+
+
 def mass_fraction_to_volume_fraction(
     ef_dict: ElementsTD, densities: dict[str, float]
 ) -> ElementsTD:
@@ -285,9 +293,7 @@ def mass_fraction_to_volume_fraction(
     :
         Volume fraction of model
     """
-    return _converter(
-        ef_dict, lambda ef: ef.fraction * densities[ef.element.element.symbol]
-    )
+    return _converter(ef_dict, lambda ef: ef.fraction * _get_dn(densities, ef.element))
 
 
 def volume_fraction_to_mass_fraction(
@@ -299,9 +305,7 @@ def volume_fraction_to_mass_fraction(
     :
         Mass fraction of model
     """
-    return _converter(
-        ef_dict, lambda ef: ef.fraction / densities[ef.element.element.symbol]
-    )
+    return _converter(ef_dict, lambda ef: ef.fraction / _get_dn(densities, ef.element))
 
 
 def atomic_fraction_to_volume_fraction(
@@ -317,7 +321,7 @@ def atomic_fraction_to_volume_fraction(
         ef_dict,
         lambda ef: ef.fraction
         * ef.element.element.mass
-        / densities[ef.element.element.symbol],
+        / _get_dn(densities, ef.element),
     )
 
 
@@ -333,7 +337,7 @@ def volume_fraction_to_atomic_fraction(
     return _converter(
         ef_dict,
         lambda ef: ef.fraction
-        * densities[ef.element.element.symbol]
+        * _get_dn(densities, ef.element)
         / ef.element.element.mass,
     )
 
