@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING, ClassVar, Literal
 import numpy as np
 import periodictable as pt
 
-from matproplib.base import N_AVOGADRO
+from matproplib.base import N_AVOGADRO, ureg
 from matproplib.converters.base import Converter
 from matproplib.nucleides import (
     ElementsTD,
@@ -25,6 +25,7 @@ from matproplib.tools import (
     to_openmc_material,
     to_serpent_material,
 )
+from matproplib.tools.neutronics import density_from_unit_cell
 
 if TYPE_CHECKING:
     import openmc
@@ -102,6 +103,11 @@ class OpenMCNeutronicConfig(NeutronicConfig):
         -------
         :
             OpenMC material object
+
+        Raises
+        ------
+        ValueError
+            If density cannot be calculated from unit cell
         """
         no_atoms = material.elements._no_atoms or self.number_of_atoms_in_sample  # noqa: SLF001
         ef_dict = _to_fraction_conversion(self.percent_type, material.elements.root)
@@ -114,11 +120,26 @@ class OpenMCNeutronicConfig(NeutronicConfig):
                 elements[k] = v.fraction
 
         # density calculation from unit cell
-        density = (
-            material.density.value_as(op_cond, "g/cm^3")
-            if hasattr(material, "density")
-            else None
-        )
+        if hasattr(material, "density"):
+            density = material.density.value_as(op_cond, "g/cm^3")
+        elif None not in {
+            no_atoms,
+            self.atoms_per_unit_cell,
+            self.volume_of_unit_cell,
+        }:
+            density = ureg.Quantity(
+                density_from_unit_cell(
+                    no_atoms,
+                    self.atoms_per_unit_cell,
+                    material.average_molar_mass,
+                    self.volume_of_unit_cell,
+                ),
+                "kg/m^3",
+            ).to("g/cm^3")
+        else:
+            raise ValueError(
+                "Density not provided and cannot be calculated from unit cell"
+            )
 
         return to_openmc_material(
             name=material.name,
@@ -134,9 +155,6 @@ class OpenMCNeutronicConfig(NeutronicConfig):
             enrichment=self.enrichment,
             enrichment_target=self.enrichment_target,
             enrichment_type=self.enrichment_type,
-            volume_of_unit_cell=self.volume_of_unit_cell,
-            atoms_in_sample=no_atoms,
-            atoms_per_unit_cell=self.atoms_per_unit_cell,
             packing_fraction=self.packing_fraction,
             temperature_to_neutronics_code=temperature_to_neutronics_code,
         )

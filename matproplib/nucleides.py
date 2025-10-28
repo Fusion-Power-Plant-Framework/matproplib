@@ -135,6 +135,17 @@ class Elements(RootModel):
             for iso in ef.element.nucleides
         })
 
+    @property
+    def average_molar_mass(self) -> float:
+        """Average molar mass of elements"""
+        mass, moles = 0, 0
+
+        for ef in self.root.values():
+            mass += ef.fraction * ef.element.element.mass
+            moles += ef.fraction
+
+        return mass / moles
+
 
 def _modify_fraction(ef: ElementFraction, iso: Element):
     if isinstance(ef.element.element, pt.core.Element):

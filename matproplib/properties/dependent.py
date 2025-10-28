@@ -38,6 +38,7 @@ from matproplib.conditions import (
     check_conditions,
     modify_conditions,
 )
+from matproplib.tools.neutronics import density_from_unit_cell
 from matproplib.tools.serialisation import (
     deserialise,
     inspect_lambda,
@@ -346,6 +347,26 @@ class Density(DependentPhysicalProperty):
             unit = unit.replace("b-cm", "(b.cm)")
 
         return cls(value=tval, unit=unit.replace("atom", "amu"))
+
+    @classmethod
+    def from_unit_cell(cls):
+        """Create the density object using values from the OpenMC converter
+
+        Notes
+        -----
+        The OpenMC converter must be available on the material
+        """  # noqa: DOC201
+
+        def _density(self, _oc):
+            omc_conv = self.converters["openmc"]
+            return density_from_unit_cell(
+                self.elements._no_atoms or omc_conv.number_of_atoms_in_sample,  # noqa: SLF001
+                omc_conv.atoms_per_unit_cell,
+                self.elements.average_molar_mass,
+                omc_conv.volume_of_unit_cell,
+            )
+
+        return cls(value=_density)
 
 
 class CoerciveField(DependentPhysicalProperty):

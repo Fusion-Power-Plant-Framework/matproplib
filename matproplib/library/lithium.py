@@ -8,6 +8,7 @@ from matproplib.library.references import FOKKENS_2003
 from matproplib.material import dependentphysicalproperty, material
 from matproplib.properties.dependent import (
     CoefficientThermalExpansion,
+    Density,
     SpecificHeatCapacity,
 )
 from matproplib.properties.group import props
@@ -80,6 +81,7 @@ Li4SiO4 = material(
                 "doi": "10.1016/S0920-3796(02)00165-5",
             },
         ),
+        density=Density.from_unit_cell(),
     ),
     converters=OpenMCNeutronicConfig(
         volume_of_unit_cell=1.1543e-27,
@@ -98,6 +100,7 @@ Li2SiO3 = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
+    density=Density.from_unit_cell(),
 )
 
 Li2ZrO3 = material(
@@ -109,6 +112,7 @@ Li2ZrO3 = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
+    density=Density.from_unit_cell(),
 )
 
 Li2TiO3 = material(
@@ -120,4 +124,5 @@ Li2TiO3 = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
+    density=Density.from_unit_cell(),
 )
