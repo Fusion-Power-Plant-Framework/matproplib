@@ -125,8 +125,12 @@ def to_openmc_material(
 
 
 def density_from_unit_cell(
-    atoms_in_sample, atoms_per_unit_cell, average_molar_mass, volume_of_unit_cell
-):
+    atoms_in_sample: int,
+    atoms_per_unit_cell: int,
+    average_molar_mass: float,
+    volume_of_unit_cell: float,
+) -> float:
+    """Density from a unit cell"""  # noqa: DOC201
     molar_mass = atoms_in_sample * average_molar_mass
     mass = atoms_per_unit_cell * molar_mass * ureg.Quantity("amu").to("kg").magnitude
     return mass / volume_of_unit_cell

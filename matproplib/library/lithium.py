@@ -101,6 +101,11 @@ Li2SiO3 = material(
         enrichment_type="atomic",
     ),
     density=Density.from_unit_cell(),
+    reference={
+        "id": "liso3_cell",
+        "type": "article",
+        "doi": "10.1016/j.ssi.2019.02.019",
+    },
 )
 
 Li2ZrO3 = material(
