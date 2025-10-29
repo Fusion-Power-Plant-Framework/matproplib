@@ -11,6 +11,7 @@ from matproplib.library.references import FOKKENS_2003
 from matproplib.material import dependentphysicalproperty, material
 from matproplib.properties.dependent import (
     CoefficientThermalExpansion,
+    Density,
     SpecificHeatCapacity,
 )
 from matproplib.properties.group import props
@@ -27,6 +28,7 @@ Be12Ti = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
+    density=Density.from_unit_cell(),
 )
 
 

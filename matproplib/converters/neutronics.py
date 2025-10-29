@@ -114,7 +114,7 @@ class OpenMCNeutronicConfig(NeutronicConfig):
         # Isotope-element separation
         isotopes, elements = {}, {}
         for k, v in ef_dict.items():
-            if isinstance(v.element, pt.core.Isotope):
+            if isinstance(v.element.element, pt.core.Isotope):
                 isotopes[k] = v.fraction
             else:
                 elements[k] = v.fraction
