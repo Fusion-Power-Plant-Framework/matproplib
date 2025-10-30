@@ -67,7 +67,7 @@ class TestOpenMCNeutronics:
             )().convert("openmc", test_condition, temperature_to_neutronics_code=True)
 
     def test_material_with_bad_density(self, condition):
-        with pytest.raises(ValueError, match="density"):
+        with pytest.raises(ValueError, match="Density"):
             material(
                 "Simple",
                 "H2O",

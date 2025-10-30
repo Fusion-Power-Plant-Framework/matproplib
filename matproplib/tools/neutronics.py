@@ -63,16 +63,13 @@ def to_openmc_material(
     name: str,
     density_unit: str,
     percent_type: Literal["atomic", "mass"],
+    density: float,
     packing_fraction: float = 1.0,
     enrichment: float | None = None,
     enrichment_target: str | None = None,
     temperature: float | None = None,
     elements: dict[str, float] | None = None,
     isotopes: dict[str, float] | None = None,
-    density: float | None = None,
-    atoms_in_sample: int | None = None,
-    atoms_per_unit_cell: int | None = None,
-    volume_of_unit_cell: float | None = None,
     enrichment_type: str | None = None,
     material_id: int | None = None,
     *,
@@ -93,26 +90,16 @@ def to_openmc_material(
     ValueError
         Arrays used in temperature specification
     """
-    if density is None and None in {atoms_per_unit_cell, volume_of_unit_cell}:
-        raise ValueError(
-            "density calculation requires 'atoms_per_unit_cell' and "
-            "'volume_per_unit_cell' to be set when density is unset"
-        )
-    percent_type = NM_FRACTION_TYPE_MAPPING[percent_type]
+    nm_percent_type = NM_FRACTION_TYPE_MAPPING[percent_type]
     enrichment_type = NM_FRACTION_TYPE_MAPPING.get(enrichment_type)
     en_el = _enrichment_check(enrichment, enrichment_target, enrichment_type)
-    volume_of_unit_cell_cm3 = (
-        None
-        if volume_of_unit_cell is None
-        else ureg.Quantity(volume_of_unit_cell, "m^3").to("cm^3").magnitude
-    )
 
     with _get_openmc() as openmc:
         material = openmc.Material(name=name, material_id=material_id)
 
         if isotopes:
             for is_name, frac in isotopes.items():
-                material.add_nuclide(is_name, frac, percent_type)
+                material.add_nuclide(is_name, frac, nm_percent_type)
 
         if elements:
             for el_name, frac in elements.items():
@@ -125,35 +112,28 @@ def to_openmc_material(
                     if el_name == en_el
                     else {}
                 )
-                material.add_element(el_name, frac, percent_type=percent_type, **extra)
+                material.add_element(
+                    el_name, frac, percent_type=nm_percent_type, **extra
+                )
 
         # Ordering of nucleide can effect results
         material._nuclides = sorted(material._nuclides)  # noqa: SLF001
-
+        material.set_density(density_unit.replace("^", ""), density * packing_fraction)
         if temperature_to_neutronics_code:
             material.temperature = temperature
-
-        if density is not None:
-            pass
-        elif None not in {
-            atoms_in_sample,
-            atoms_per_unit_cell,
-            volume_of_unit_cell_cm3,
-        }:
-            molar_mass = atoms_in_sample * material.average_molar_masss
-            mass = (
-                atoms_per_unit_cell * molar_mass * ureg.Quantity("amu").to("g").magnitude
-            )
-            density = mass / volume_of_unit_cell_cm3
-        else:
-            raise ValueError(
-                "Density or atom_per_unt_cell, volume_of_unit_cell"
-                " and atoms_in_unit_cell must be provided"
-            )
-
-        material.set_density(density_unit.replace("^", ""), density * packing_fraction)
-
     return material
+
+
+def density_from_unit_cell(
+    atoms_in_sample: int,
+    atoms_per_unit_cell: int,
+    average_molar_mass: float,
+    volume_of_unit_cell: float,
+) -> float:
+    """Density from a unit cell"""  # noqa: DOC201
+    molar_mass = atoms_in_sample * average_molar_mass
+    mass = atoms_per_unit_cell * molar_mass * ureg.Quantity("amu").to("kg").magnitude
+    return mass / volume_of_unit_cell
 
 
 def to_fispact_material(
