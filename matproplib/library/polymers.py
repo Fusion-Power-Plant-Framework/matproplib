@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Polymer materials"""
 
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from pydantic import Field
 
 from matproplib.base import rebuild
@@ -42,4 +44,9 @@ class EpoxyResin(FullMaterial):
             },
         },
         poissons_ratio=0.33,
+    )
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
     )

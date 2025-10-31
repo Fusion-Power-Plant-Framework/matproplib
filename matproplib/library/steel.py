@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Steel materials"""
 
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from pydantic import Field
 
 from matproplib.base import References, rebuild
@@ -85,6 +87,11 @@ class SS316_L(FullMaterial):
         }
     )
     reference: References = CHOONG_1975
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
+    )
     properties: PropertiesT_co = props(
         as_field=True,
         density=_ss316l_density,

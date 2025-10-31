@@ -6,6 +6,7 @@
 from typing import Final
 
 from matproplib.conditions import OpCondT
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import CORATO_2016, FERRACIN_2022
 from matproplib.material import dependentphysicalproperty, material
 from matproplib.properties.dependent import SpecificHeatCapacity
@@ -129,6 +130,7 @@ NbTi = material(
         specific_heat_capacity=nbti_specific_heat_capacity,
         superconducting_parameterisation=NBTI_ITER_STRAND,
     ),
+    converters=OpenMCNeutronicConfig(),
 )
 
 
@@ -188,4 +190,5 @@ Nb3Sn = material(
         specific_heat_capacity=nb3sn_specific_heat_capacity,
         superconducting_parameterisation=NBS3N_WST_TF_STRAND,
     ),
+    converters=OpenMCNeutronicConfig(),
 )

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Concrete materials"""
 
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.material import material
 from matproplib.properties.group import props
 
@@ -20,6 +21,7 @@ Concrete = material(
         "Fe": 0.01378,
     },
     properties=props(as_field=True, density=2250, poissons_ratio=0.33),
+    converters=OpenMCNeutronicConfig(),
 )
 
 OrdinaryConcrete = material(
@@ -37,6 +39,7 @@ OrdinaryConcrete = material(
         "K": 0.0192,
     },
     properties=props(as_field=True, density=2200, poissons_ratio=0.33),
+    converters=OpenMCNeutronicConfig(),
 )
 HeavyConcrete = material(
     "HeavyConcrete",
@@ -52,4 +55,5 @@ HeavyConcrete = material(
         "P": 0.0015,
     },
     properties=props(as_field=True, density=3600, poissons_ratio=0.33),
+    converters=OpenMCNeutronicConfig(),
 )

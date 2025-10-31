@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Tungsten materials"""
 
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from pydantic import Field
 
 from matproplib.base import References, rebuild
@@ -161,6 +163,11 @@ class PlanseeTungsten(FullMaterial):
             "Pb": 1e-6,
             "fraction_type": "mass",
         }
+    )
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
     )
     reference: References = PLANSEE_2025
     properties: PropertiesT_co = props(
