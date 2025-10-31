@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Polymer materials"""
 
-from matproplib.converters.base import Converters
-from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from pydantic import Field
 
 from matproplib.base import rebuild
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.material import FullMaterial, PropertiesT_co
 from matproplib.nucleides import Elements
 from matproplib.properties.group import props

@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 """Tungsten materials"""
 
-from matproplib.converters.base import Converters
-from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from pydantic import Field
 
 from matproplib.base import References, rebuild
 from matproplib.conditions import OpCondT
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import PLANSEE_2025
 from matproplib.material import (
     FullMaterial,

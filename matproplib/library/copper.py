@@ -6,12 +6,12 @@
 from typing import Final
 
 import numpy as np
-from matproplib.converters.base import Converters
-from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from pydantic import Field
 
 from matproplib.base import References, rebuild
 from matproplib.conditions import OpCondT
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import HUST_1984, SIMON_1992
 from matproplib.material import (
     FullMaterial,
