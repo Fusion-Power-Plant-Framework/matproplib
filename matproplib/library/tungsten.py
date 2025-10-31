@@ -7,6 +7,8 @@ from pydantic import Field
 
 from matproplib.base import References, rebuild
 from matproplib.conditions import OpCondT
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import PLANSEE_2025
 from matproplib.material import (
     FullMaterial,
@@ -161,6 +163,11 @@ class PlanseeTungsten(FullMaterial):
             "Pb": 1e-6,
             "fraction_type": "mass",
         }
+    )
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
     )
     reference: References = PLANSEE_2025
     properties: PropertiesT_co = props(

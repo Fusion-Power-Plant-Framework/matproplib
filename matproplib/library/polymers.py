@@ -6,6 +6,8 @@
 from pydantic import Field
 
 from matproplib.base import rebuild
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.material import FullMaterial, PropertiesT_co
 from matproplib.nucleides import Elements
 from matproplib.properties.group import props
@@ -42,4 +44,9 @@ class EpoxyResin(FullMaterial):
             },
         },
         poissons_ratio=0.33,
+    )
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
     )

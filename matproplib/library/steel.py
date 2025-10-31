@@ -7,6 +7,8 @@ from pydantic import Field
 
 from matproplib.base import References, rebuild
 from matproplib.conditions import OpCondT
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import CHOONG_1975
 from matproplib.material import (
     FullMaterial,
@@ -85,6 +87,11 @@ class SS316_L(FullMaterial):
         }
     )
     reference: References = CHOONG_1975
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
+    )
     properties: PropertiesT_co = props(
         as_field=True,
         density=_ss316l_density,

@@ -96,6 +96,7 @@ Water = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    converters=OpenMCNeutronicConfig(),
     reference=COOLPROP_7,
 )
 
@@ -141,6 +142,7 @@ Air = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    converters=OpenMCNeutronicConfig(),
     reference=COOLPROP_7,
 )
 
@@ -181,6 +183,7 @@ Hydrogen = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    converters=OpenMCNeutronicConfig(),
     reference=COOLPROP_7,
 )
 
@@ -222,5 +225,6 @@ Helium = material(
         minimum_ultimate_tensile_stress=0,
         average_ultimate_tensile_stress=0,
     ),
+    converters=OpenMCNeutronicConfig(),
     reference=COOLPROP_7,
 )

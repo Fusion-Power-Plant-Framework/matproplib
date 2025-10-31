@@ -10,6 +10,8 @@ from pydantic import Field
 
 from matproplib.base import References, rebuild
 from matproplib.conditions import OpCondT
+from matproplib.converters.base import Converters
+from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.references import HUST_1984, SIMON_1992
 from matproplib.material import (
     FullMaterial,
@@ -41,6 +43,12 @@ class Bronze(FullMaterial):
     elements: Elements = Field(default={"Cu": 0.95, "Sn": 0.05})
     properties: PropertiesT_co = props(
         as_field=True, density=8877.5, poissons_ratio=0.33
+    )
+
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
     )
 
 
@@ -433,5 +441,10 @@ class CryogenicCopper(FullMaterial):
         coefficient_thermal_expansion=_copper_thermal_expansion_coefficient,
         electrical_resistivity=_copper_electrical_resistivity,
         magnetic_susceptibility=_copper_magnetic_susceptibility,
+    )
+    converters: Converters = Field(
+        default_factory=lambda: OpenMCNeutronicConfig(
+            percent_type="atomic",
+        )
     )
     reference: References = SIMON_1992
