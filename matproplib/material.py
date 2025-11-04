@@ -42,6 +42,7 @@ from matproplib.conditions import (
     DependentPropertyConditionConfig,
     DependentPropertyConditionConfigTD,
     OpCondT,
+    OperationalConditions,
     STPConditions,
 )
 from matproplib.converters.base import Converter, ConverterK, Converters
@@ -154,7 +155,9 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
 
     def convert(self, name: ConverterK, op_cond: OpCondT, *args, **kwargs):
         """Convert material to another format"""  # noqa: DOC201
-        return self.converters[name].convert(self, op_cond, *args, **kwargs)
+        return self.converters[name].convert(
+            self, OperationalConditions.model_validate(op_cond), *args, **kwargs
+        )
 
     @property
     def is_superconductor(self):
@@ -196,7 +199,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
                     out = f"{out.split('>')[0]}>)"
                 p += f", {k}={type(v).__name__}({start}value={out}, unit{end})"
             else:
-                p += f", {k}={type(v).__name__}({v})"
+                p += f", {k}={v}"
         return (
             f"{type(self).__name__}(reference={self.reference},"
             f" elements={self.elements.__repr__()}, {self.converters.__repr__()}{p})"
