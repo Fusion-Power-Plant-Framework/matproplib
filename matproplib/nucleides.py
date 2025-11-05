@@ -304,7 +304,7 @@ def mass_fraction_to_volume_fraction(
     :
         Volume fraction of model
     """
-    return _converter(ef_dict, lambda ef: ef.fraction * _get_dn(densities, ef.element))
+    return _converter(ef_dict, lambda ef: ef.fraction / _get_dn(densities, ef.element))
 
 
 def volume_fraction_to_mass_fraction(
@@ -316,7 +316,7 @@ def volume_fraction_to_mass_fraction(
     :
         Mass fraction of model
     """
-    return _converter(ef_dict, lambda ef: ef.fraction / _get_dn(densities, ef.element))
+    return _converter(ef_dict, lambda ef: ef.fraction * _get_dn(densities, ef.element))
 
 
 def atomic_fraction_to_volume_fraction(

@@ -50,9 +50,7 @@ from matproplib.nucleides import (
     ElementFraction,
     Elements,
     ElementsTD,
-    atomic_fraction_to_mass_fraction,
     atomic_fraction_to_volume_fraction,
-    volume_fraction_to_atomic_fraction,
 )
 from matproplib.properties.dependent import (
     AttributeErrorProperty,
@@ -518,7 +516,7 @@ class AttributeErrorSCParameterisation(UndefinedSuperconductingParameterisation)
     critical_current_density: AttributeErrorProperty
 
 
-def mixture(  # noqa: PLR0912
+def mixture(
     name: str,
     materials: Sequence[
         MaterialFraction[ConverterK] | tuple[Material[ConverterK], float]
@@ -627,33 +625,49 @@ def mixture(  # noqa: PLR0912
         **prop_ann,
     )
 
-    mat_elements = [mf.material.elements for mf in materials]
-
-    inp_frac = _void_check(materials, fraction_type)
-
-    if fraction_type == "atomic":
-        elements = _atomic_to_inp_converter(mat_elements, inp_frac, lambda inp: inp)
-    elif fraction_type == "mass":
-        elements = {}
-        elements = _atomic_to_inp_converter(
-            mat_elements, inp_frac, atomic_fraction_to_mass_fraction
-        )
-        elements["fraction_type"] = "mass"
-    elif fraction_type == "volume":
-        volume_conditions = volume_conditions or STPConditions()
-        densities = [mf.material.density(volume_conditions) for mf in materials]
-        elements, vf_den = _atomic_to_volume_converter(mat_elements, inp_frac, densities)
-        elements = volume_fraction_to_atomic_fraction(elements, vf_den)
-    else:
-        raise NotImplementedError(f"{fraction_type=} not a valid option")
-
     return model[ConverterK](
         **prop_val,
-        elements=elements,
+        elements=_mix_elements(
+            materials, fraction_type, volume_conditions or STPConditions()
+        ),
         reference=reference,
         converters=converters or Converters(),
         mixture_fraction=materials,
     )
+
+
+def _mix_elements(materials, fraction_type, volume_conditions):
+    total_fraction = sum(mf.fraction for mf in materials)
+    for mf in materials:
+        mf.fraction /= total_fraction
+
+    atomic_counts = {}
+    total_atoms = 0.0
+
+    for mf in materials:
+        mat_elements = mf.material.elements
+        mat_density = mf.material.density(volume_conditions)
+
+        # Convert to mass fraction
+        if fraction_type == "volume":
+            mass_frac = mf.fraction * mat_density
+        elif fraction_type == "mass":
+            mass_frac = mf.fraction
+        elif fraction_type == "atomic":
+            # Convert atomic fractions to mass fractions
+            atomic_mass_total = sum(
+                el.element.element.mass * el.fraction
+                for el in mat_elements.root.values()
+            )
+            mass_frac = mf.fraction * atomic_mass_total
+
+        # Convert mass fractions to atomic counts
+        for el_n, el in mat_elements.root.items():
+            atomic_mass = el.element.element.mass
+            atoms = (el.fraction * mass_frac) / atomic_mass
+            atomic_counts[el_n] = atomic_counts.get(el_n, 0.0) + atoms
+            total_atoms += atoms
+    return {el: count / total_atoms for el, count in atomic_counts.items()}
 
 
 Owner = TypeVar("Owner")
