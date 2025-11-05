@@ -65,6 +65,10 @@ class Elements(RootModel):
                 el = ElementFraction.model_validate(e)
                 ret[el.element.element.symbol] = el
             return ret
+
+        for k, v in self.items():
+            if isinstance(v, float):
+                self[k] = float(v)
         return self
 
     @model_validator(mode="after")
