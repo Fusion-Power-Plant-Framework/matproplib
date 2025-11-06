@@ -5,11 +5,11 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 import copy
 import logging
 import operator
 from abc import ABC
+from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from functools import partial, reduce
 from typing import Any, Generic, Literal, Protocol, TypedDict, Union, get_args
@@ -32,7 +32,6 @@ from pydantic_core import ValidationError
 from typing_extensions import TypeVar
 
 from matproplib.base import (
-    N_AVOGADRO,
     BaseGroup,
     MaterialBaseModel,
     PMBaseModel,
@@ -641,6 +640,11 @@ def mixture(
 def _crude_average_molar_mass(material: Material) -> float:
     """
     Average molar mass of a Material, ignoring enrichment
+
+    Returns
+    -------
+    :
+        Average molar mass of a material
     """
     nucleides = material.elements.nucleides.root.values()
     return np.sum([n.element.element.mass * n.fraction for n in nucleides]) / np.sum([
@@ -663,10 +667,20 @@ def _mix_elements(
     volume_conditions : Any
         Passed to `material.density(volume_conditions)`.
 
+    Returns
+    -------
+    :
+        A dictionary of element composition in atomic fractions.
+
+    Raises
+    ------
+    ValueError
+        If an unsupported fraction_type is specified.
+
     Notes
     -----
-    Emulates OpenMC functionality in `mix_materials`, but treats densities differently (we
-    use our own as opposed to the summation of the nucleide densities).
+    Emulates OpenMC functionality in `mix_materials`, but treats densities differently
+    (we use our own as opposed to the summation of the nucleide densities).
 
     Enrichment is presently ignored when calculating the average molar mass.
     """
@@ -690,7 +704,9 @@ def _mix_elements(
 
     nucleides_per_cc = defaultdict(float)
     total_atoms_per_cc = 0.0
-    for weight, mat, density, amm in zip(weights, materials, densities, molar_mass):
+    for weight, mat, density, amm in zip(
+        weights, materials, densities, molar_mass, strict=False
+    ):
         for name, element in mat.elements.root.items():
             # TODO: Again, enrichment ignored here. (Not presently tracked at the
             # material level)
