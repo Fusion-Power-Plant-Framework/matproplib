@@ -97,6 +97,15 @@ dependencies = ["pre-commit", "ruff", "ty"]
 [tool.hatch.envs.lint.scripts]
 fmt    = ["pre-commit run --all-files --hook-stage manual"]
 
+
+[tool.hatch.envs.mpl_conda]
+type = "conda"
+environment-file = "conda/environment.yml"
+conda-forge = true
+features = ["test"]
+python = "3.11"
+
+
 [tool.ty.terminal]
 output-format = "concise"
 

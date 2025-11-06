@@ -538,6 +538,7 @@ def compare_openmc_mat_cards(str1: str, str2: str, tol: float = 1e-8):
     }
 
 
+@pytest.mark.integration
 def test_nmm_regression_complex_mixture():
     li_enrich_ao = 0.6
     KALOS_ACB_MAT = make_KALOS_ACB_mat(li_enrich_ao)
