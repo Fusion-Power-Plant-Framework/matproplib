@@ -637,7 +637,6 @@ def mixture(
     )
 
 
-
 def _crude_average_molar_mass(material: Material) -> float:
     """
     Average molar mass of a Material, ignoring enrichment
@@ -716,6 +715,7 @@ def _mix_elements(
             total_atoms_per_cc += atoms_per_cc
 
     return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
+
 
 def _mix_elements_old(materials, fraction_type, volume_conditions):
     total_fraction = sum(mf.fraction for mf in materials)
