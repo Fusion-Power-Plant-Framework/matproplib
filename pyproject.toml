@@ -105,6 +105,8 @@ conda-forge = true
 features = ["test"]
 python = "3.11"
 
+[tool.hatch.envs.mpl_conda.scripts]
+tests      = "pytest --integration {args:tests}"
 
 [tool.ty.terminal]
 output-format = "concise"
