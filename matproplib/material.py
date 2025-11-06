@@ -482,7 +482,7 @@ def mixture(
     converters: Converters[ConverterK] | None = None,
     reference: References | None = None,
     *,
-    volume_conditions: OpCondT | None = None,
+    mix_condition: OpCondT | None = None,
     **property_overrides: DependentPhysicalProperty,
 ) -> Material[ConverterK]:
     """
@@ -500,7 +500,7 @@ def mixture(
         Conversion to other formats, these are not transferred from constituent materials
     reference:
         Any reference for the material data
-    volume_conditions:
+    mix_condition:
         if the fraction type is 'volume' what conditions to mix under.
         These are used to calculate the density of the materials. Defaults to IUPAC STP
     **properties_overrides:
@@ -588,7 +588,7 @@ def mixture(
     return model[ConverterK](
         **prop_val,
         elements=_mix_elements(
-            materials, fraction_type, volume_conditions or STPConditions()
+            materials, fraction_type, mix_condition or STPConditions()
         ),
         reference=reference,
         converters=converters or Converters(),
@@ -612,7 +612,7 @@ def _crude_average_molar_mass(material: Material) -> float:
 
 
 def _mix_elements(
-    materials: list[MaterialFraction], fraction_type: str, volume_conditions: OpCondT
+    materials: list[MaterialFraction], fraction_type: str, mix_condition: OpCondT
 ) -> dict[str, float]:
     """
     Compute normalised elemental composition of a material mixture.
@@ -623,8 +623,8 @@ def _mix_elements(
         Each entry must have `.fraction` and `.material` attributes.
     fraction_type : str
         One of {"volume", "mass", "atomic"}.
-    volume_conditions : Any
-        Passed to `material.density(volume_conditions)`.
+    mix_condition : Any
+        Passed to `material.density(mix_condition)`.
 
     Returns
     -------
@@ -646,7 +646,7 @@ def _mix_elements(
     fractions = np.array([mf.fraction for mf in materials])
     fractions /= np.sum(fractions)
     materials = [mf.material for mf in materials]
-    densities = np.array([mat.density(volume_conditions) for mat in materials])
+    densities = np.array([mat.density(mix_condition) for mat in materials])
     molar_mass = np.array([_crude_average_molar_mass(mat) for mat in materials])
 
     match fraction_type:

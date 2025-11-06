@@ -365,7 +365,7 @@ class TestMixtures:
         mix = mixture(
             "PlasmaWater",
             [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (Water(), 0.2)],
-            volume_conditions=condition,
+            mix_condition=condition,
         )
 
         constit = [m.material.density(test_condition) for m in mix.mixture_fraction]
@@ -383,7 +383,7 @@ class TestMixtures:
             "PlasmaWater",
             [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (Water(), 0.2)],
             density=6,
-            volume_conditions=condition,
+            mix_condition=condition,
         )
         assert mix.density(test_condition) == pytest.approx(6)
 
@@ -395,7 +395,7 @@ class TestMixtures:
             "SteelWaterMixture",
             [(steel, 0.7), (water, 0.3)],
             fraction_type="mass",
-            volume_conditions=condition,
+            mix_condition=condition,
         )
 
         with pytest.raises(AttributeError, match="is undefined on Water"):

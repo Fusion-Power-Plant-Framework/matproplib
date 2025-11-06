@@ -28,7 +28,7 @@ Be12Ti = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
-    properties=props(density=Density.from_unit_cell()),
+    properties=props(as_field=True, density=Density.from_unit_cell()),
 )
 
 
