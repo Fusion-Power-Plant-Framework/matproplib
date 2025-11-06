@@ -319,7 +319,7 @@ def material(  # noqa: C901
     | str
     | list[str | ElementFraction]
     | list[str]
-    | dict[str, float]
+    | ElementsTD
     | None = None,
     properties: Properties
     | dict[str, Ldefine | DependentPhysicalProperty]

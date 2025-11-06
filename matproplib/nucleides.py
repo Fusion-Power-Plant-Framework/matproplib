@@ -31,11 +31,8 @@ class ElementFraction(PMBaseModel):
     fraction: NonNegativeFloat
 
 
-_ef_root_model = dict[str, ElementFraction | float | int | References | str | None]
-
-
-class ElementsTD(TypedDict, total=False, extra_items=ElementFraction):
-    """Strict typing of Elements.root, not yet supported by pydantic as type"""
+class ElementsTD(TypedDict, total=False, extra_items=ElementFraction | float):
+    """Strict typing of Elements.root"""
 
     _no_atoms: int
     reference: References | None
@@ -45,7 +42,7 @@ class ElementsTD(TypedDict, total=False, extra_items=ElementFraction):
 class Elements(RootModel):
     """Element grouping model"""
 
-    root: _ef_root_model
+    root: ElementsTD
     _no_atoms: int | None = None
     _reference: References | None = None
     model_config = ConfigDict(validate_default=True)
