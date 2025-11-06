@@ -556,7 +556,7 @@ def test_nmm_regression_complex_mixture():
             (HELIUM_MAT, helium_fraction_vo),
         ],
         fraction_type="volume",
-        volume_conditions=OperationalConditions(temperature=673.15, pressure=8e6),
+        volume_conditions=OperationalConditions(temperature=300, pressure=8e6),
         converters=OpenMCNeutronicConfig(
             material_id=102,
             enrichment=li_enrich_ao * 100,
