@@ -6,7 +6,6 @@ import re
 from typing import Any
 
 import numpy as np
-from matproplib.properties.group import props
 import pytest
 
 from matproplib.conditions import OperationalConditions
@@ -18,6 +17,7 @@ from matproplib.converters.neutronics import (
     global_id,
 )
 from matproplib.material import Material, material, mixture
+from matproplib.properties.group import props
 from matproplib.tools.neutronics import NM_FRACTION_TYPE_MAPPING
 
 
@@ -297,7 +297,6 @@ def test_change_converters():
     assert simple.converters.root.keys() == {"fispact", "mcnp"}
 
 
-
 TRUE_OPENMC_MAT_CARD_0_15_2 = """
     Material
         ID             =	102
@@ -306,8 +305,8 @@ TRUE_OPENMC_MAT_CARD_0_15_2 = """
         Density        =	2.2730677516373854 [g/cm3]
         Volume         =	None [cm^3]
         Depletable     =	False
-        S(a,b) Tables  
-        Nuclides       
+        S(a,b) Tables
+        Nuclides
         Be9            =	0.6998631398987395 [ao]
         Cr50           =	0.0006047907018436486 [ao]
         Cr52           =	0.011662786678199647 [ao]
@@ -375,6 +374,7 @@ HELIUM_MAT = material(
     properties=props(density=0.008867),
 )()
 
+
 def make_Li4SiO4_mat(li_enrich_ao, packing_fraction=0.642) -> Material:
     """
     Making enriched Li4SiO4 from elements with enrichment of Li6 enrichment
@@ -441,6 +441,7 @@ def make_Li2TiO3_mat(li_enrich_ao, packing_fraction=0.642) -> Material:
         ),
     )()
 
+
 # Lithium-containing material that is also a mixture of existing materials
 def make_KALOS_ACB_mat(li_enrich_ao) -> Material:
     """
@@ -486,8 +487,8 @@ def compare_openmc_mat_cards(str1: str, str2: str, tol: float = 1e-8):
     def parse_material(s: str):
         pattern = re.compile(r"(\w+)\s*=\s*([^\s]+)")
         data = {}
-        for key, value in pattern.findall(s):
-            v = re.sub(r"\[.*?\]", "", value).strip()
+        for key, value in pattern.findall(repr(s)):
+            v = re.sub(r"\[.*?\]", "", value).encode().decode("unicode_escape").strip()
             try:
                 data[key] = float(v)
             except ValueError:
@@ -528,16 +529,14 @@ def compare_openmc_mat_cards(str1: str, str2: str, tol: float = 1e-8):
         if rel is None:
             print(f"  {key}: '{v1}' != '{v2}'")
         else:
-            print(
-                f"  {key}: {v1:.6g} → {v2:.6g}  "
-                f"(Δ={delta:.3g}, rel={rel * 100:.3f}%)"
-            )
+            print(f"  {key}: {v1:.6g} → {v2:.6g}  (Δ={delta:.3g}, rel={rel * 100:.3f}%)")
 
     return {
         "only_in_ref": only_in_ref,
         "only_in_new": only_in_new,
         "diffs": diffs,
     }
+
 
 def test_nmm_regression_complex_mixture():
     li_enrich_ao = 0.6
@@ -548,7 +547,7 @@ def test_nmm_regression_complex_mixture():
     breeder_fraction_vo = 0.103  # 0.163
     helium_fraction_vo = 0.276  # 0.062
 
-    mat=mixture(
+    mat = mixture(
         name="inb_breeder_zone",
         materials=[
             (EUROFER_MAT, structural_fraction_vo),
@@ -567,9 +566,10 @@ def test_nmm_regression_complex_mixture():
     )
     mat_card = mat.convert("openmc", {"temperature": 300, "pressure": 1.01325e5})
 
-    comparison = compare_openmc_mat_cards(TRUE_OPENMC_MAT_CARD_0_15_2, mat_card, tol=1e-6)
+    comparison = compare_openmc_mat_cards(
+        TRUE_OPENMC_MAT_CARD_0_15_2, mat_card, tol=1e-6
+    )
 
     assert len(comparison["only_in_ref"]) == 0
     assert len(comparison["only_in_new"]) == 0
     assert len(comparison["diffs"]) == 0
-    
