@@ -29,7 +29,7 @@ dependencies = [
    "numpydantic",
    "periodictable",
    "pint >=0.24",
-   "pydantic>=2",
+   "pydantic>=2.12",
    ]
 keywords = ["materials", "fusion", "structural", "electromagnetism", "neutronics"]
 classifiers = [
@@ -96,6 +96,17 @@ dependencies = ["pre-commit", "ruff", "ty"]
 
 [tool.hatch.envs.lint.scripts]
 fmt    = ["pre-commit run --all-files --hook-stage manual"]
+
+
+[tool.hatch.envs.mpl_conda]
+type = "conda"
+environment-file = "conda/environment.yml"
+conda-forge = true
+features = ["test"]
+python = "3.11"
+
+[tool.hatch.envs.mpl_conda.scripts]
+tests      = "pytest --integration {args:tests}"
 
 [tool.ty.terminal]
 output-format = "concise"
@@ -206,5 +217,6 @@ exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 [tool.pytest.ini_options]
 addopts = "--html=report.html --self-contained-html --strict-markers -r fEX"
 markers = [
+    "integration: Run integration tests with neutronics codes",
     "classplot: Show and close figures after running all tests in class",
 ]

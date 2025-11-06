@@ -31,11 +31,8 @@ class ElementFraction(PMBaseModel):
     fraction: NonNegativeFloat
 
 
-_ef_root_model = dict[str, ElementFraction | float | int | References | str | None]
-
-
-class ElementsTD(TypedDict, total=False, extra_items=ElementFraction):
-    """Strict typing of Elements.root, not yet supported by pydantic as type"""
+class ElementsTD(TypedDict, total=False, extra_items=ElementFraction | float):
+    """Strict typing of Elements.root"""
 
     _no_atoms: int
     reference: References | None
@@ -45,7 +42,7 @@ class ElementsTD(TypedDict, total=False, extra_items=ElementFraction):
 class Elements(RootModel):
     """Element grouping model"""
 
-    root: _ef_root_model
+    root: ElementsTD
     _no_atoms: int | None = None
     _reference: References | None = None
     model_config = ConfigDict(validate_default=True)
@@ -65,6 +62,10 @@ class Elements(RootModel):
                 el = ElementFraction.model_validate(e)
                 ret[el.element.element.symbol] = el
             return ret
+
+        for k, v in self.items():
+            if isinstance(v, float):
+                self[k] = float(v)
         return self
 
     @model_validator(mode="after")
@@ -304,7 +305,7 @@ def mass_fraction_to_volume_fraction(
     :
         Volume fraction of model
     """
-    return _converter(ef_dict, lambda ef: ef.fraction * _get_dn(densities, ef.element))
+    return _converter(ef_dict, lambda ef: ef.fraction / _get_dn(densities, ef.element))
 
 
 def volume_fraction_to_mass_fraction(
@@ -316,7 +317,7 @@ def volume_fraction_to_mass_fraction(
     :
         Mass fraction of model
     """
-    return _converter(ef_dict, lambda ef: ef.fraction / _get_dn(densities, ef.element))
+    return _converter(ef_dict, lambda ef: ef.fraction * _get_dn(densities, ef.element))
 
 
 def atomic_fraction_to_volume_fraction(

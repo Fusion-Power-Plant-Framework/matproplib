@@ -1,0 +1,7 @@
+name: mpl_conda
+channels:
+  - conda-forge
+
+dependencies:
+  - python=3.11
+  - openmc>=0.15.0

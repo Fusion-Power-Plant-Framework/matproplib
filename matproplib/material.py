@@ -9,6 +9,7 @@ import copy
 import logging
 import operator
 from abc import ABC
+from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
 from functools import partial, reduce
 from typing import Any, Generic, Literal, Protocol, TypedDict, Union, get_args
@@ -42,6 +43,7 @@ from matproplib.conditions import (
     DependentPropertyConditionConfig,
     DependentPropertyConditionConfigTD,
     OpCondT,
+    OperationalConditions,
     STPConditions,
 )
 from matproplib.converters.base import Converter, ConverterK, Converters
@@ -49,9 +51,6 @@ from matproplib.nucleides import (
     ElementFraction,
     Elements,
     ElementsTD,
-    atomic_fraction_to_mass_fraction,
-    atomic_fraction_to_volume_fraction,
-    volume_fraction_to_atomic_fraction,
 )
 from matproplib.properties.dependent import (
     AttributeErrorProperty,
@@ -154,7 +153,9 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
 
     def convert(self, name: ConverterK, op_cond: OpCondT, *args, **kwargs):
         """Convert material to another format"""  # noqa: DOC201
-        return self.converters[name].convert(self, op_cond, *args, **kwargs)
+        return self.converters[name].convert(
+            self, OperationalConditions.model_validate(op_cond), *args, **kwargs
+        )
 
     @property
     def is_superconductor(self):
@@ -196,7 +197,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
                     out = f"{out.split('>')[0]}>)"
                 p += f", {k}={type(v).__name__}({start}value={out}, unit{end})"
             else:
-                p += f", {k}={type(v).__name__}({v})"
+                p += f", {k}={v}"
         return (
             f"{type(self).__name__}(reference={self.reference},"
             f" elements={self.elements.__repr__()}, {self.converters.__repr__()}{p})"
@@ -318,7 +319,7 @@ def material(  # noqa: C901
     | str
     | list[str | ElementFraction]
     | list[str]
-    | dict[str, float]
+    | ElementsTD
     | None = None,
     properties: Properties
     | dict[str, Ldefine | DependentPhysicalProperty]
@@ -441,49 +442,6 @@ def _get_indexes(dpp: list[DependentPhysicalProperty], value=None):
     return [i for i in range(len(dpp)) if dpp[i] == value]
 
 
-def _atomic_to_inp_converter(
-    m_el: list[Elements],
-    input_frac: Sequence[float],
-    conversion: Callable[[ElementsTD], ElementsTD],
-) -> ElementsTD:
-    elements = {}
-    for el, f in zip(m_el, input_frac, strict=False):
-        for k, elf in conversion(copy.deepcopy(el.root)).items():
-            if k in elements:
-                elements[k].fraction += elf.fraction * f
-            else:
-                elf.fraction *= f
-                elements[k] = elf
-    ttl = sum(e.fraction for e in elements.values())
-    for el in elements.values():
-        el.fraction /= ttl
-    return elements
-
-
-def _atomic_to_volume_converter(
-    m_el: list[Elements], input_frac: Sequence[float], densities: list[float]
-) -> tuple[ElementsTD, dict[str, float]]:
-    elements = {}
-    vf_den = {}
-    for el, f, d in zip(m_el, input_frac, densities, strict=False):
-        for k, elf in atomic_fraction_to_volume_fraction(
-            copy.deepcopy(el.root), dict.fromkeys(el.root, d)
-        ).items():
-            if k in elements:
-                vf_den[k] += d * elf.fraction
-                elements[k].fraction += elf.fraction * f
-            else:
-                vf_den[k] = d * elf.fraction
-                elf.fraction *= f
-                elements[k] = elf
-
-    ttl = sum(e.fraction for e in elements.values())
-    for el in elements.values():
-        el.fraction /= ttl
-
-    return elements, vf_den
-
-
 def _void_check(
     materials: Sequence[MaterialFraction[ConverterK]], fraction_type: str
 ) -> Sequence[float]:
@@ -515,7 +473,7 @@ class AttributeErrorSCParameterisation(UndefinedSuperconductingParameterisation)
     critical_current_density: AttributeErrorProperty
 
 
-def mixture(  # noqa: PLR0912
+def mixture(
     name: str,
     materials: Sequence[
         MaterialFraction[ConverterK] | tuple[Material[ConverterK], float]
@@ -524,7 +482,7 @@ def mixture(  # noqa: PLR0912
     converters: Converters[ConverterK] | None = None,
     reference: References | None = None,
     *,
-    volume_conditions: OpCondT | None = None,
+    mix_condition: OpCondT | None = None,
     **property_overrides: DependentPhysicalProperty,
 ) -> Material[ConverterK]:
     """
@@ -542,8 +500,8 @@ def mixture(  # noqa: PLR0912
         Conversion to other formats, these are not transferred from constituent materials
     reference:
         Any reference for the material data
-    volume_conditions:
-        if the fraction type is 'volume' what conditions to mix under.
+    mix_condition:
+        The conditions to mix under.
         These are used to calculate the density of the materials. Defaults to IUPAC STP
     **properties_overrides:
         any replacement properties for the mixture eg density
@@ -572,6 +530,9 @@ def mixture(  # noqa: PLR0912
                 **property_overrides,
             )
         )
+
+    _void_check(materials, fraction_type)
+
     all_fields = reduce(
         operator.or_,
         [type(m.material).model_fields for m in materials],
@@ -624,33 +585,96 @@ def mixture(  # noqa: PLR0912
         **prop_ann,
     )
 
-    mat_elements = [mf.material.elements for mf in materials]
-
-    inp_frac = _void_check(materials, fraction_type)
-
-    if fraction_type == "atomic":
-        elements = _atomic_to_inp_converter(mat_elements, inp_frac, lambda inp: inp)
-    elif fraction_type == "mass":
-        elements = {}
-        elements = _atomic_to_inp_converter(
-            mat_elements, inp_frac, atomic_fraction_to_mass_fraction
-        )
-        elements["fraction_type"] = "mass"
-    elif fraction_type == "volume":
-        volume_conditions = volume_conditions or STPConditions()
-        densities = [mf.material.density(volume_conditions) for mf in materials]
-        elements, vf_den = _atomic_to_volume_converter(mat_elements, inp_frac, densities)
-        elements = volume_fraction_to_atomic_fraction(elements, vf_den)
-    else:
-        raise NotImplementedError(f"{fraction_type=} not a valid option")
-
     return model[ConverterK](
         **prop_val,
-        elements=elements,
+        elements=_mix_elements(
+            materials, fraction_type, mix_condition or STPConditions()
+        ),
         reference=reference,
         converters=converters or Converters(),
         mixture_fraction=materials,
     )
+
+
+def _crude_average_molar_mass(material: Material) -> float:
+    """
+    Average molar mass of a Material, ignoring enrichment
+
+    Returns
+    -------
+    :
+        Average molar mass of a material
+    """
+    nucleides = material.elements.nucleides.root.values()
+    return np.sum([n.element.element.mass * n.fraction for n in nucleides]) / np.sum([
+        n.fraction for n in nucleides
+    ])
+
+
+def _mix_elements(
+    materials: list[MaterialFraction], fraction_type: str, mix_condition: OpCondT
+) -> dict[str, float]:
+    """
+    Compute normalised elemental composition of a material mixture.
+
+    Parameters
+    ----------
+    materials : list
+        Each entry must have `.fraction` and `.material` attributes.
+    fraction_type : str
+        One of {"volume", "mass", "atomic"}.
+    mix_condition : Any
+        Passed to `material.density(mix_condition)`.
+
+    Returns
+    -------
+    :
+        A dictionary of element composition in atomic fractions.
+
+    Raises
+    ------
+    ValueError
+        If an unsupported fraction_type is specified.
+
+    Notes
+    -----
+    Emulates OpenMC functionality in `mix_materials`, but treats densities differently
+    (we use our own as opposed to the summation of the nucleide densities).
+
+    Enrichment is presently ignored when calculating the average molar mass.
+    """
+    fractions = np.array([mf.fraction for mf in materials])
+    fractions /= np.sum(fractions)
+    materials = [mf.material for mf in materials]
+    densities = np.array([mat.density(mix_condition) for mat in materials])
+    molar_mass = np.array([_crude_average_molar_mass(mat) for mat in materials])
+
+    match fraction_type:
+        case "volume":
+            weights = fractions
+        case "mass":
+            weights = fractions / densities
+        case "atomic":
+            weights = fractions * molar_mass / densities
+        case _:
+            raise ValueError(f"Unknown fraction_type: {fraction_type!r}")
+
+    weights /= np.sum(weights)
+
+    nucleides_per_cc = defaultdict(float)
+    total_atoms_per_cc = 0.0
+    for weight, mat, density, amm in zip(
+        weights, materials, densities, molar_mass, strict=False
+    ):
+        for name, element in mat.elements.root.items():
+            # TODO @CoronelBuendia:  Again, enrichment ignored here.
+            # (Not presently tracked at the material level)
+            # 22
+            atoms_per_cc = weight * element.fraction * density / amm
+            nucleides_per_cc[name] += atoms_per_cc
+            total_atoms_per_cc += atoms_per_cc
+
+    return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
 
 
 Owner = TypeVar("Owner")

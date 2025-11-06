@@ -100,7 +100,7 @@ Li2SiO3 = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
-    density=Density.from_unit_cell(),
+    properties=props(as_field=True, density=Density.from_unit_cell()),
     reference={
         "id": "liso3_cell",
         "type": "article",
@@ -117,7 +117,7 @@ Li2ZrO3 = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
-    density=Density.from_unit_cell(),
+    properties=props(as_field=True, density=Density.from_unit_cell()),
 )
 
 Li2TiO3 = material(
@@ -129,5 +129,5 @@ Li2TiO3 = material(
         enrichment_target="Li6",
         enrichment_type="atomic",
     ),
-    density=Density.from_unit_cell(),
+    properties=props(as_field=True, density=Density.from_unit_cell()),
 )

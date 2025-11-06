@@ -40,3 +40,21 @@ jobs:
 
       - name: Run pytest
         run: hatch run test.py${{ matrix.python-version }}:tests-cov
+
+  integration:
+    runs-on: ubuntu-latest
+    env:
+      PYTHON_VERSION: "3.11"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup python and hatch
+        uses: Fusion-Power-Plant-Framework/fppf-actions/hatch-conda@main
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          environment: mpl_conda
+
+      - name: Run pytest
+        shell: bash -l {0}
+        run: hatch run mpl_conda:tests

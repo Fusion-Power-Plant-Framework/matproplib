@@ -35,6 +35,7 @@ from matproplib.conditions import (
     DependentPropertyConditionConfig,
     ModifiedOperationalConditions,
     OpCondT,
+    OperationalConditions,
     check_conditions,
     modify_conditions,
 )
@@ -270,7 +271,9 @@ class DependentPhysicalProperty(BasePhysicalProperty):
             Property value at conditons
         """
         if self.op_cond_config is not None:
-            op_cond = _modify_and_check(op_cond, self.op_cond_config)
+            op_cond = _modify_and_check(
+                OperationalConditions.model_validate(op_cond), self.op_cond_config
+            )
         return self.value(op_cond, *args, **kwargs)
 
     def __str__(self) -> str:  # noqa: D105

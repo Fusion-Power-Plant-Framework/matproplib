@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
+import re
 from typing import Any
 
 import numpy as np
@@ -15,7 +16,8 @@ from matproplib.converters.neutronics import (
     SerpentNeutronicConfig,
     global_id,
 )
-from matproplib.material import material
+from matproplib.material import Material, material, mixture
+from matproplib.properties.group import props
 from matproplib.tools.neutronics import NM_FRACTION_TYPE_MAPPING
 
 
@@ -293,3 +295,282 @@ def test_change_converters():
     simple.converters.add(MCNPNeutronicConfig())
 
     assert simple.converters.root.keys() == {"fispact", "mcnp"}
+
+
+TRUE_OPENMC_MAT_CARD_0_15_2 = """
+    Material
+        ID             =	102
+        Name           =	inb_breeder_zone
+        Temperature    =	None
+        Density        =	2.2730677516373854 [g/cm3]
+        Volume         =	None [cm^3]
+        Depletable     =	False
+        S(a,b) Tables
+        Nuclides
+        Be9            =	0.6998631398987395 [ao]
+        Cr50           =	0.0006047907018436486 [ao]
+        Cr52           =	0.011662786678199647 [ao]
+        Cr53           =	0.0013224663885423491 [ao]
+        Cr54           =	0.00032918987568704926 [ao]
+        Fe54           =	0.007699874949531171 [ao]
+        Fe56           =	0.12087156990920157 [ao]
+        Fe57           =	0.0027914516711816176 [ao]
+        Fe58           =	0.0003714909727575347 [ao]
+        He4            =	5.015408434749479e-06 [ao]
+        Li6            =	0.023828836409492994 [ao]
+        Li7            =	0.015885890939662 [ao]
+        O16            =	0.043926895401338095 [ao]
+        Si28           =	0.007822597811197195 [ao]
+        Ti46           =	0.005159062951108941 [ao]
+        Ti47           =	0.004652536770454609 [ao]
+        Ti48           =	0.04610013584918195 [ao]
+        Ti49           =	0.003383094613999924 [ao]
+        Ti50           =	0.0032392661923326444 [ao]
+        W182           =	0.00012897639723287904 [ao]
+        W183           =	6.895717680765254e-05 [ao]
+        W184           =	0.00014723557673232383 [ao]
+        W186           =	0.0001347374563400298 [ao]
+    """
+
+EUROFER_MAT = material(
+    name="eurofer",
+    elements={
+        "Fe": 0.9006,
+        "Cr": 0.0886,
+        "W182": 0.0108 * 0.266,
+        "W183": 0.0108 * 0.143,
+        "W184": 0.0108 * 0.307,
+        "W186": 0.0108 * 0.284,
+        "fraction_type": "mass",
+    },
+    properties=props(density=(7.78, "g/cm^3")),
+    converters=OpenMCNeutronicConfig(),
+)()
+
+TUNGSTEN_MAT = material(
+    name="tungsten",
+    elements={
+        "W182": 0.266,
+        "W183": 0.143,
+        "W184": 0.307,
+        "W186": 0.284,
+        "fraction_type": "atomic",
+    },
+    properties=props(density=(19.3, "g/cm^3")),
+    converters=OpenMCNeutronicConfig(),
+)()
+
+Be12Ti = material(
+    "Be12Ti",
+    elements={"Be": 12.0 / 13, "Ti": 1.0 / 13, "fraction_type": "atomic"},
+    converters=OpenMCNeutronicConfig(),
+    properties=props(density=2250.0),
+)
+
+HELIUM_MAT = material(
+    "He",
+    elements={"He4": 1.0},
+    converters=OpenMCNeutronicConfig(),
+    properties=props(density=0.008867),
+)()
+
+
+def make_Li4SiO4_mat(li_enrich_ao, packing_fraction=0.642) -> Material:
+    """
+    Making enriched Li4SiO4 from elements with enrichment of Li6 enrichment
+
+    Parameters
+    ----------
+    li_enrich_ao:
+        The fraction of enrichment of the lithium-6.
+
+    Returns
+    -------
+    :
+        Li4SiO4 material with the specified Li-6 enrichment.
+
+    Notes
+    -----
+    packing_fraction=0.642 Fusion Eng. Des., 164, 112171. See issue #3657
+    """
+    return material(
+        name="lithium_orthosilicate",
+        elements={"Li": 4 / 9, "Si28": 1 / 9, "O16": 4 / 9},
+        properties=props(
+            density=(packing_fraction * (2.247 + 0.078 * (1.0 - li_enrich_ao)), "g/cm^3")
+        ),
+        converters=OpenMCNeutronicConfig(
+            enrichment=li_enrich_ao * 100,
+            enrichment_target="Li6",
+            enrichment_type="atomic",
+        ),
+    )()
+
+
+def make_Li2TiO3_mat(li_enrich_ao, packing_fraction=0.642) -> Material:
+    """
+    Make Li2TiO3 according to the enrichment fraction inputted.
+
+    Parameters
+    ----------
+    li_enrich_ao:
+        The fraction of enrichment of the lithium-6.
+
+    Returns
+    -------
+    :
+        Li2TiO3 material with the specified Li-6 enrichment.
+
+    Notes
+    -----
+    packing_fraction=0.642 Fusion Eng. Des., 164, 112171. See issue #3657
+    """
+    return material(
+        name="lithium_titanate",
+        elements={"Li": 2 / 6, "Ti": 1 / 6, "O16": 3 / 6},
+        properties=props(
+            density=(
+                packing_fraction * (3.28 + 0.06 * (1.0 - li_enrich_ao)),
+                "g/cm^3",
+            )
+        ),
+        converters=OpenMCNeutronicConfig(
+            enrichment=li_enrich_ao * 100,
+            enrichment_target="Li6",
+            enrichment_type="atomic",
+        ),
+    )()
+
+
+# Lithium-containing material that is also a mixture of existing materials
+def make_KALOS_ACB_mat(li_enrich_ao) -> Material:
+    """
+    Parameters
+    ----------
+    li_enrich_ao:
+        The fraction of enrichment of the lithium-6.
+
+    Returns
+    -------
+    :
+        the KALOS_ACB material with the specified Li-6 enrichment.
+
+    Notes
+    -----
+    Ref: Current status and future perspectives of EU ceramic breeder development
+    (Fusion Eng. Des., 164, 112171)
+    """
+    return mixture(
+        name="kalos_acb",  # optional name of homogeneous material
+        materials=[  # molar combination adjusted to atom fractions
+            (make_Li4SiO4_mat(li_enrich_ao), 9 * 0.65 / (9 * 0.65 + 6 * 0.35)),
+            (make_Li2TiO3_mat(li_enrich_ao), 6 * 0.35 / (9 * 0.65 + 6 * 0.35)),
+        ],
+        fraction_type="atomic",
+        converters=OpenMCNeutronicConfig(
+            # packing_fraction=0.642,  # Fusion Eng. Des., 164, 112171. See issue #3657
+            enrichment=li_enrich_ao * 100,
+            enrichment_target="Li6",
+            enrichment_type="atomic",
+        ),
+    )  # combination fraction type is by atom fraction
+    # KALOS_ACB_mat.set_density("g/cm^3", 2.52 * 0.642)  # applying packing fraction
+    # 3657
+
+
+def compare_openmc_mat_cards(str1: str, str2: str, tol: float = 1e-8):
+    """
+    Compare two OpenMC material definition strings, using str1 as the reference.
+    Shows absolute and relative (to str1) differences.
+    """  # noqa: DOC201
+
+    def parse_material(s: str):
+        pattern = re.compile(r"(\w+)\s*=\s*([^\s]+)")
+        data = {}
+        for key, value in pattern.findall(repr(s)):
+            v = re.sub(r"\[.*?\]", "", value).encode().decode("unicode_escape").strip()
+            try:
+                data[key] = float(v)
+            except ValueError:
+                data[key] = v
+        return data
+
+    ref = parse_material(str1)
+    new = parse_material(str2)
+
+    ref_keys, new_keys = set(ref), set(new)
+
+    only_in_ref = sorted(ref_keys - new_keys)
+    only_in_new = sorted(new_keys - ref_keys)
+    both = sorted(ref_keys & new_keys)
+
+    diffs = []
+
+    for key in both:
+        v1, v2 = ref[key], new[key]
+        if isinstance(v1, float) and isinstance(v2, float):
+            if not np.isclose(v1, v2, rtol=tol, atol=tol):
+                rel_diff = (v2 - v1) / v1 if v1 != 0 else float("inf")
+                diffs.append((key, v1, v2, v2 - v1, rel_diff))
+        elif v1 != v2:
+            diffs.append((key, v1, v2, None, None))
+
+    # --- Print summary ---
+    in_ref = ["🔹 Only in reference (missing in second):"]
+    in_ref.extend(f"  {k} = {ref[k]}" for k in only_in_ref)
+
+    out_ref = ["\n🔹 Only in second (not in reference):"]
+    out_ref.extend(f"  {k} = {new[k]}" for k in only_in_new)
+
+    diff_ref = ["\n🔹 Differences beyond tolerance (relative to reference):"]
+    for key, v1, v2, delta, rel in diffs:
+        if rel is None:
+            diff_ref.append(f"  {key}: '{v1}' != '{v2}'")
+        else:
+            diff_ref.append(
+                f"  {key}: {v1:.6g} → {v2:.6g}  (Δ={delta:.3g}, rel={rel * 100:.3f}%)"
+            )
+
+    return {
+        "only_in_ref": [only_in_ref, "\n ".join(in_ref)],
+        "only_in_new": [only_in_new, "\n ".join(out_ref)],
+        "diffs": [diffs, "\n ".join(diff_ref)],
+    }
+
+
+@pytest.mark.integration
+def test_nmm_regression_complex_mixture():
+    li_enrich_ao = 0.6
+    KALOS_ACB_MAT = make_KALOS_ACB_mat(li_enrich_ao)
+
+    structural_fraction_vo = 0.128
+    multiplier_fraction_vo = 0.493  # 0.647
+    breeder_fraction_vo = 0.103  # 0.163
+    helium_fraction_vo = 0.276  # 0.062
+
+    mat = mixture(
+        name="inb_breeder_zone",
+        materials=[
+            (EUROFER_MAT, structural_fraction_vo),
+            (Be12Ti(), multiplier_fraction_vo),
+            (KALOS_ACB_MAT, breeder_fraction_vo),
+            (HELIUM_MAT, helium_fraction_vo),
+        ],
+        fraction_type="volume",
+        mix_condition=OperationalConditions(temperature=300, pressure=8e6),
+        converters=OpenMCNeutronicConfig(
+            material_id=102,
+            enrichment=li_enrich_ao * 100,
+            enrichment_target="Li6",
+            enrichment_type="atomic",
+        ),
+    )
+    mat_card = mat.convert("openmc", {"temperature": 300, "pressure": 1.01325e5})
+
+    comparison = compare_openmc_mat_cards(
+        TRUE_OPENMC_MAT_CARD_0_15_2, mat_card, tol=5e-4
+    )
+
+    assert len(comparison["only_in_ref"][0]) == 0, comparison["only_in_ref"][1]
+    assert len(comparison["only_in_new"][0]) == 0, comparison["only_in_new"][1]
+    assert len(comparison["diffs"][0]) == 0, comparison["diffs"][1]

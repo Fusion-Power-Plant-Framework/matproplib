@@ -191,10 +191,15 @@ class MaterialBaseModel(PMBaseModel, ABC):
             if (
                 isinstance(attr, DependentPhysicalProperty)
                 and attr.value is not None
-                and not isinstance(attr.value, partial)
                 and not isinstance(attr.value, _NoDependence)
             ):
-                if isinstance(attr.value, _WrapCallable) and _injection_check(
+                if (
+                    isinstance(attr.value, partial)
+                    and not isinstance(attr.value.args[0], type(self))
+                    and isinstance(self, type(self))
+                ):
+                    object.__setattr__(attr, "value", partial(attr.value.func, self))  # noqa: PLC2801
+                elif isinstance(attr.value, _WrapCallable) and _injection_check(
                     attr.value.value
                 ):
                     object.__setattr__(  # noqa: PLC2801
