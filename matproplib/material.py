@@ -501,7 +501,7 @@ def mixture(
     reference:
         Any reference for the material data
     mix_condition:
-        if the fraction type is 'volume' what conditions to mix under.
+        The conditions to mix under.
         These are used to calculate the density of the materials. Defaults to IUPAC STP
     **properties_overrides:
         any replacement properties for the mixture eg density
