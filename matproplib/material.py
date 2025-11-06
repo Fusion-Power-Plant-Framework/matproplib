@@ -636,7 +636,88 @@ def mixture(
         mixture_fraction=materials,
     )
 
-def _mix_elements(materials, fraction_type, volume_conditions):
+
+
+def _crude_average_molar_mass(material: Material) -> float:
+    """
+    Average molar mass of a Material, ignoring enrichment
+
+    Returns
+    -------
+    :
+        Average molar mass of a material
+    """
+    nucleides = material.elements.nucleides.root.values()
+    return np.sum([n.element.element.mass * n.fraction for n in nucleides]) / np.sum([
+        n.fraction for n in nucleides
+    ])
+
+
+def _mix_elements(
+    materials: list[MaterialFraction], fraction_type: str, volume_conditions: OpCondT
+) -> dict[str, float]:
+    """
+    Compute normalized elemental composition of a material mixture.
+
+    Parameters
+    ----------
+    materials : list
+        Each entry must have `.fraction` and `.material` attributes.
+    fraction_type : str
+        One of {"volume", "mass", "atomic"}.
+    volume_conditions : Any
+        Passed to `material.density(volume_conditions)`.
+
+    Returns
+    -------
+    :
+        A dictionary of element composition in atomic fractions.
+
+    Raises
+    ------
+    ValueError
+        If an unsupported fraction_type is specified.
+
+    Notes
+    -----
+    Emulates OpenMC functionality in `mix_materials`, but treats densities differently
+    (we use our own as opposed to the summation of the nucleide densities).
+
+    Enrichment is presently ignored when calculating the average molar mass.
+    """
+    fractions = np.array([mf.fraction for mf in materials])
+    fractions /= np.sum(fractions)
+    materials = [mf.material for mf in materials]
+    densities = np.array([mat.density(volume_conditions) for mat in materials])
+    molar_mass = np.array([_crude_average_molar_mass(mat) for mat in materials])
+
+    match fraction_type:
+        case "volume":
+            weights = fractions
+        case "mass":
+            weights = fractions / densities
+        case "atomic":
+            weights = fractions * molar_mass / densities
+        case _:
+            raise ValueError(f"Unknown fraction_type: {fraction_type!r}")
+
+    weights /= np.sum(weights)
+
+    nucleides_per_cc = defaultdict(float)
+    total_atoms_per_cc = 0.0
+    for weight, mat, density, amm in zip(
+        weights, materials, densities, molar_mass, strict=False
+    ):
+        for name, element in mat.elements.root.items():
+            # TODO: Again, enrichment ignored here. (Not presently tracked at the
+            # material level)
+            atoms_per_cc = weight * element.fraction * density / amm
+            nucleides_per_cc[name] += atoms_per_cc
+            total_atoms_per_cc += atoms_per_cc
+
+    return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
+
+def _mix_elements_old(materials, fraction_type, volume_conditions):
     total_fraction = sum(mf.fraction for mf in materials)
     for mf in materials:
         mf.fraction /= total_fraction
