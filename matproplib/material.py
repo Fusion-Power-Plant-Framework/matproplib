@@ -51,7 +51,6 @@ from matproplib.nucleides import (
     ElementFraction,
     Elements,
     ElementsTD,
-    atomic_fraction_to_volume_fraction,
 )
 from matproplib.properties.dependent import (
     AttributeErrorProperty,
@@ -443,49 +442,6 @@ def _get_indexes(dpp: list[DependentPhysicalProperty], value=None):
     return [i for i in range(len(dpp)) if dpp[i] == value]
 
 
-def _atomic_to_inp_converter(
-    m_el: list[Elements],
-    input_frac: Sequence[float],
-    conversion: Callable[[ElementsTD], ElementsTD],
-) -> ElementsTD:
-    elements = {}
-    for el, f in zip(m_el, input_frac, strict=False):
-        for k, elf in conversion(copy.deepcopy(el.root)).items():
-            if k in elements:
-                elements[k].fraction += elf.fraction * f
-            else:
-                elf.fraction *= f
-                elements[k] = elf
-    ttl = sum(e.fraction for e in elements.values())
-    for el in elements.values():
-        el.fraction /= ttl
-    return elements
-
-
-def _atomic_to_volume_converter(
-    m_el: list[Elements], input_frac: Sequence[float], densities: list[float]
-) -> tuple[ElementsTD, dict[str, float]]:
-    elements = {}
-    vf_den = {}
-    for el, f, d in zip(m_el, input_frac, densities, strict=False):
-        for k, elf in atomic_fraction_to_volume_fraction(
-            copy.deepcopy(el.root), dict.fromkeys(el.root, d)
-        ).items():
-            if k in elements:
-                vf_den[k] += d * elf.fraction
-                elements[k].fraction += elf.fraction * f
-            else:
-                vf_den[k] = d * elf.fraction
-                elf.fraction *= f
-                elements[k] = elf
-
-    ttl = sum(e.fraction for e in elements.values())
-    for el in elements.values():
-        el.fraction /= ttl
-
-    return elements, vf_den
-
-
 def _void_check(
     materials: Sequence[MaterialFraction[ConverterK]], fraction_type: str
 ) -> Sequence[float]:
@@ -574,6 +530,9 @@ def mixture(
                 **property_overrides,
             )
         )
+
+    _void_check(materials, fraction_type)
+
     all_fields = reduce(
         operator.or_,
         [type(m.material).model_fields for m in materials],
@@ -708,47 +667,14 @@ def _mix_elements(
         weights, materials, densities, molar_mass, strict=False
     ):
         for name, element in mat.elements.root.items():
-            # TODO: Again, enrichment ignored here. (Not presently tracked at the
-            # material level)
+            # TODO @CoronelBuendia:  Again, enrichment ignored here.
+            # (Not presently tracked at the material level)
+            # 22
             atoms_per_cc = weight * element.fraction * density / amm
             nucleides_per_cc[name] += atoms_per_cc
             total_atoms_per_cc += atoms_per_cc
 
     return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
-
-
-def _mix_elements_old(materials, fraction_type, volume_conditions):
-    total_fraction = sum(mf.fraction for mf in materials)
-    for mf in materials:
-        mf.fraction /= total_fraction
-
-    atomic_counts = {}
-    total_atoms = 0.0
-
-    for mf in materials:
-        mat_elements = mf.material.elements
-        mat_density = mf.material.density(volume_conditions)
-
-        # Convert to mass fraction
-        if fraction_type == "volume":
-            mass_frac = mf.fraction * mat_density
-        elif fraction_type == "mass":
-            mass_frac = mf.fraction
-        elif fraction_type == "atomic":
-            # Convert atomic fractions to mass fractions
-            atomic_mass_total = sum(
-                el.element.element.mass * el.fraction
-                for el in mat_elements.root.values()
-            )
-            mass_frac = mf.fraction * atomic_mass_total
-
-        # Convert mass fractions to atomic counts
-        for el_n, el in mat_elements.root.items():
-            atomic_mass = el.element.element.mass
-            atoms = (el.fraction * mass_frac) / atomic_mass
-            atomic_counts[el_n] = atomic_counts.get(el_n, 0.0) + atoms
-            total_atoms += atoms
-    return {el: count / total_atoms for el, count in atomic_counts.items()}
 
 
 Owner = TypeVar("Owner")

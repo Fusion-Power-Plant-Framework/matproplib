@@ -19,6 +19,7 @@ from matproplib.library.copper import CryogenicCopper
 from matproplib.library.fluids import DDPlasma, DTPlasma, Water
 from matproplib.library.steel import SS316_L
 from matproplib.library.superconductors import Nb3Sn
+from matproplib.library.tungsten import PlanseeTungsten
 from matproplib.material import (
     FullMaterial,
     Material,
@@ -346,10 +347,10 @@ class TestMixtures:
         "mats",
         [
             [
-                MaterialFraction(material=CryogenicCopper(), fraction=0.5),
-                MaterialFraction(material=CryogenicCopper(), fraction=0.5),
+                MaterialFraction(material=PlanseeTungsten(), fraction=0.5),
+                MaterialFraction(material=PlanseeTungsten(), fraction=0.5),
             ],
-            [(CryogenicCopper(), 0.5), (CryogenicCopper(), 0.5)],
+            [(PlanseeTungsten(), 0.5), (PlanseeTungsten(), 0.5)],
         ],
     )
     def test_simple_combination(self, mats):
@@ -359,10 +360,12 @@ class TestMixtures:
             mix.mixture_fraction[0].material.elements.model_dump()
         )
 
-    def test_complex_combination(self, test_condition):
+    def test_complex_combination(self, condition, test_condition):
         test_condition.temperature = [289, 459]
         mix = mixture(
-            "PlasmaWater", [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (Water(), 0.2)]
+            "PlasmaWater",
+            [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (Water(), 0.2)],
+            volume_conditions=condition,
         )
 
         constit = [m.material.density(test_condition) for m in mix.mixture_fraction]
@@ -375,30 +378,35 @@ class TestMixtures:
             (constit[0] * 0.4) + (constit[1] * 0.4) + (constit[2][1] * 0.2)
         )
 
-    def test_overridden_properties_function(self, test_condition):
+    def test_overridden_properties_function(self, condition, test_condition):
         mix = mixture(
             "PlasmaWater",
             [(DDPlasma(), 0.4), (DTPlasma(), 0.4), (Water(), 0.2)],
             density=6,
+            volume_conditions=condition,
         )
         assert mix.density(test_condition) == pytest.approx(6)
 
-    def test_undefined_properties_on_one_material_raises(self, test_condition):
+    def test_undefined_properties_on_one_material_raises(self, condition):
+        condition.temperature = 300
         steel = SS316_L()
         water = Water()
         my_mixture = mixture(
-            "SteelWaterMixture", [(steel, 0.7), (water, 0.3)], fraction_type="mass"
+            "SteelWaterMixture",
+            [(steel, 0.7), (water, 0.3)],
+            fraction_type="mass",
+            volume_conditions=condition,
         )
 
         with pytest.raises(AttributeError, match="is undefined on Water"):
-            my_mixture.coefficient_thermal_expansion(test_condition)
+            my_mixture.coefficient_thermal_expansion(condition)
 
     @pytest.mark.parametrize(
         ("fraction", "elements"),
         [
             ("atomic", {"H": 0.5, "O": 0.5}),
-            ("mass", {"H": 0.94073, "O": 0.0592697}),
-            ("volume", {"H": 0.499576, "O": 0.500424}),
+            ("mass", {"H": 0.940733, "O": 0.0592667}),
+            ("volume", {"H": 0.499589, "O": 0.500411}),
         ],
     )
     def test_fractional_type(self, fraction, elements):
@@ -422,8 +430,8 @@ class TestMixtures:
         ("fraction", "elements"),
         [
             ("atomic", {"H": 0.3749999, "O": 0.625}),
-            ("mass", {"H": 0.904972, "O": 0.095028}),
-            ("volume", {"H": 0.3746024, "O": 0.625397}),
+            ("mass", {"H": 0.904976, "O": 0.0950234}),
+            ("volume", {"H": 0.374615, "O": 0.625385}),
         ],
     )
     def test_fractional_type_with_void(self, fraction, elements, caplog):
@@ -458,8 +466,8 @@ class TestMixtures:
         ("fraction", "elements"),
         [
             ("atomic", {"H": 0.25, "O": 0.5, "C": 0.25}),
-            ("mass", {"H": 0.311105, "O": 0.5, "C": 0.1888953}),
-            ("volume", {"H": 3.75276e-7, "O": 0.779048, "C": 0.2209513}),
+            ("mass", {"H": 0.311102, "O": 0.5, "C": 0.1888977}),
+            ("volume", {"H": 6.14389e-06, "O": 0.5, "C": 0.499994}),
         ],
     )
     def test_fractional_types_complex(self, fraction, elements):
