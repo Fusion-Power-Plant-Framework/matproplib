@@ -656,7 +656,7 @@ def _mix_elements(
     materials: list[MaterialFraction], fraction_type: str, volume_conditions: OpCondT
 ) -> dict[str, float]:
     """
-    Compute normalized elemental composition of a material mixture.
+    Compute normalised elemental composition of a material mixture.
 
     Parameters
     ----------
