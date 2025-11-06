@@ -643,9 +643,14 @@ def _crude_average_molar_mass(material: Material) -> float:
     Average molar mass of a Material, ignoring enrichment
     """
     nucleides = material.elements.nucleides.root.values()
-    return np.sum([n.element.element.mass * n.fraction for n in nucleides]) / np.sum([n.fraction for n in nucleides])
+    return np.sum([n.element.element.mass * n.fraction for n in nucleides]) / np.sum([
+        n.fraction for n in nucleides
+    ])
 
-def _mix_elements(materials: list[MaterialFraction], fraction_type: str, volume_conditions: OpCondT) -> dict[str, float]:
+
+def _mix_elements(
+    materials: list[MaterialFraction], fraction_type: str, volume_conditions: OpCondT
+) -> dict[str, float]:
     """
     Compute normalized elemental composition of a material mixture.
 
@@ -668,7 +673,7 @@ def _mix_elements(materials: list[MaterialFraction], fraction_type: str, volume_
     fractions = np.array([mf.fraction for mf in materials])
     fractions /= np.sum(fractions)
     materials = [mf.material for mf in materials]
-    densities = np.array([mat.density(volume_conditions) for mat in materials])    
+    densities = np.array([mat.density(volume_conditions) for mat in materials])
     molar_mass = np.array([_crude_average_molar_mass(mat) for mat in materials])
 
     match fraction_type:
@@ -680,7 +685,7 @@ def _mix_elements(materials: list[MaterialFraction], fraction_type: str, volume_
             weights = fractions * molar_mass / densities
         case _:
             raise ValueError(f"Unknown fraction_type: {fraction_type!r}")
-    
+
     weights /= np.sum(weights)
 
     nucleides_per_cc = defaultdict(float)
