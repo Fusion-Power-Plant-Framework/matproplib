@@ -23,7 +23,7 @@ dependencies = [
    "asttokens",
    "babel",
    "CoolProp",
-   "csl_reference @ git+https://git@github.com/Fusion-Power-Plant-Framework/csl-reference@main",
+   "csl_reference",
    "matplotlib >=3.10",
    "numpy >=1.26",
    "numpydantic",
