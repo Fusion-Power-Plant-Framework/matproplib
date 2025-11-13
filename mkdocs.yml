@@ -14,7 +14,6 @@ plugins:
   - gen-files:
       scripts:
         - documentation/gen_api_ref.py
-  - doi
   - literate-nav:
       nav_file: overview.md
   - mkdocs-jupyter:
