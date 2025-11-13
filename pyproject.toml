@@ -68,7 +68,9 @@ docs = [
   "jupytext",
 ]
 lint = ["ruff==0.12.9", "ty"]
-all = ["matproplib[test,docs,lint]"]
+
+matml = ["xsdata_pydantic"]
+all = ["matproplib[test,docs,lint,matml]"]
 
 [tool.hatch.envs.default]
 features = ["dev", "test", "docs", "lint"]
