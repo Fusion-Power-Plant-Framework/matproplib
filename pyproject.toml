@@ -66,7 +66,6 @@ docs = [
   "mkdocs-literate-nav",
   "mkdocs-jupyter",
   "jupytext",
-  "mkdocs-doi-plugin @ {root:uri}/documentation/doi_plugin"
 ]
 lint = ["ruff==0.12.9", "ty"]
 all = ["matproplib[test,docs,lint]"]
