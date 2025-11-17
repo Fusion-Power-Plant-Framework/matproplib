@@ -143,7 +143,6 @@ class DependentPhysicalProperty(BasePhysicalProperty):
         conditions: dict[str, npt.NDArray],
         data_array: npt.NDArray,
         method: RegularGridInterpolator._ALL_METHODS = "linear",
-        unit: Unit | None = None,
         op_cond_config: DependentPropertyConditionConfig | None = None,
     ):
         """Initialise dependent property from data
@@ -161,19 +160,19 @@ class DependentPhysicalProperty(BasePhysicalProperty):
             interpolation method
         op_cond_config:
             Configuration of limits for its operational conditions
-        unit:
-            Unit of the dependent property if not defined on the class
 
         Notes
         -----
         Uses scipy RegularGridInterpolator under the hood
         """  # noqa: DOC201
+        if isinstance(cls.model_fields["unit"].default, PydanticUndefinedType):
+            raise NotImplementedError(
+                "Initialised from data only possibly on defined dependent property"
+            )
         interpolator = FromNDData(
             tuple(conditions.values()), data_array, tuple(conditions.keys()), method
         )
-        if unit is None:
-            return cls(value=interpolator, op_cond_config=op_cond_config)
-        return cls(value=interpolator, unit=unit, op_cond_config=op_cond_config)
+        return cls(value=interpolator, op_cond_config=op_cond_config)
 
     @field_serializer("value")
     @classmethod
