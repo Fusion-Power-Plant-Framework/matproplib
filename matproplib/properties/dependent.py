@@ -10,6 +10,7 @@ import logging
 from collections.abc import Callable  # noqa: TC003
 from functools import partial
 from typing import (
+    TYPE_CHECKING,
     Literal,
     Protocol,
     TypedDict,
@@ -46,6 +47,11 @@ from matproplib.tools.serialisation import (
     is_lambda,
     stringify_function,
 )
+from matproplib.tools.tools import FromNDData
+
+if TYPE_CHECKING:
+    import numpy.typing as npt
+    from scipy.interpolate import RegularGridInterpolator
 
 log = logging.getLogger(__name__)
 
@@ -130,6 +136,44 @@ class DependentPhysicalProperty(BasePhysicalProperty):
                 f"No default unit set on {cls}."
                 " Please set a default unit attribute 'unit: Unit | str = \"myunit\"'"
             )
+
+    @classmethod
+    def from_data(
+        cls,
+        conditions: dict[str, npt.NDArray],
+        data_array: npt.NDArray,
+        method: RegularGridInterpolator._ALL_METHODS = "linear",
+        unit: Unit | None = None,
+        op_cond_config: DependentPropertyConditionConfig | None = None,
+    ):
+        """Initialise dependent property from data
+
+
+        Parameters
+        ----------
+        conditions:
+            dictionary of arrays of condition data
+        data_array:
+            Array of resultant quantity
+        conditions:
+            condition name
+        method:
+            interpolation method
+        op_cond_config:
+            Configuration of limits for its operational conditions
+        unit:
+            Unit of the dependent property if not defined on the class
+
+        Notes
+        -----
+        Uses scipy RegularGridInterpolator under the hood
+        """  # noqa: DOC201
+        interpolator = FromNDData(
+            tuple(conditions.values()), data_array, tuple(conditions.keys()), method
+        )
+        if unit is None:
+            return cls(value=interpolator, op_cond_config=op_cond_config)
+        return cls(value=interpolator, unit=unit, op_cond_config=op_cond_config)
 
     @field_serializer("value")
     @classmethod
