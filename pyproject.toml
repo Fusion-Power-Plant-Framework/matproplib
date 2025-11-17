@@ -30,6 +30,7 @@ dependencies = [
    "periodictable",
    "pint >=0.24",
    "pydantic>=2.12",
+   "scipy>=1.0",
    ]
 keywords = ["materials", "fusion", "structural", "electromagnetism", "neutronics"]
 classifiers = [
