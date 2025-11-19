@@ -307,6 +307,19 @@ class TestDependentPhysicalProperties:
         cond3 = OperationalConditions(temperature=15, pressure=20)
         assert den(cond3) == pytest.approx(1.5)
 
+        # 3 conditions
+        den2 = Density.from_data(
+            {
+                "temperature": [10, 20, 30, 40, 50],
+                "pressure": [20, 50, 100],
+                "magnetic_field": [1, 2, 3, 4],
+            },
+            np.arange(60).reshape(5, 3, 4),
+        )
+        assert den2(
+            OperationalConditions(temperature=100, pressure=5, magnetic_field=2)
+        ) == pytest.approx(107)
+
 
 class TestGroupingProperties:
     def test_props_as_field(self, test_condition):
