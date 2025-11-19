@@ -25,7 +25,7 @@
 # In `matproplib`, we can create a mixture of materials using the `Mixture` class. This
 # allows us to define a material that is composed of multiple other materials,
 # each with its own properties.
-
+#
 # In this example, we will create a mixture of steel and water.
 
 # %%
@@ -48,7 +48,10 @@ water = Water()
 
 # %%
 my_mixture = mixture(
-    "SteelWaterMixture", [(steel, 0.7), (water, 0.3)], fraction_type="mass"
+    "SteelWaterMixture",
+    [(steel, 0.7), (water, 0.3)],
+    mix_condition=OperationalConditions(temperature=300, pressure=(1, "atm")),
+    fraction_type="mass",
 )
 
 # %% [markdown]
