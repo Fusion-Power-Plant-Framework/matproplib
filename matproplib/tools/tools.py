@@ -5,8 +5,11 @@
 
 from collections.abc import Sequence
 from copy import deepcopy
+from operator import attrgetter
 
 import numpy as np
+import numpy.typing as npt
+from scipy.interpolate import RegularGridInterpolator
 
 from matproplib.base import References
 from matproplib.conditions import OpCondT
@@ -87,6 +90,10 @@ class From1DData:
         Array of resultant quantity
     condition:
         condition name
+
+    Notes
+    -----
+    Uses numpy.interp under the hood
     """
 
     def __init__(self, x: Sequence[float], y: Sequence[float], condition: str):
@@ -97,3 +104,45 @@ class From1DData:
     def __call__(self, op_cond: OpCondT):
         """Call the interpolator"""  # noqa: DOC201
         return np.interp(getattr(op_cond, self.condition), self.x, self.y)
+
+
+class FromNDData:
+    """N-D Data interpolation from conditions
+
+    Parameters
+    ----------
+    condition_array:
+        Sequence of arrays of condition data
+    data_array:
+        Array of resultant quantity
+    conditions:
+        conditions used
+
+    Notes
+    -----
+    Uses scipy RegularGridInterpolator under the hood
+    """
+
+    def __init__(
+        self,
+        condition_array: Sequence[npt.NDArray] | npt.NDArray,
+        data_array: npt.NDArray,
+        conditions: Sequence[str],
+        method: RegularGridInterpolator._ALL_METHODS = "linear",
+        **kwargs,
+    ):
+        if not isinstance(condition_array, tuple):
+            condition_array = tuple(*condition_array)
+        self.interpolator = RegularGridInterpolator(
+            condition_array,
+            data_array,
+            method=method,
+            bounds_error=kwargs.pop("bounds_error", False),
+            fill_value=kwargs.pop("fill_value", None),
+            **kwargs,
+        )
+        self.conditions = attrgetter(*conditions)
+
+    def __call__(self, op_cond: OpCondT):
+        """Call the interpolator"""  # noqa: DOC201
+        return self.interpolator(self.conditions(op_cond))

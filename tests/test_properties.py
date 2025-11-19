@@ -11,6 +11,7 @@ from pydantic_core import ValidationError
 from matproplib.base import rebuild, ureg
 from matproplib.conditions import (
     DependentPropertyConditionConfig,
+    OperationalConditions,
     PropertyConfig,
     STPConditions,
 )
@@ -288,6 +289,36 @@ class TestDependentPhysicalProperties:
         assert np.interp(test_condition.temperature, arr, arr[::-1]) == pytest.approx(
             np.array([295, 203])
         )
+
+    def test_initialisation_from_data(self, condition):
+        den = Density.from_data(
+            {"temperature": [10, 20, 30, 40, 50], "pressure": [20, 50, 100]},
+            np.arange(15).reshape(5, 3),
+        )
+
+        # extrapolation
+        assert den(condition) == pytest.approx(2112.9)
+
+        # exact value on grid
+        cond2 = OperationalConditions(temperature=20, pressure=20)
+        assert den(cond2) == pytest.approx(3)
+
+        # value interpolation
+        cond3 = OperationalConditions(temperature=15, pressure=20)
+        assert den(cond3) == pytest.approx(1.5)
+
+        # 3 conditions
+        den2 = Density.from_data(
+            {
+                "temperature": [10, 20, 30, 40, 50],
+                "pressure": [20, 50, 100],
+                "magnetic_field": [1, 2, 3, 4],
+            },
+            np.arange(60).reshape(5, 3, 4),
+        )
+        assert den2(
+            OperationalConditions(temperature=100, pressure=5, magnetic_field=2)
+        ) == pytest.approx(107)
 
 
 class TestGroupingProperties:

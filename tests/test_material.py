@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 import warnings
 
+import numpy as np
 import pytest
 from csl_reference import Reference
 from pint import Unit
@@ -161,6 +162,14 @@ class TestMaterialFunctionalInit:
                 "youngs_modulus",
             }
         )
+
+        s1_mod = Struct1(
+            density=Density.from_data(
+                {"temperature": [10, 20, 30, 40, 50], "pressure": [20, 50, 100]},
+                np.arange(15).reshape(5, 3),
+            )
+        )
+        assert s1_mod.density(cond) == pytest.approx(2078.944)
 
     def test_default_properties(self):
         Struct3 = material("Struct3", properties=DefaultProperties())
