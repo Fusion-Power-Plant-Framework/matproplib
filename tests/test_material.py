@@ -180,14 +180,19 @@ class TestMaterialFunctionalInit:
         ).model_fields.keys() == DefaultProperties.model_fields.keys()
 
     @pytest.mark.parametrize(
-        "prop",
+        ("reference_1", "prop"),
         [
-            DefaultProperties(reference={"id": 1, "type": "article"}),
-            props(reference={"id": 1, "type": "article"}),
+            (None, DefaultProperties(reference={"id": 1, "type": "article"})),
+            (None, props(reference={"id": 1, "type": "article"})),
+            ({"id": 1, "type": "article"}, DefaultProperties()),
+            (
+                {"id": 1, "type": "article"},
+                DefaultProperties(reference={"id": 2, "type": "article"}),
+            ),
         ],
     )
-    def test_reference_combining(self, prop):
-        struct = material("Struct", properties=prop)()
+    def test_reference_combining(self, reference_1, prop):
+        struct = material("Struct", properties=prop, reference=reference_1)()
 
         assert struct.reference[1] == Reference(id=1, type="article")
 
