@@ -186,7 +186,7 @@ class Element(PMBaseModel):
                 raise ValueError(
                     "Ground state isomers should take the form `<element><number>`; "
                     "metastable and excited state isomers shall be appended with "
-                    "`_m<number>` or `_e<number>`."
+                    f"`_m<number>` or `_e<number>`. Cannot match '{self['element']}'"
                 )
             symbol, a_n, state = regex_result.groups()
 
