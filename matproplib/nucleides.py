@@ -182,7 +182,13 @@ class Element(PMBaseModel):
         if isinstance(self, dict) and not isinstance(
             self.get("element"), pt.core.Isotope | pt.core.Element
         ):
-            symbol, a_n, state = _GNDS_metaStable.fullmatch(self["element"]).groups()
+            if (regex_result := _GNDS_metaStable.fullmatch(self["element"])) is None:
+                raise ValueError(
+                    "Ground state isomers should take the form `<element><number>`; "
+                    "metastable and excited state isomers shall be appended with "
+                    f"`_m<number>` or `_e<number>`. Cannot match '{self['element']}'"
+                )
+            symbol, a_n, state = regex_result.groups()
 
             symbol = getattr(pt, symbol)
 
