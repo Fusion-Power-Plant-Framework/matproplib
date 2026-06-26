@@ -120,10 +120,17 @@ PNNL_COMPENDIUM = {
     "id": "pnnl_compendium",
     "doi": "10.2172/1782721",
     "type": "report",
-    "author": ['Detwiler, Rebecca S. [Pacific Northwest National Lab. (PNNL), Richland, WA (United States)]',
-        'McConn, Ronald J. [Pacific Northwest National Lab. (PNNL), Richland, WA (United States)] (ORCID:0000000268788805)',
-        'Grimes, Thomas F. [Pacific Northwest National Lab. (PNNL), Richland, WA (United States)] (ORCID:0000000257990274)',
-        'Upton, Scott A. [Pacific Northwest National Lab. (PNNL), Richland, WA (United States)]',
-        'Engel, Eric J. [Pacific Northwest National Lab. (PNNL), Richland, WA (United States)]'],
+    "author": ["Detwiler, Rebecca S. "
+            "[Pacific Northwest National Lab. (PNNL), Richland, WA (United States)]",
+        "McConn, Ronald J. "
+            "[Pacific Northwest National Lab. (PNNL), Richland, WA (United States)] "
+            "(ORCID:0000000268788805)",
+        "Grimes, Thomas F. "
+            "[Pacific Northwest National Lab. (PNNL), Richland, WA (United States)] "
+            "(ORCID:0000000257990274)",
+        "Upton, Scott A. "
+            "[Pacific Northwest National Lab. (PNNL), Richland, WA (United States)]",
+        "Engel, Eric J. "
+            "[Pacific Northwest National Lab. (PNNL), Richland, WA (United States)]"],
     "url": "https://www.pnnl.gov/main/publications/external/technical_reports/PNNL-15870Rev2.pdf",
 }
