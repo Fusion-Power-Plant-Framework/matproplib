@@ -180,16 +180,27 @@ class TestMaterialFunctionalInit:
         ).model_fields.keys() == DefaultProperties.model_fields.keys()
 
     @pytest.mark.parametrize(
-        "prop",
+        ("reference_1", "prop", "expected_n_refs"),
         [
-            DefaultProperties(reference={"id": 1, "type": "article"}),
-            props(reference={"id": 1, "type": "article"}),
+            (None, DefaultProperties(reference={"id": 2, "type": "article"}), 1),
+            (None, props(reference={"id": 2, "type": "article"}), 1),
+            ({"id": 1, "type": "article"}, DefaultProperties(), 1),
+            (
+                {"id": 1, "type": "article"},
+                DefaultProperties(reference={"id": 2, "type": "article"}),
+                2,
+            ),
         ],
     )
-    def test_reference_combining(self, prop):
-        struct = material("Struct", properties=prop)()
+    def test_reference_combining(self, reference_1, prop, expected_n_refs):
+        struct = material("Struct", properties=prop, reference=reference_1)()
 
-        assert struct.reference[1] == Reference(id=1, type="article")
+        if reference_1 is None:
+            assert struct.reference[2] == Reference(id=2, type="article")
+        else:
+            assert struct.reference[1] == Reference(id=1, type="article")
+
+        assert len(struct.reference.root.keys()) == expected_n_refs
 
     def test_superconducting_check(self):
         Struct = material(
