@@ -4,56 +4,63 @@
 """Concrete materials"""
 
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
+from matproplib.library.references import PNNL_COMPENDIUM
 from matproplib.material import material
 from matproplib.properties.group import props
 
 __all__ = ["Concrete", "HeavyConcrete", "OrdinaryConcrete"]
 
 Concrete = material(
-    "Concrete",
+    "Concrete [Los Alamos (MCNP) Mix]",
     elements={
-        "H": 0.00453,
-        "O": 0.5126,
-        "Na": 0.01527,
-        "Al": 0.03555,
-        "Si": 0.36036,
-        "Ca": 0.05791,
-        "Fe": 0.01378,
+        "H": 0.004530,
+        "O": 0.512600,
+        "Si": 0.360360,
+        "Al": 0.035550,
+        "Na": 0.015270,
+        "Ca": 0.057910,
+        "Fe": 0.013780,
     },
-    properties=props(as_field=True, density=2250, poissons_ratio=0.33),
+    properties=props(as_field=True, density=2250),
     converters=OpenMCNeutronicConfig(),
+    reference=PNNL_COMPENDIUM,
 )
 
 OrdinaryConcrete = material(
-    "OrdinaryConcrete",
+    "Concrete, Ordinary (NBS 03)",
     elements={
-        "H": 0.0055,
-        "O": 0.4975,
-        "Si": 0.3147,
-        "Ca": 0.0828,
-        "Mg": 0.0026,
-        "Al": 0.0469,
-        "S": 0.0013,
-        "Fe": 0.0124,
-        "Na": 0.0171,
-        "K": 0.0192,
+        "H": 0.008485,
+        "C": 0.050064,
+        "O": 0.473483,
+        "Mg": 0.024183,
+        "Al": 0.036063,
+        "Si": 0.145100,
+        "S": 0.002970,
+        "K": 0.001697,
+        "Ca": 0.246924,
+        "Fe": 0.011031,
     },
-    properties=props(as_field=True, density=2200, poissons_ratio=0.33),
+    properties=props(as_field=True, density=2350),
     converters=OpenMCNeutronicConfig(),
+    reference=PNNL_COMPENDIUM,
 )
 HeavyConcrete = material(
-    "HeavyConcrete",
+    "Concrete, Magnetite",
     elements={
-        "H": 0.0052,
-        "O": 0.3273,
-        "C": 0.004,
-        "Si": 0.0224,
-        "Ca": 0.0657,
-        "Mg": 0.0021,
-        "Al": 0.0038,
-        "Fe": 0.568,
-        "P": 0.0015,
+        "H": 0.003113,
+        "O": 0.330504,
+        "Mg": 0.009338,
+        "Al": 0.023486,
+        "Si": 0.025750,
+        "S": 0.001415,
+        "Ca": 0.071024,
+        "Ti": 0.054329,
+        "V": 0.003113,
+        "Cr": 0.001698,
+        "Mn": 0.001981,
+        "Fe": 0.474250,
     },
-    properties=props(as_field=True, density=3600, poissons_ratio=0.33),
+    properties=props(as_field=True, density=3530),
     converters=OpenMCNeutronicConfig(),
+    reference=PNNL_COMPENDIUM,
 )
