@@ -1,0 +1,1 @@
+pyo3::Bound<'_, PyArrayLike<'_, f64, Dim<[usize; 1]>, AllowTypeChange>>: pyo3::FromPyObject<'_, '_>

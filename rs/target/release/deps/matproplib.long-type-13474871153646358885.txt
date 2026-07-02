@@ -1,0 +1,2 @@
+pyo3::Bound<'_, PyArrayLike<'_, f64, Dim<[usize; 1]>, AllowTypeChange>>: From<pyo3::Bound<'_, PyAny>>
+Into<pyo3::Bound<'_, PyArrayLike<'_, f64, Dim<[usize; 1]>, AllowTypeChange>>>

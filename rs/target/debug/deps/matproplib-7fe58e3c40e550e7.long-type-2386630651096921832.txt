@@ -1,0 +1,1 @@
+for<'a> fn(&'a pyo3::Bound<'_, _>) -> Result<&'a pyo3::Bound<'_, _>, CastError<'a, '_>> {pyo3::Bound::<'_, _>::cast::<_>}

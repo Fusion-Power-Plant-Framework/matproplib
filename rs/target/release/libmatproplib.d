@@ -1,0 +1,1 @@
+/home/james/Documents/BLUEPRINT/mpl-rs/rs/target/release/libmatproplib.so: /home/james/Documents/BLUEPRINT/mpl-rs/rs/src/conditions.rs /home/james/Documents/BLUEPRINT/mpl-rs/rs/src/lib.rs /home/james/Documents/BLUEPRINT/mpl-rs/rs/src/materials.rs /home/james/Documents/BLUEPRINT/mpl-rs/rs/src/physicalproperties.rs
