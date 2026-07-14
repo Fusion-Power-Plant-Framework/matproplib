@@ -340,15 +340,10 @@ def material(  # noqa: C901
     )
 
     def combine_refs(ref1: References | None, ref2: FieldInfo) -> References | None:
-        if ref1 and ref2.default:
-            combined_ref = References.model_validate(ref1)
-            combined_ref.combine(ref2.default)
-            return combined_ref
-        if ref1 and not ref2.default:
-            return References.model_validate(ref1)
-        if not ref1 and ref2.default:
+        if ref2.default is not None:
+            if ref1 is not None:
+                return References.model_validate(ref1).combine(ref2.default)
             return ref2.default
-
         return None
 
     if properties is None:
