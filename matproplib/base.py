@@ -122,13 +122,23 @@ class References(RootModel):
     def __str__(self) -> str:  # noqa: D105
         return " ".join(f"[{k}] {ref.__str__()}" for k, ref in self.root.items())
 
-    def combine(self, reference: References | Reference):
-        """Combine references into this reference object"""
+    def combine(self, reference: References | Reference) -> References | Reference:
+        """
+        Combine references into this reference object and
+        return a new reference object
+
+        Returns
+        -------
+        References | Reference
+            Combined reference object
+        """
+        new_ref = self.copy()
         if isinstance(reference, References):
             for k, r in reference:
-                self.root[k] = r
+                new_ref.root[k] = r
         if isinstance(reference, Reference):
-            self.root[reference.id] = reference
+            new_ref[reference.id] = reference
+        return new_ref
 
 
 class PMBaseModel(BaseModel, ABC):
