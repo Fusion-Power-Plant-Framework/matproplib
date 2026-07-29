@@ -146,7 +146,7 @@ def props(  # noqa: PLR0913
     | Literal[True]
     | None = None,
     property_group: type[PropertiesT_co] = DefaultProperties,
-    reference: References | None = None,
+    reference: References | dict | None = None,
     as_field: bool = False,
     **extra_values: dict[str, DependentPhysicalProperty | DependentPhysicalPropertyTD],
 ) -> PropertiesT_co:
@@ -202,6 +202,9 @@ def props(  # noqa: PLR0913
                 _superconduction_validation
             )
         }
+    # convert to Reference, if reference is given as a dict
+    if isinstance(reference, dict):
+        reference = References(**reference)
     model = create_model(
         "DynamicProperties",
         __base__=(Properties, Generic[SuperconductingParameterisationT_co]),

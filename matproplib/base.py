@@ -132,7 +132,7 @@ class References(RootModel):
         References | Reference
             Combined reference object
         """
-        new_ref = self.copy()
+        new_ref = self.model_copy()
         if isinstance(reference, References):
             for k, r in reference:
                 new_ref.root[k] = r
