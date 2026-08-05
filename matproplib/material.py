@@ -250,7 +250,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
                               doping_material.density(dope_condition)])
         molar_mass = np.array([_crude_average_molar_mass(self),
                                _crude_average_molar_mass(doping_material)])
-        self.elements = calculate_elements(fractions, fraction_type, materials,
+        self.elements = _calculate_elements(fractions, fraction_type, materials,
                                            densities, molar_mass)
 
     def _process_enrich_inputs(self,
@@ -258,7 +258,8 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         enrich_target:  str | None = None,
         enrich_type: Literal["atomic", "mass"] | None = None,
     ):
-        if enrich_percentage < 0 or enrich_percentage > 100:
+        percentage_ceiling = 100
+        if enrich_percentage < 0 or enrich_percentage > percentage_ceiling:
             raise ValueError(f"The doping_percentage {enrich_percentage} must be"
                                 " between 0 and 100.")
 
@@ -290,16 +291,54 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
 
         return enrich_mat, fraction_type
 
+    def _renormalise_elements(self,
+            elements: ElementsTD,
+            pre_enrich_fraction_atomic: float,
+            enrich_mat_prefix: str,
+    ) -> ElementsTD:
+        post_enrich_fraction_atomic = 0
+        for el in elements:
+            prefix = re.split(r"(\d+)", el)[0]
+            if prefix == enrich_mat_prefix:
+                post_enrich_fraction_atomic += elements[el].fraction
+        for el in elements:
+            prefix = re.split(r"(\d+)", el)[0]
+            if prefix == enrich_mat_prefix:
+                elements[el].fraction /= (post_enrich_fraction_atomic
+                                                / pre_enrich_fraction_atomic)
+            else:
+                elements[el].fraction /= ((1 - post_enrich_fraction_atomic) /
+                (1 - pre_enrich_fraction_atomic))
+
+        self.elements = Elements(elements)
+
     def enrich_material(self,
         enrich_percentage: float = 0.0,
         enrich_target:  str | None = None,
         enrich_type: Literal["atomic", "mass"] | None = None,
     ):
+        """
+        Allows for the enrichement of the base material with an isotope contained within
+        the material. Will result in overriding the Elements part of the class, with
+        changing out the enriched element for its isotopes. Enrichment will not impact
+        the atomic fractions of the material only the isotope composition, however it
+        will result in differences when converting from atomic to other fraction types.
+
+        Parameters
+        ----------
+        enrich_percentage:
+            The enrichment percentage of the added isotope as a fraction of that elements
+            fraction of the material.
+        enrich_target:
+            The string of the isotope that the material is being enriched by.
+        enrich_type:
+            The method of enrichement: atomic or mass.
+        """
         enrich_mat, fraction_type = self._process_enrich_inputs(enrich_percentage,
                                   enrich_target,
                                   enrich_type)
 
-        enrich_mat_prefix = re.split('(\d+)', enrich_mat)[0]
+        enrich_mat_prefix = re.split(r"(\d+)", enrich_mat)[0]
         enrich_fraction = enrich_percentage / 100
         nucleides = self.elements.nucleides.root
         converted_nucleides = _to_fraction_type_conversion(fraction_type, nucleides)
@@ -308,14 +347,15 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         subset_element_total = 0
         pre_enrich_fraction_atomic = 0
         for iso in converted_nucleides:
-            prefix = re.split('(\d+)', iso)[0]
+            prefix = re.split(r"(\d+)", iso)[0]
             if prefix == enrich_mat_prefix:
                 pre_enrich_fraction_atomic += nucleides[iso].fraction
                 iso_list[iso] = converted_nucleides[iso]
                 if iso != enrich_mat:
                     subset_element_total += converted_nucleides[iso].fraction
 
-        element_fraction = sum(x.fraction for x in iso_list.values())  # fraction of target isotope element in compound 
+        # fraction of target isotope element in compound
+        element_fraction = sum(x.fraction for x in iso_list.values())
         non_enrich_fraction = subset_element_total / element_fraction
         tail_fraction = 1 - enrich_fraction
 
@@ -342,23 +382,13 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
             new_elements[iso] = iso_list[iso]
 
         new_elements = _from_fraction_type_conversion(fraction_type, new_elements)
-        post_enrich_fraction_atomic = 0
-        for el in new_elements:
-            prefix = re.split('(\d+)', el)[0]
-            if prefix == enrich_mat_prefix:
-                post_enrich_fraction_atomic += new_elements[el].fraction
-        for el in new_elements:
-            prefix = re.split('(\d+)', el)[0]
-            if prefix == enrich_mat_prefix:
-                new_elements[el].fraction /= (post_enrich_fraction_atomic
-                                              / pre_enrich_fraction_atomic)
-            else:
-                new_elements[el].fraction /= ((1 - post_enrich_fraction_atomic) /
-                (1 - pre_enrich_fraction_atomic))
-        self.elements = Elements(new_elements)
+
+        self._renormalise_elements(new_elements,
+            pre_enrich_fraction_atomic,
+            enrich_mat_prefix)
 
 
-def calculate_elements(
+def _calculate_elements(
         fractions,
         fraction_type,
         materials,
@@ -810,7 +840,11 @@ def _mix_elements(
     densities = np.array([mat.density(mix_condition) for mat in materials])
     molar_mass = np.array([_crude_average_molar_mass(mat) for mat in materials])
 
-    return calculate_elements(fractions, fraction_type, materials, densities, molar_mass)
+    return _calculate_elements(fractions,
+                               fraction_type,
+                               materials,
+                               densities,
+                               molar_mass)
 
 
 Owner = TypeVar("Owner")
