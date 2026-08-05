@@ -274,7 +274,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         """
         percentage_ceiling = 100
         if doping_percentage < 0 or doping_percentage > percentage_ceiling:
-            raise ValueError(f"The doping_percentage {doping_percentage} must be"
+            raise ValueError(f"The doping_percentage ({doping_percentage}) must be"
                              " between 0 and 100.")
         doping_fraction = doping_percentage / 100
         fractions = np.array([1 - doping_fraction, doping_fraction])

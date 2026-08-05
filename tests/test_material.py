@@ -738,8 +738,8 @@ class TestDoping:
     def test_overdoping(self):
         doping = 110
         with pytest.raises(ValueError,
-                match=f"The value for doping_percentage {doping} must be"
-                    " between 0 and 100."):
+                match=f"The doping_percentage \\({doping}\\) must be"
+                             " between 0 and 100."):
             self.base_material.dope_material(doping,
                 self.add_material,
                 "atomic",
