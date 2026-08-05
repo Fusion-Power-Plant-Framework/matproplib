@@ -312,11 +312,11 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
                 if self.enrich_target != enrich_target:
                     raise ValueError(f"Mismatch between material enrichment target "
                                      f"{self.enrich_target} and set enrichment "
-                                     f"and target {enrich_target}.")
+                                     f"target {enrich_target}.")
 
         if enrich_mat not in self.elements.nucleides.root:
             raise ValueError(f"Desired enrichment isotope {enrich_mat} not in "
-                                "{self.name} therefore not enrichable. Use "
+                                f"{self.name} therefore not enrichable. Use "
                                 "dope_material function instead.")
 
         fraction_type = enrich_type if enrich_type is not None else self.enrich_type
