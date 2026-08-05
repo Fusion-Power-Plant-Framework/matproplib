@@ -18,6 +18,7 @@ from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.copper import CryogenicCopper
 from matproplib.library.fluids import DDPlasma, DTPlasma, Water
+from matproplib.library.lithium import Li2SiO3
 from matproplib.library.steel import SS316_L
 from matproplib.library.superconductors import Nb3Sn
 from matproplib.library.tungsten import PlanseeTungsten
@@ -627,3 +628,85 @@ class TestSerialisation:
         assert osp.critical_current_density(
             test_condition
         ) == ssp.critical_current_density(test_condition)
+
+
+class TestEnrichment:
+    @classmethod
+    def setup_class(cls):
+        cls.lithium = material("lithium", elements="Li")()
+        cls.lithium_compound = Li2SiO3()
+        cls.li_fraction = cls.lithium_compound.elements["Li"].fraction
+
+    def test_no_enrichment_target(self):
+        with pytest.raises(ValueError, match="Enrichment target must be set"):
+            self.lithium.enrich_material(enrichement_percentage=10, enrichment_type="mass")
+
+    def test_different_enrchment_targets(self):
+        target1 = "Li7"
+        target2 = "Li6"
+        self.lithium.enrichement_target = target1
+        with pytest.raises(ValueError, match=f"Mismatch between material enrichment target {target1}"
+                                     f" and set enrichment target {target2}."):
+            self.lithium.enrich_material(enrichement_percentage=10, enrichement_target=target2, enrichment_type="mass")
+
+    def test_isotope_not_present(self):
+        isotope = "H1"
+        self.lithium.enrichement_target = None
+        with pytest.raises(ValueError, match=f"Desired enrichment isotope {isotope} not in {self.lithium.name} therefore not enrichable."
+                             " Use dope_material function instead."):
+                    self.lithium.enrich_material(enrichement_percentage=10, enrichement_target=isotope, enrichment_type="mass")
+
+    def test_no_enrichment_type(self):
+        with pytest.raises(ValueError, match="Enrichment fraction-type must be set"):
+                            self.lithium_compound.enrich_material(enrichement_percentage=10, enrichement_target="Li6")
+
+    def test_simple_case_atomic(self):
+        self.lithium.enrichement_target = None
+        self.lithium.enrich_material(enrichement_percentage=20, enrichement_target="Li6", enrichment_type="atomic")
+        assert self.lithium.elements["Li6"].fraction == 0.2
+        assert self.lithium.elements["Li7"].fraction == 0.8
+
+    def test_complex_case_atomic(self):
+        self.lithium_compound.enrichement_target = None
+        self.lithium_compound.enrich_material(enrichement_percentage=20, enrichement_target="Li6", enrichment_type="atomic")
+        assert np.round(self.lithium_compound.elements["Li6"].fraction, 6) == np.round(0.2 * self.li_fraction, 6)
+        assert np.round(self.lithium_compound.elements["Li7"].fraction, 6) == np.round(0.8 * self.li_fraction, 6)
+
+    def test_simple_case_mass(self):
+        self.lithium.enrichement_target = None
+        self.lithium.enrich_material(enrichement_percentage=20, enrichement_target="Li6", enrichment_type="mass")
+        assert np.round(self.lithium.elements["Li6"].fraction, 6) == 0.225766
+        assert np.round(self.lithium.elements["Li7"].fraction, 6) == 0.774234
+
+    def test_complex_case_mass(self):
+        self.lithium_compound.enrichement_target = None
+        self.lithium_compound.enrich_material(enrichement_percentage=20, enrichement_target="Li6", enrichment_type="mass")
+        total_li_isotopes = self.lithium_compound.elements["Li6"].fraction + self.lithium_compound.elements["Li7"].fraction
+        assert np.round(total_li_isotopes, 6) == np.round(self.li_fraction, 6)
+        assert np.round(self.lithium_compound.elements["Li6"].fraction, 6) == np.round(0.225766 * self.li_fraction, 6)
+        assert np.round(self.lithium_compound.elements["Li7"].fraction, 6) == np.round(0.774234 * self.li_fraction, 6)
+
+
+class TestDoping:
+    @classmethod
+    def setup_class(cls):
+        cls.base_material = SS316_L()
+        cls.add_material = material("W",
+            elements="W",
+            properties=props(
+                density=Density(value=19.3,
+                    unit="g/cm^3"))
+        )()
+
+    def test_doping(self):
+        doping = 10
+        df = doping / 100
+        for i in range(1, 5):
+            self.base_material.dope_material(doping, self.add_material, "atomic", OperationalConditions(temperature=300, pressure=(1, "atm")))
+            assert np.round(self.base_material.elements["W"].fraction, 8) == np.round(np.sum(df * np.power(1 - df, x) for x in range(i)), 8)
+
+    def test_overdoping(self):
+        doping = 110
+        with pytest.raises(ValueError, match=f"The value for doping_percentage {doping} must be"
+                             " between 0 and 100."):
+            self.base_material.dope_material(doping, self.add_material, "atomic", OperationalConditions(temperature=300, pressure=(1, "atm")))

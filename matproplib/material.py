@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import re
 import copy
 import logging
 import operator
@@ -51,6 +52,8 @@ from matproplib.nucleides import (
     ElementFraction,
     Elements,
     ElementsTD,
+    _from_fraction_type_conversion,
+    _to_fraction_type_conversion
 )
 from matproplib.properties.dependent import (
     AttributeErrorProperty,
@@ -111,6 +114,9 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
     elements: Elements = Field(
         default=[], validation_alias=AliasChoices("elements", "chemical_equation")
     )
+    enrichement_percentage: float = 0.0
+    enrichement_target:  str | None = None
+    enrichment_type: Literal["atomic", "mass"] | None = None
     converters: Converters[ConverterK] = Field(default_factory=Converters)
     reference: References | None = None
     mixture_fraction: list[MaterialFraction[ConverterK]] | None = Field(
@@ -227,6 +233,131 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
             if statement(v) and isinstance(v, DependentPhysicalProperty)
         ]
 
+    def dope_material(self,
+        doping_percentage: float,
+        doping_material:  Material,
+        fraction_type: Literal["volume", "atomic", "mass"],
+        dope_condition: OpCondT,
+    ):
+        if doping_percentage < 0 or doping_percentage > 100:
+            raise ValueError(f"The value for doping_percentage {doping_percentage} must be"
+                             " between 0 and 100.")
+        doping_fraction = doping_percentage / 100
+        fractions = np.array([1 - doping_fraction, doping_fraction])
+        fractions /= np.sum(fractions)
+        materials = [self, doping_material]
+        densities = np.array([self.density(dope_condition), doping_material.density(dope_condition)])
+        molar_mass = np.array([_crude_average_molar_mass(self), _crude_average_molar_mass(doping_material)])
+        self.elements = calculate_elements(fractions, fraction_type, materials, densities, molar_mass)
+
+    def enrich_material(self,
+        enrichement_percentage: float = 0.0,
+        enrichement_target:  str | None = None,
+        enrichment_type: Literal["atomic", "mass"] | None = None,
+    ):
+        # checks and sorting conditions
+        cond1 = self.enrichement_target is None
+        cond2 = enrichement_target is None
+        match (cond1, cond2):
+            case (True, True):
+                raise ValueError("Enrichment target must be set")
+            case (True, False):
+                enrich_mat = enrichement_target
+                self.enrichement_target = enrichement_target
+            case (False, True):
+                enrich_mat = self.enrichement_target
+            case (False, False):
+                enrich_mat = self.enrichement_target
+                if self.enrichement_target != enrichement_target:
+                    raise ValueError(f"Mismatch between material enrichment target {self.enrichement_target}"
+                                     f" and set enrichment target {enrichement_target}.")
+
+        if enrich_mat not in self.elements.nucleides.root:
+            raise ValueError(f"Desired enrichment isotope {enrich_mat} not in {self.name} therefore not enrichable."
+                             " Use dope_material function instead.")
+
+        fraction_type = enrichment_type if enrichment_type is not None else self.enrichment_type
+        if fraction_type is None:
+            raise ValueError("Enrichment fraction-type must be set")
+
+        enrich_mat_prefix = re.split('(\d+)', enrich_mat)[0]
+        enrich_fraction = enrichement_percentage / 100
+        nucleides = self.elements.nucleides.root
+        converted_nucleides = _to_fraction_type_conversion(fraction_type, nucleides)
+
+        iso_list = {}
+        subset_element_total = 0
+        pre_enrich_fraction_atomic = 0
+        for iso in converted_nucleides:
+            prefix = re.split('(\d+)', iso)[0]
+            if prefix == enrich_mat_prefix:
+                pre_enrich_fraction_atomic += nucleides[iso].fraction
+                iso_list[iso] = converted_nucleides[iso]
+                if iso != enrich_mat:
+                    subset_element_total += converted_nucleides[iso].fraction
+
+        element_fraction = sum([x.fraction for x in iso_list.values()]) # fraction of target isotope element in compound 
+        non_enrich_fraction = subset_element_total / element_fraction
+        tail_fraction = 1 - enrich_fraction
+
+        for iso in iso_list:
+            if iso == enrich_mat:
+                iso_list[iso].fraction = enrich_fraction * element_fraction
+            else:
+                iso_list[iso].fraction *= tail_fraction / non_enrich_fraction
+
+        check_fraction = sum([x.fraction for x in iso_list.values()])
+        if element_fraction != check_fraction:
+            norm = check_fraction / element_fraction
+            for iso in iso_list:
+                iso_list[iso].fraction /= norm
+
+        converted_elements = _to_fraction_type_conversion(fraction_type, self.elements.root)
+        new_elements = {}
+        for el in converted_elements:
+            if el != enrich_mat_prefix:
+                new_elements[el] = converted_elements[el]
+
+        for iso in iso_list:
+            new_elements[iso] = iso_list[iso]
+
+        new_elements = _from_fraction_type_conversion(fraction_type, new_elements)
+        post_enrich_fraction_atomic = 0
+        for el in new_elements:
+            prefix = re.split('(\d+)', el)[0]
+            if prefix == enrich_mat_prefix:
+                post_enrich_fraction_atomic += new_elements[el].fraction
+        for el in new_elements:
+            prefix = re.split('(\d+)', el)[0]
+            if prefix == enrich_mat_prefix:
+                new_elements[el].fraction /= post_enrich_fraction_atomic / pre_enrich_fraction_atomic
+            else:
+                new_elements[el].fraction /= (1 - post_enrich_fraction_atomic) / (1 - pre_enrich_fraction_atomic)
+        self.elements = Elements(new_elements)
+
+def calculate_elements(fractions, fraction_type, materials, densities, molar_mass) -> Elements:
+    match fraction_type:
+        case "volume":
+            weights = fractions
+        case "mass":
+            weights = fractions / densities
+        case "atomic":
+            weights = fractions * molar_mass / densities
+        case _:
+            raise ValueError(f"Unknown fraction_type: {fraction_type!r}")
+
+    weights /= np.sum(weights)
+
+    nucleides_per_cc = defaultdict(float)
+    total_atoms_per_cc = 0.0
+    for weight, mat, density, amm in zip(
+        weights, materials, densities, molar_mass, strict=False
+    ):
+        for name, element in mat.elements.root.items():
+            atoms_per_cc = weight * element.fraction * density / amm
+            nucleides_per_cc[name] += atoms_per_cc
+            total_atoms_per_cc += atoms_per_cc
+    return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
 
 def field_alias_path(name, *alias_path, default=None):
     """Helper to create alias field for properties"""  # noqa: DOC201
@@ -321,6 +452,9 @@ def material(  # noqa: C901
     | list[str]
     | ElementsTD
     | None = None,
+    enrichement_percentage: float | None = None,
+    enrichement_target:  str | None = None,
+    enrichment_type: Literal["atomic", "mass"] | None = None,
     properties: Properties
     | dict[str, Ldefine | DependentPhysicalProperty]
     | None = None,
@@ -649,32 +783,7 @@ def _mix_elements(
     densities = np.array([mat.density(mix_condition) for mat in materials])
     molar_mass = np.array([_crude_average_molar_mass(mat) for mat in materials])
 
-    match fraction_type:
-        case "volume":
-            weights = fractions
-        case "mass":
-            weights = fractions / densities
-        case "atomic":
-            weights = fractions * molar_mass / densities
-        case _:
-            raise ValueError(f"Unknown fraction_type: {fraction_type!r}")
-
-    weights /= np.sum(weights)
-
-    nucleides_per_cc = defaultdict(float)
-    total_atoms_per_cc = 0.0
-    for weight, mat, density, amm in zip(
-        weights, materials, densities, molar_mass, strict=False
-    ):
-        for name, element in mat.elements.root.items():
-            # TODO @CoronelBuendia:  Again, enrichment ignored here.
-            # (Not presently tracked at the material level)
-            # 22
-            atoms_per_cc = weight * element.fraction * density / amm
-            nucleides_per_cc[name] += atoms_per_cc
-            total_atoms_per_cc += atoms_per_cc
-
-    return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
+    return calculate_elements(fractions, fraction_type, materials, densities, molar_mass)
 
 
 Owner = TypeVar("Owner")
