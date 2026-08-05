@@ -239,7 +239,41 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         fraction_type: Literal["volume", "atomic", "mass"],
         dope_condition: OpCondT,
     ):
-        if doping_percentage < 0 or doping_percentage > 100:
+        """
+        Allows for the doping of a material with another material. Works similar to
+        creating a mixture of the base material and the doping material without having
+        to create a new mixture from scratch.
+
+        Parameters
+        ----------
+        doping_percentage:
+            The doping percentage of the added material.
+        doping_material:
+            The Material with which to dope the base material.
+        fraction_type:
+            The method of doping: volume, atomic or mass.
+        dope_condition:
+            The operating conditions under which the material is doped.
+
+        Raises
+        ------
+        ValueError
+            The doping percentage is outside the valid range.
+
+        Note
+        ----
+        Due to it functioning like a mixture consecutive uses could have unexpected
+        results in terms of atomic fractions of added material. This is because
+        subsequent uses will create a mixture of the mixture. For example if you add
+        10% tungsten to a mixture the first doping will increase it to 10% in material
+        (assuming none already present). The next doping will increase it to 19%, then
+        27.1% following the equation:
+            $x_{n} = \\sigma_{0}^{n-1} F(1-F)^{i}$
+        where $x_n$ is the atomic fraction after the nth addition and F is the doping
+        fraction.
+        """
+        percentage_ceiling = 100
+        if doping_percentage < 0 or doping_percentage > percentage_ceiling:
             raise ValueError(f"The doping_percentage {doping_percentage} must be"
                              " between 0 and 100.")
         doping_fraction = doping_percentage / 100
@@ -358,8 +392,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         element_fraction = sum(x.fraction for x in iso_list.values())
         non_enrich_fraction = subset_element_total / element_fraction
         tail_fraction = 1 - enrich_fraction
-
-        for iso in iso_list:
+        for iso in iso_list:  # ruff: ignore[dict-index-missing-items]
             if iso == enrich_mat:
                 iso_list[iso].fraction = enrich_fraction * element_fraction
             else:
@@ -368,8 +401,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         check_fraction = sum(x.fraction for x in iso_list.values())
         if element_fraction != check_fraction:
             norm = check_fraction / element_fraction
-            for iso in iso_list:
-                iso_list[iso].fraction /= norm
+            iso_list.update({iso: iso_list[iso] / norm for iso in iso_list})
 
         converted_elements = _to_fraction_type_conversion(fraction_type,
                                                           self.elements.root)
@@ -378,8 +410,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
             if el != enrich_mat_prefix:
                 new_elements[el] = converted_elements[el]
 
-        for iso in iso_list:
-            new_elements[iso] = iso_list[iso]
+        new_elements.update(dict(iso_list.items()))
 
         new_elements = _from_fraction_type_conversion(fraction_type, new_elements)
 
