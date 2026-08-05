@@ -352,7 +352,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         enrich_type: Literal["atomic", "mass"] | None = None,
     ):
         """
-        Allows for the enrichement of the base material with an isotope contained within
+        Allows for the enrichment of the base material with an isotope contained within
         the material. Will result in overriding the Elements part of the class, with
         changing out the enriched element for its isotopes. Enrichment will not impact
         the atomic fractions of the material only the isotope composition, however it
@@ -366,7 +366,7 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         enrich_target:
             The string of the isotope that the material is being enriched by.
         enrich_type:
-            The method of enrichement: atomic or mass.
+            The method of enrichment: atomic or mass.
         """
         enrich_mat, fraction_type = self._process_enrich_inputs(enrich_percentage,
                                   enrich_target,
