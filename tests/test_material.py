@@ -273,7 +273,8 @@ class TestMaterialClassInit:
             == type(c2).model_fields.keys()
             == type(c3).model_fields.keys()
         )
-        assert {"name", "elements", "converters", "mixture_fraction"} ^ type(
+        assert {"name", "elements", "converters", "mixture_fraction",
+                "enrich_percentage", "enrich_target", "enrich_type"} ^ type(
             c3
         ).model_fields.keys() == DefaultProperties.model_fields.keys()
 
