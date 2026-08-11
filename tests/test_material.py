@@ -53,6 +53,9 @@ class TestMaterialFunctionalInit:
             "reference",
             "name",
             "elements",
+            "enrich_percentage",
+            "enrich_target",
+            "enrich_type",
             "converters",
             "mixture_fraction",
         }
@@ -75,6 +78,9 @@ class TestMaterialFunctionalInit:
             "reference",
             "name",
             "elements",
+            "enrich_percentage",
+            "enrich_target",
+            "enrich_type",
             "converters",
             "mixture_fraction",
         }
@@ -156,6 +162,9 @@ class TestMaterialFunctionalInit:
                 "reference",
                 "name",
                 "elements",
+                "enrich_percentage",
+                "enrich_target",
+                "enrich_type",
                 "converters",
                 "mixture_fraction",
                 "density",
@@ -176,7 +185,8 @@ class TestMaterialFunctionalInit:
         Struct3 = material("Struct3", properties=DefaultProperties())
 
         struct3 = Struct3()
-        assert {"name", "elements", "converters", "mixture_fraction"} ^ type(
+        assert {"name", "elements", "converters", "mixture_fraction",
+                "enrich_percentage", "enrich_target", "enrich_type"} ^ type(
             struct3
         ).model_fields.keys() == DefaultProperties.model_fields.keys()
 
