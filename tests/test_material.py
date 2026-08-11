@@ -743,7 +743,7 @@ class TestDoping:
                 self.add_material,
                 "atomic",
                 OperationalConditions(temperature=300, pressure=(1, "atm")))
-            ref_fr = np.round(np.sum(df * np.power(1 - df, x) for x in range(i)), 8)
+            ref_fr = np.round(sum(df * np.power(1 - df, x) for x in range(i)), 8)
             assert np.round(self.base_material.elements["W"].fraction, 8) == ref_fr
 
     def test_overdoping(self):
