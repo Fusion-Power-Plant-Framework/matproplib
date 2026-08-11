@@ -325,7 +325,7 @@ def material(  # noqa: C901
     | dict[str, Ldefine | DependentPhysicalProperty]
     | None = None,
     converters: Converter | Iterable[Converter] | Converters[ConverterK] | None = None,
-    reference: References | None = None,
+    reference: References | dict | None = None,
     **custom_properties: DependentPhysicalProperty,
 ) -> type[Material[ConverterK]]:
     """Functional material definition
@@ -344,7 +344,12 @@ def material(  # noqa: C901
             if ref1 is not None:
                 return References.model_validate(ref1).combine(ref2.default)
             return ref2.default
+        if ref1 is not None:
+            return References.model_validate(ref1)
         return None
+
+    if isinstance(reference, dict):
+        reference = References(**reference)
 
     if properties is None:
         properties: Properties = Properties()

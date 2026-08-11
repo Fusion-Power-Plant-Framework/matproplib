@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 import warnings
+from itertools import product
 
 import numpy as np
 import pytest
 from csl_reference import Reference
 from pint import Unit
 
-from matproplib.base import rebuild, ureg
+from matproplib.base import References, rebuild, ureg
 from matproplib.conditions import (
     DependentPropertyConditionConfig,
     OperationalConditions,
@@ -18,6 +19,7 @@ from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.copper import CryogenicCopper
 from matproplib.library.fluids import DDPlasma, DTPlasma, Water
+from matproplib.library.references import CORATO_2016, FOKKENS_2003
 from matproplib.library.steel import SS316_L
 from matproplib.library.superconductors import Nb3Sn
 from matproplib.library.tungsten import PlanseeTungsten
@@ -180,16 +182,55 @@ class TestMaterialFunctionalInit:
         ).model_fields.keys() == DefaultProperties.model_fields.keys()
 
     @pytest.mark.parametrize(
-        "prop",
-        [
-            DefaultProperties(reference={"id": 1, "type": "article"}),
-            props(reference={"id": 1, "type": "article"}),
-        ],
+        ("prop", "reference"),
+        list(
+            product(
+                [
+                    DefaultProperties(reference={"id": 1, "type": "article"}),
+                    DefaultProperties(),
+                    props(reference={"id": 1, "type": "article"}),
+                    props(
+                        density=(19.0, "g/cm^3"),
+                        reference=CORATO_2016,
+                    ),
+                ],
+                [
+                    None,
+                    FOKKENS_2003,
+                    CORATO_2016,
+                    References({"id": 2, "type": "article"}),
+                ],
+            )
+        ),
     )
-    def test_reference_combining(self, prop):
-        struct = material("Struct", properties=prop)()
+    def test_reference_combining(self, prop, reference):
+        """
+        Test how material() combines references provided through
+        properties and directly through the reference argument.
 
-        assert struct.reference[1] == Reference(id=1, type="article")
+        A variety of ways of providing references have been used
+        to cover different combinations of properties and direct
+        references.
+        """
+        test_mat = material(
+            "test_mat",
+            properties=prop,
+            reference=reference,
+        )()
+
+        if prop.reference is not None:
+            for key in prop.reference.root:
+                assert test_mat.reference[key] == prop.reference[key]
+
+        if reference is not None:
+            # convert to Reference, if reference is given as a dict
+            if isinstance(reference, dict):
+                reference = References(**reference)
+            for key in reference.root:
+                assert test_mat.reference[key] == reference[key]
+
+        if not prop.reference and not reference:
+            assert test_mat.reference is None
 
     def test_superconducting_check(self):
         Struct = material(
