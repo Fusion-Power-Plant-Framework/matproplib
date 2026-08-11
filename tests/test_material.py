@@ -18,7 +18,6 @@ from matproplib.converters.base import Converters
 from matproplib.converters.neutronics import OpenMCNeutronicConfig
 from matproplib.library.copper import CryogenicCopper
 from matproplib.library.fluids import DDPlasma, DTPlasma, Water
-from matproplib.library.lithium import Li2SiO3
 from matproplib.library.steel import SS316_L
 from matproplib.library.superconductors import Nb3Sn
 from matproplib.library.tungsten import PlanseeTungsten
@@ -645,7 +644,8 @@ class TestEnrichment:
     @classmethod
     def setup_class(cls):
         cls.lithium = material("lithium", elements="Li")()
-        cls.lithium_compound = Li2SiO3()
+        cls.lithium_compound = material("lithium_compound", elements="Li2SiO3"
+        )()
         cls.li_fraction = cls.lithium_compound.elements["Li"].fraction
 
     def test_no_enrichment_target(self):
