@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 import logging
 import operator
+import re
 from abc import ABC
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Sequence
@@ -51,6 +52,8 @@ from matproplib.nucleides import (
     ElementFraction,
     Elements,
     ElementsTD,
+    _from_fraction_type_conversion,
+    _to_fraction_type_conversion,
 )
 from matproplib.properties.dependent import (
     AttributeErrorProperty,
@@ -111,6 +114,9 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
     elements: Elements = Field(
         default=[], validation_alias=AliasChoices("elements", "chemical_equation")
     )
+    enrich_percentage: float = 0.0
+    enrich_target: str | None = None
+    enrich_type: Literal["atomic", "mass"] | None = None
     converters: Converters[ConverterK] = Field(default_factory=Converters)
     reference: References | None = None
     mixture_fraction: list[MaterialFraction[ConverterK]] | None = Field(
@@ -226,6 +232,236 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
             for k, v in self
             if statement(v) and isinstance(v, DependentPhysicalProperty)
         ]
+
+    def dope_material(
+        self,
+        doping_percentage: float,
+        doping_material: Material,
+        fraction_type: Literal["volume", "atomic", "mass"],
+        dope_condition: OpCondT,
+    ):
+        """
+        Allows for the doping of a material with another material. Works similar to
+        creating a mixture of the base material and the doping material without having
+        to create a new mixture from scratch.
+
+        Parameters
+        ----------
+        doping_percentage:
+            The doping percentage of the added material.
+        doping_material:
+            The Material with which to dope the base material.
+        fraction_type:
+            The method of doping: volume, atomic or mass.
+        dope_condition:
+            The operating conditions under which the material is doped.
+
+        Raises
+        ------
+        ValueError
+            The doping percentage is outside the valid range.
+
+        Note
+        ----
+        Due to it functioning like a mixture consecutive uses could have unexpected
+        results in terms of atomic fractions of added material. This is because
+        subsequent uses will create a mixture of the mixture. For example if you add
+        10% tungsten to a mixture the first doping will increase it to 10% in material
+        (assuming none already present). The next doping will increase it to 19%, then
+        27.1% following the equation:
+            $x_{n} = \\sigma_{0}^{n-1} F(1-F)^{i}$
+        where $x_n$ is the atomic fraction after the nth addition and F is the doping
+        fraction.
+        """
+        percentage_ceiling = 100
+        if doping_percentage < 0 or doping_percentage > percentage_ceiling:
+            raise ValueError(
+                f"The doping_percentage ({doping_percentage}) must be between 0 and 100."
+            )
+        doping_fraction = doping_percentage / 100
+        fractions = np.array([1 - doping_fraction, doping_fraction])
+        fractions /= np.sum(fractions)
+        materials = [self, doping_material]
+        densities = np.array([
+            self.density(dope_condition),
+            doping_material.density(dope_condition),
+        ])
+        molar_mass = np.array([
+            _crude_average_molar_mass(self),
+            _crude_average_molar_mass(doping_material),
+        ])
+        self.elements = _calculate_elements(
+            fractions, fraction_type, materials, densities, molar_mass
+        )
+
+    def _process_enrich_inputs(
+        self,
+        enrich_percentage: float = 0.0,
+        enrich_target: str | None = None,
+        enrich_type: Literal["atomic", "mass"] | None = None,
+    ):
+        percentage_ceiling = 100
+        if enrich_percentage < 0 or enrich_percentage > percentage_ceiling:
+            raise ValueError(
+                f"The doping_percentage {enrich_percentage} must be between 0 and 100."
+            )
+
+        cond1 = self.enrich_target is None
+        cond2 = enrich_target is None
+        match (cond1, cond2):
+            case (True, True):
+                raise ValueError("Enrichment target must be set")
+            case (True, False):
+                enrich_mat = enrich_target
+                self.enrich_target = enrich_target
+            case (False, True):
+                enrich_mat = self.enrich_target
+            case (False, False):
+                enrich_mat = self.enrich_target
+                if self.enrich_target != enrich_target:
+                    raise ValueError(
+                        f"Mismatch between material enrichment target "
+                        f"{self.enrich_target} and set enrichment "
+                        f"target {enrich_target}."
+                    )
+
+        if enrich_mat not in self.elements.nucleides.root:
+            raise ValueError(
+                f"Desired enrichment isotope {enrich_mat} not in "
+                f"{self.name} therefore not enrichable. Use "
+                "dope_material function instead."
+            )
+
+        fraction_type = enrich_type if enrich_type is not None else self.enrich_type
+        if fraction_type is None:
+            raise ValueError("Enrichment fraction-type must be set")
+
+        return enrich_mat, fraction_type
+
+    def _renormalise_elements(
+        self,
+        elements: ElementsTD,
+        pre_enrich_fraction_atomic: float,
+        enrich_mat_prefix: str,
+    ) -> ElementsTD:
+        post_enrich_fraction_atomic = 0
+        for el in elements:
+            prefix = re.split(r"(\d+)", el)[0]
+            if prefix == enrich_mat_prefix:
+                post_enrich_fraction_atomic += elements[el].fraction
+        for el in elements:
+            prefix = re.split(r"(\d+)", el)[0]
+            if prefix == enrich_mat_prefix:
+                elements[el].fraction /= (
+                    post_enrich_fraction_atomic / pre_enrich_fraction_atomic
+                )
+            else:
+                elements[el].fraction /= (1 - post_enrich_fraction_atomic) / (
+                    1 - pre_enrich_fraction_atomic
+                )
+
+        self.elements = Elements(elements)
+
+    def enrich_material(
+        self,
+        enrich_percentage: float = 0.0,
+        enrich_target: str | None = None,
+        enrich_type: Literal["atomic", "mass"] | None = None,
+    ):
+        """
+        Allows for the enrichment of the base material with an isotope contained within
+        the material. Will result in overriding the Elements part of the class, with
+        changing out the enriched element for its isotopes. Enrichment will not impact
+        the atomic fractions of the material only the isotope composition, however it
+        will result in differences when converting from atomic to other fraction types.
+
+        Parameters
+        ----------
+        enrich_percentage:
+            The enrichment percentage of the added isotope as a fraction of that elements
+            fraction of the material.
+        enrich_target:
+            The string of the isotope that the material is being enriched by.
+        enrich_type:
+            The method of enrichment: atomic or mass.
+        """
+        enrich_mat, fraction_type = self._process_enrich_inputs(
+            enrich_percentage, enrich_target, enrich_type
+        )
+
+        enrich_mat_prefix = re.split(r"(\d+)", enrich_mat)[0]
+        enrich_fraction = enrich_percentage / 100
+        nucleides = self.elements.nucleides.root
+        converted_nucleides = _to_fraction_type_conversion(fraction_type, nucleides)
+
+        iso_list = {}
+        subset_element_total = 0
+        pre_enrich_fraction_atomic = 0
+        for iso in converted_nucleides:
+            prefix = re.split(r"(\d+)", iso)[0]
+            if prefix == enrich_mat_prefix:
+                pre_enrich_fraction_atomic += nucleides[iso].fraction
+                iso_list[iso] = converted_nucleides[iso]
+                if iso != enrich_mat:
+                    subset_element_total += converted_nucleides[iso].fraction
+
+        # fraction of target isotope element in compound
+        element_fraction = sum(x.fraction for x in iso_list.values())
+        non_enrich_fraction = subset_element_total / element_fraction
+        tail_fraction = 1 - enrich_fraction
+        for iso in iso_list:  # noqa: PLC0206
+            if iso == enrich_mat:
+                iso_list[iso].fraction = enrich_fraction * element_fraction
+            else:
+                iso_list[iso].fraction *= tail_fraction / non_enrich_fraction
+
+        check_fraction = sum(x.fraction for x in iso_list.values())
+        if element_fraction != check_fraction:
+            norm = check_fraction / element_fraction
+            iso_list.update({iso: iso_list[iso] / norm for iso in iso_list})
+
+        converted_elements = _to_fraction_type_conversion(
+            fraction_type, self.elements.root
+        )
+        new_elements = {}
+        for el in converted_elements:
+            if el != enrich_mat_prefix:
+                new_elements[el] = converted_elements[el]
+
+        new_elements.update(dict(iso_list.items()))
+
+        new_elements = _from_fraction_type_conversion(fraction_type, new_elements)
+
+        self._renormalise_elements(
+            new_elements, pre_enrich_fraction_atomic, enrich_mat_prefix
+        )
+
+
+def _calculate_elements(
+    fractions, fraction_type, materials, densities, molar_mass
+) -> Elements:
+    match fraction_type:
+        case "volume":
+            weights = fractions
+        case "mass":
+            weights = fractions / densities
+        case "atomic":
+            weights = fractions * molar_mass / densities
+        case _:
+            raise ValueError(f"Unknown fraction_type: {fraction_type!r}")
+
+    weights /= np.sum(weights)
+
+    nucleides_per_cc = defaultdict(float)
+    total_atoms_per_cc = 0.0
+    for weight, mat, density, amm in zip(
+        weights, materials, densities, molar_mass, strict=False
+    ):
+        for name, element in mat.elements.root.items():
+            atoms_per_cc = weight * element.fraction * density / amm
+            nucleides_per_cc[name] += atoms_per_cc
+            total_atoms_per_cc += atoms_per_cc
+    return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
 
 
 def field_alias_path(name, *alias_path, default=None):
@@ -654,32 +890,9 @@ def _mix_elements(
     densities = np.array([mat.density(mix_condition) for mat in materials])
     molar_mass = np.array([_crude_average_molar_mass(mat) for mat in materials])
 
-    match fraction_type:
-        case "volume":
-            weights = fractions
-        case "mass":
-            weights = fractions / densities
-        case "atomic":
-            weights = fractions * molar_mass / densities
-        case _:
-            raise ValueError(f"Unknown fraction_type: {fraction_type!r}")
-
-    weights /= np.sum(weights)
-
-    nucleides_per_cc = defaultdict(float)
-    total_atoms_per_cc = 0.0
-    for weight, mat, density, amm in zip(
-        weights, materials, densities, molar_mass, strict=False
-    ):
-        for name, element in mat.elements.root.items():
-            # TODO @CoronelBuendia:  Again, enrichment ignored here.
-            # (Not presently tracked at the material level)
-            # 22
-            atoms_per_cc = weight * element.fraction * density / amm
-            nucleides_per_cc[name] += atoms_per_cc
-            total_atoms_per_cc += atoms_per_cc
-
-    return {el: count / total_atoms_per_cc for el, count in nucleides_per_cc.items()}
+    return _calculate_elements(
+        fractions, fraction_type, materials, densities, molar_mass
+    )
 
 
 Owner = TypeVar("Owner")
