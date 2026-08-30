@@ -78,3 +78,14 @@ class Converter(PMBaseModel, ABC):
     @abstractmethod
     def convert(self, material: Material, op_cond: OpCondT):
         """Function to convert material to secondary format"""
+
+    @classmethod
+    def import_from(cls, obj, /) -> Material:
+        """Import a material from an object
+
+        Notes
+        -----
+        This could be from a file or a python object as
+        appropriate for incoming format
+        """
+        raise NotImplementedError("No importer implemented")
