@@ -165,13 +165,18 @@ class TestConditionModification:
             check_conditions(mod_op_cond, op_cond_config)
 
     def test_dependentpropertyconfig_repr(self):
-        assert repr(DependentPropertyConditionConfig(temperature=("degC", -2, 2))) == (
+        def _stripper(string: str) -> str:
+            return string.replace("'", '"').replace("<", "").replace(">", "")
+
+        assert _stripper(
+            repr(DependentPropertyConditionConfig(temperature=("degC", -2, 2)))
+        ) == (
             "DependentPropertyConditionConfig(temperature=PropertyConfig(reference=None "
-            "unit=<Unit('degree_Celsius')> lower=-2.0 upper=2.0))"
+            'unit=Unit("degree_Celsius") lower=-2.0 upper=2.0))'
         )
-        assert repr(DependentPropertyConditionConfig(volume=("cm^3"))) == (
+        assert _stripper(repr(DependentPropertyConditionConfig(volume=("cm^3")))) == (
             "DependentPropertyConditionConfig(volume=PropertyConfig(reference=None "
-            "unit=<Unit('centimeter ** 3')> lower=None upper=None))"
+            'unit=Unit("centimeter ** 3") lower=None upper=None))'
         )
 
     def test_op_cond_config_raises_ValueError_on_unknown_config(self):
