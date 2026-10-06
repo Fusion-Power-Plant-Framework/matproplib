@@ -112,9 +112,10 @@ tests      = "pytest --integration {args:tests}"
 output-format = "concise"
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py311"
 line-length = 89
 output-format = "concise"
+output-prefer-rule-codes = true
 exclude = [
   ".git",
   "__pycache__",
@@ -157,10 +158,12 @@ ignore = [
   "RUF105",  # keep codes
   "RUF106",
   "RUF201",
+  "pytest-fixture-autouse",
 ]
 
 [tool.ruff.lint.per-file-ignores]
 # Tests can use magic values, assertions, and relative imports
+"__init__.py" = ["RUF067"]
 "tests/**" = [
   "INP001",
   "D100",
@@ -178,6 +181,8 @@ ignore = [
   "N806",
   "S101",
   "TID252",
+  "RUF069",
+
 ]
 "tests/conftest.py" = ["PLC0415"]
 "matproplib/tools/tools.py" = ["PLR0913", "PLR0917"]

@@ -12,6 +12,7 @@ from functools import partial
 from typing import (
     TYPE_CHECKING,
     Literal,
+    NotRequired,
     Protocol,
     TypedDict,
 )
@@ -22,7 +23,6 @@ from pint import Unit  # noqa: TC002
 from pint.errors import DimensionalityError
 from pydantic import Field, field_serializer, model_validator
 from pydantic_core import PydanticUndefinedType
-from typing_extensions import NotRequired
 
 from matproplib.base import (
     ArrayFloat,
@@ -251,15 +251,15 @@ class DependentPhysicalProperty(BasePhysicalProperty):
     def _unitify(self):
         """Convert value and unit to default
 
-        Raises
-        ------
-        ValueError
-            Failed unit conversion
-
         Returns
         -------
         :
             The property instance
+
+        Raises
+        ------
+        ValueError
+            Failed unit conversion
         """
         unit_val, default = super()._unitify()
 
@@ -292,7 +292,8 @@ class DependentPhysicalProperty(BasePhysicalProperty):
 
         try:
             return (
-                ureg.Quantity(
+                ureg
+                .Quantity(
                     self.value(op_cond, *args, **kwargs),
                     self.unit,
                 )

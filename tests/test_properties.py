@@ -216,7 +216,8 @@ class TestDependentPhysicalProperties:
             ):
                 assert np.allclose(
                     inited_prop(conds),
-                    ureg.Quantity(value(conds), "K")
+                    ureg
+                    .Quantity(value(conds), "K")
                     .to(inited_prop.op_cond_config.temperature.unit)
                     .magnitude,
                 )
@@ -331,8 +332,9 @@ class TestGroupingProperties:
                 poissons_ratio=True,
                 thermal_conductivity=3.4,
                 youngs_modulus={
-                    "value": lambda properties, oc: properties.density(oc)
-                    * oc.temperature
+                    "value": lambda properties, oc: (
+                        properties.density(oc) * oc.temperature
+                    )
                 },
                 coefficient_thermal_expansion={"value": 6, "unit": "1/mK"},
                 extra_prop={"value": 5, "unit": "Btu"},

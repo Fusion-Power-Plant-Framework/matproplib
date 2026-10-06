@@ -152,15 +152,16 @@ class PhysicalProperty(BasePhysicalProperty, UnVerifiedPhysicalProperty):
     def _unitify(self):
         """Convert value and unit to default
 
+        Returns
+        -------
+        :
+            The property instance
+
         Raises
         ------
         ValueError
             Failed unit conversion
 
-        Returns
-        -------
-        :
-            The property instance
         """
         dunit = type(self).model_fields["unit"].default
         if isinstance(dunit, Unit) and self.unit == dunit:

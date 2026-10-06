@@ -251,7 +251,7 @@ class MCNPNeutronicConfig(NeutronicConfig):
             mat_id = self.material_id
 
         nucleides: list[tuple[ElementFraction, Literal["mass", "atomic"]]] = [
-            (v, self.percent_type) for _k, v in ef_dict.items()
+            (v, self.percent_type) for v in ef_dict.values()
         ]
 
         return to_mcnp_material(
@@ -295,7 +295,7 @@ class SerpentNeutronicConfig(NeutronicConfig):
         )
         mass_density = _get_mass_density(material, op_cond)
         nucleides: list[tuple[ElementFraction, Literal["mass", "atomic"]]] = [
-            (v, self.percent_type) for _k, v in ef_dict.items()
+            (v, self.percent_type) for v in ef_dict.values()
         ]
 
         return to_serpent_material(

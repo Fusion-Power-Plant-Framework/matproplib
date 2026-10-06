@@ -116,7 +116,7 @@ class Elements(RootModel):
 
     @property
     def nucleides(self) -> Elements:
-        """Get the nucleides for a given element group
+        """The nucleides for a given element group
 
         Returns
         -------
@@ -337,9 +337,9 @@ def atomic_fraction_to_volume_fraction(
     """
     return _converter(
         ef_dict,
-        lambda ef: ef.fraction
-        * ef.element.element.mass
-        / _get_dn(densities, ef.element),
+        lambda ef: (
+            ef.fraction * ef.element.element.mass / _get_dn(densities, ef.element)
+        ),
     )
 
 
@@ -354,9 +354,9 @@ def volume_fraction_to_atomic_fraction(
     """
     return _converter(
         ef_dict,
-        lambda ef: ef.fraction
-        * _get_dn(densities, ef.element)
-        / ef.element.element.mass,
+        lambda ef: (
+            ef.fraction * _get_dn(densities, ef.element) / ef.element.element.mass
+        ),
     )
 
 
