@@ -12,18 +12,23 @@ repos:
         exclude: test_data
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.9
+    rev: v0.16.10
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: v2.2.0
+    rev: v2.5.15
     hooks:
       - id: biome-format
         types: [json]
         args: ["--indent-style=space", "--indent-width=2"]
+
+  - repo: https://github.com/astral-sh/ty-pre-commit
+    rev: v0.0.84
+    hooks:
+      - id: ty
 
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8

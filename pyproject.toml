@@ -154,6 +154,9 @@ ignore = [
   "FURB152", # 3.14 != pi
   "ERA",  # remove commented out code
   "G004",  # f-string in logging
+  "RUF105",  # keep codes
+  "RUF106",
+  "RUF201",
 ]
 
 [tool.ruff.lint.per-file-ignores]
