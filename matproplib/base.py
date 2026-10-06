@@ -18,6 +18,7 @@ from numpydantic import NDArray, Shape
 from numpydantic.dtype import Number
 from pint import Quantity, Unit, UnitRegistry
 from pint.errors import DimensionalityError
+from pint.facets.plain import PlainQuantity, PlainUnit
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -242,7 +243,7 @@ class BasePhysicalProperty(PMBaseModel, ABC):
             return np.squeeze(value)
         return value
 
-    def _unitify(self) -> Quantity:
+    def _unitify(self) -> tuple[PlainQuantity, PlainUnit]:
         dunit = type(self).model_fields["unit"].default
         if isinstance(dunit, Unit) and self.unit == dunit:
             return None
