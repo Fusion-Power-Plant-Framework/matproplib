@@ -18,7 +18,6 @@ from numpydantic import NDArray, Shape
 from numpydantic.dtype import Number
 from pint import Quantity, Unit, UnitRegistry
 from pint.errors import DimensionalityError
-from pint.facets.plain import PlainQuantity, PlainUnit
 from pydantic import (
     BaseModel,
     ConfigDict,
@@ -35,6 +34,8 @@ from typing_extensions import TypeVar
 
 if TYPE_CHECKING:
     from collections.abc import Generator
+
+    from pint.facets.plain import PlainQuantity, PlainUnit
 
 __all__ = [
     "BaseGroup",

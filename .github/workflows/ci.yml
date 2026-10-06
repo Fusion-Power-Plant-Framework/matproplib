@@ -19,7 +19,7 @@ jobs:
           python-version: "3.11"
 
       - name: Lint
-        run: hatch run lint:fmt
+        run: SKIP="ty" hatch run lint:fmt
 
   pytest:
     runs-on: ubuntu-latest

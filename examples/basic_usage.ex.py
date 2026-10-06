@@ -195,8 +195,9 @@ except ValueError as ve:
 # %%
 myprops = props(
     specific_heat_capacity={
-        "value": lambda properties, op_cond: properties.density(op_cond)
-        * op_cond.temperature
+        "value": lambda properties, op_cond: (
+            properties.density(op_cond) * op_cond.temperature
+        )
     },
     density=lambda oc: oc.pressure * 5,
     superconducting_parameterisation=NbTiBotturaParameterisation(

@@ -54,9 +54,11 @@ def _get_openmc():
     cs = os.environ.get("OPENMC_CROSS_SECTIONS")
     if cs is not None:
         del os.environ["OPENMC_CROSS_SECTIONS"]
-    yield openmc
-    if cs is not None:
-        os.environ["OPENMC_CROSS_SECTIONS"] = cs
+    try:
+        yield openmc
+    finally:
+        if cs is not None:
+            os.environ["OPENMC_CROSS_SECTIONS"] = cs
 
 
 def to_openmc_material(
