@@ -5,12 +5,14 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generic, Literal, Union
+from collections.abc import Callable, Sequence
+from typing import TYPE_CHECKING, Any, Generic, Literal, Union
 
 from pint import Unit
 from pydantic import ConfigDict, Field, SerializeAsAny, create_model, field_validator
 from pydantic_core import PydanticUndefined
 
+from matproplib import OperationalConditions
 from matproplib.base import (
     ArrayFloat,
     BaseGroup,
@@ -119,7 +121,13 @@ class DefaultProperties(Properties, Generic[SuperconductingParameterisationT_co]
     )
 
 
-Ldefine = UndefinedProperty | DependentPhysicalPropertyTD | ArrayFloat
+Ldefine = (
+    UndefinedProperty
+    | DependentPhysicalPropertyTD
+    | ArrayFloat
+    | Callable[[Any, OperationalConditions], Sequence[float] | float]
+    | tuple[float, str]
+)
 
 
 def props(  # noqa: PLR0913
