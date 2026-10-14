@@ -317,10 +317,11 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         Raises
         ------
         ValueError
-            Invalid inputs when calling enrich_material for either the percentage not being
-            within the valid bounds, invalid enrichment target inputs with relation to the
-            materials enrichment target, the provided target is not an isotope found in the
-            material or an invalid enrichment fraction type is provided.
+            Invalid inputs when calling enrich_material for either the percentage not
+            being within the valid bounds, invalid enrichment target inputs with
+            relation to the materials enrichment target, the provided target is
+            not an isotope found in the material or an invalid enrichment fraction
+            type is provided.
         """
         percentage_ceiling = 100
         if enrich_percentage < 0 or enrich_percentage > percentage_ceiling:
