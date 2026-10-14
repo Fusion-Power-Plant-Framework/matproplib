@@ -300,25 +300,38 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         enrich_target: str | None = None,
         enrich_type: Literal["atomic", "mass"] | None = None,
     ):
+        """
+        Handles inputs for enrichment to avoid issues. Specifically for target 
+        input cases are set for all possibilities.Looking to avoid situation where
+        a material is enriched by isotope A and is then enriched
+        by isotope B. This is discouraged because enriching with multiple
+        different isotopes can lead to a very different material with different
+        properties, so instead a new material with the desired isotopic fractions
+        should be created.
+        """
         percentage_ceiling = 100
         if enrich_percentage < 0 or enrich_percentage > percentage_ceiling:
             raise ValueError(
                 f"The doping_percentage {enrich_percentage} must be between 0 and 100."
             )
-
         cond1 = self.enrich_target is None
         cond2 = enrich_target is None
         match (cond1, cond2):
             case (True, True):
+                # no targets provided
                 raise ValueError("Enrichment target must be set")
             case (True, False):
+                # target only provided by function
                 enrich_mat = enrich_target
                 self.enrich_target = enrich_target
             case (False, True):
+                # target only provided by class
                 enrich_mat = self.enrich_target
             case (False, False):
+                # targets provided by class and function, defaults to class
                 enrich_mat = self.enrich_target
                 if self.enrich_target != enrich_target:
+                    # errors if class and function target mismatch
                     raise ValueError(
                         f"Mismatch between material enrichment target "
                         f"{self.enrich_target} and set enrichment "
