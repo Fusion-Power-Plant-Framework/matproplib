@@ -301,13 +301,26 @@ class Material(MaterialBaseModel, ABC, Generic[ConverterK]):
         enrich_type: Literal["atomic", "mass"] | None = None,
     ):
         """
-        Handles inputs for enrichment to avoid issues. Specifically for target 
+        Handles inputs for enrichment to avoid issues. Specifically for target
         input cases are set for all possibilities.Looking to avoid situation where
         a material is enriched by isotope A and is then enriched
         by isotope B. This is discouraged because enriching with multiple
         different isotopes can lead to a very different material with different
         properties, so instead a new material with the desired isotopic fractions
         should be created.
+
+        Returns
+        -------
+        :
+            strings for isotope used for enrichment and the fraction type for enrichment
+
+        Raises
+        ------
+        ValueError
+            Invalid inputs when calling enrich_material for either the percentage not being
+            within the valid bounds, invalid enrichment target inputs with relation to the
+            materials enrichment target, the provided target is not an isotope found in the
+            material or an invalid enrichment fraction type is provided.
         """
         percentage_ceiling = 100
         if enrich_percentage < 0 or enrich_percentage > percentage_ceiling:
