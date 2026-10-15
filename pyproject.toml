@@ -16,7 +16,7 @@ allow-direct-references = true  # remove after reference published
 name = "matproplib"
 description = "Materials that are dependent on conditions"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "LGPL-2.1-or-later"
 dynamic = ["version"]
 dependencies = [
@@ -77,7 +77,7 @@ features = ["dev", "test", "docs", "lint"]
 [tool.hatch.envs.test]
 features = ["test"]
 [[tool.hatch.envs.test.matrix]]
-python = ["3.10", "3.11", "3.12", "3.13"]
+python = ["3.11", "3.12", "3.13", "3.14"]
 [tool.hatch.envs.test.scripts]
 tests      = "pytest {args:tests}"
 tests-cov  = "pytest --cov matproplib  --cov-report html:htmlcov --cov-report xml {args:tests}"
