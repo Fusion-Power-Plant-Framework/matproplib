@@ -246,13 +246,31 @@ def most_abundant_isoptope(el: pt.core.Element) -> pt.core.Isotope:
 
 
 def _from_fraction_type_conversion(
-    fraction_type: Literal["atomic", "mass"], ef_dict: ElementsTD
+    fraction_type: Literal["atomic", "mass", "volume"], ef_dict: ElementsTD
 ) -> ElementsTD:
     if fraction_type == "atomic":
         return ef_dict
 
     if fraction_type == "mass":
         return mass_fraction_to_atomic_fraction(ef_dict)
+
+    if fraction_type == "volume":
+        return volume_fraction_to_atomic_fraction(ef_dict)
+
+    raise NotImplementedError(f"Conversion from {fraction_type} not implemented")
+
+
+def _to_fraction_type_conversion(
+    fraction_type: Literal["atomic", "mass", "volume"], ef_dict: ElementsTD
+) -> ElementsTD:
+    if fraction_type == "atomic":
+        return ef_dict
+
+    if fraction_type == "mass":
+        return atomic_fraction_to_mass_fraction(ef_dict)
+
+    if fraction_type == "volume":
+        return atomic_fraction_to_volume_fraction(ef_dict)
 
     raise NotImplementedError(f"Conversion from {fraction_type} not implemented")
 
