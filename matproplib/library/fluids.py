@@ -85,7 +85,7 @@ Water = material(
                 oc.pressure.value,
                 "Water",
             ),
-            op_cond_config={"temperature": ("K", float(273.153))},
+            op_cond_config={"temperature": ("K", 273.153)},
         ),
         youngs_modulus=0,
         bulk_modulus=0,
