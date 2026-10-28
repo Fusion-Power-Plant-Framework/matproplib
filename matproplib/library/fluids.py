@@ -99,6 +99,9 @@ Water = material(
     converters=OpenMCNeutronicConfig(),
     reference=COOLPROP_7,
 )
+print("woo i done water")
+import sys
+print(sys.version)
 
 Air = material(
     "Air (gas)",
